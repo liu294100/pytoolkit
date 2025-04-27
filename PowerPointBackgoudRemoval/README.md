@@ -20,9 +20,31 @@ Before you begin, ensure you have the following installed or available:
 
 1.  **Python:** Version 3.8 or newer is recommended. Python is the programming language the application is written in.
 2.  **pip:** The Python package installer. It usually comes bundled with Python installations.
-3.  **LibreOffice or OpenOffice (Optional but Required for `.ppt`):** This is **essential** if you need to process legacy `.ppt` files. The application uses the command-line interface (`soffice`) of LibreOffice/OpenOffice to convert `.ppt` to `.pptx` before processing.
-    *   **Crucially:** The `soffice` executable needs to be accessible via your system's **PATH environment variable** for the script to find it automatically. Alternatively, you might need to modify the script's `find_soffice` function if it's installed in a non-standard location not covered by the script's search paths.
+3.  **LibreOffice or OpenOffice (Optional but Required for `.ppt`):** This is **essential** if you need to process legacy `.ppt` files. The application uses the command-line interface (`soffice`) of LibreOffice/OpenOffice to convert `.ppt` to `.pptx` before processing. See section 2.1 for detailed setup instructions, especially for Windows.
 4.  **Source Code:** You need the Python script (`run.py` or similar) and the associated helper files (`requirements.txt`, `.bat` scripts if using them).
+
+### 2.1 Installing LibreOffice and Configuring PATH (Windows)
+
+If you need to process `.ppt` files, follow these steps to install LibreOffice and ensure the application can find its command-line tool (`soffice`):
+
+1.  **Download LibreOffice:** Go to the official LibreOffice download page: [https://www.libreoffice.org/download/download/](https://www.libreoffice.org/download/download/)
+2.  **Install LibreOffice:** Run the downloaded installer and follow the installation steps. Default settings are usually sufficient.
+3.  **Locate the Installation Directory:** After installation, find the `program` sub-directory within the LibreOffice installation folder. The typical location is:
+    *   `C:\Program Files\LibreOffice\program`
+    *   *Note: If you installed the 32-bit version on a 64-bit system, it might be in `C:\Program Files (x86)\LibreOffice\program`.*
+    The key file within this directory is `soffice.exe`.
+4.  **Add the Directory to System PATH:** You need to tell Windows where to find `soffice.exe`.
+    *   Search for "Environment Variables" in the Windows search bar and select "Edit the system environment variables".
+    *   In the "System Properties" window that opens, click the "Environment Variables..." button (usually under the "Advanced" tab).
+    *   In the "Environment Variables" window, look for the `Path` variable under the "System variables" section (preferred) or "User variables". Select `Path` and click "Edit...".
+    *   In the "Edit environment variable" window, click "New".
+    *   Paste the full path to the LibreOffice `program` directory (e.g., `C:\Program Files\LibreOffice\program`) into the new line.
+    *   Click "OK" on all open dialog windows to save the changes.
+5.  **Verify:** Close any currently open Command Prompt or PowerShell windows. Open a *new* one and type:
+    ```bash
+    soffice --version
+    
+    If the PATH is configured correctly, you should see the LibreOffice version information printed. If you get an error like "'soffice' is not recognized...", double-check the path you added and ensure you've reopened the command prompt. Once this command works, the Python script should be able to find and use LibreOffice for `.ppt` conversion.
 
 ## 3. Installation and Setup
 
@@ -39,13 +61,13 @@ Follow these steps to set up your environment and install the necessary packages
     python --version
     # or on some systems
     python3 --version
-    ```
+```
     You should see the installed Python version printed. Also verify pip:
     ```bash
     pip --version
     # or
     pip3 --version
-    ```
+```
 
 ### Step 3.2: Set Up Project Directory
 
@@ -136,7 +158,7 @@ To create a standalone executable that can be run on other machines without inst
     *   PyInstaller will run and show output in the console. This may take some time.
     *   If successful, the script will pause and indicate completion.
     *   Your standalone executable file will be located inside a newly created `dist` sub-directory (e.g., `dist\AdvancedSlidesUtilities.exe`).
-5.  **Distribute:** You can now copy the `.exe` file from the `dist` folder to another Windows machine and run it. Remember the LibreOffice dependency for `.ppt` files on the target machine!
+5.  **Distribute:** You can now copy the `.exe` file from the `dist` folder to another Windows machine and run it. Remember the LibreOffice dependency (installed and PATH configured as per section 2.1) for `.ppt` files on the target machine!
 
 ## 6. Code Overview
 
@@ -168,12 +190,11 @@ The `run.py` script contains the core logic for the application. Here's a high-l
 
 ## 7. Troubleshooting / Notes
 
-*   **`.ppt` Conversion Fails:** The most common reason is that LibreOffice/OpenOffice is not installed, or the `soffice` command is not in the system's PATH environment variable. Verify the installation and PATH. Check the console output for specific errors from `soffice`.
+*   **`.ppt` Conversion Fails:** The most common reason is that LibreOffice/OpenOffice is not installed, or the `soffice` command is not in the system's PATH environment variable. **Carefully follow the steps in Section 2.1 (for Windows) or ensure `soffice` is in the PATH on Linux/macOS.** Check the console output for specific errors from `soffice`.
 *   **Tkinter Not Found (Linux):** On some Linux distributions, Tkinter needs to be installed separately via the system package manager (e.g., `sudo apt-get update && sudo apt-get install python3-tk` on Debian/Ubuntu).
 *   **Errors During Build/Run:** Check the console window where you ran the script or the build process for detailed error messages.
 *   **Large Files:** Processing very large presentations or using large background images can take significant time and memory.
 *   **Antivirus:** Sometimes, executables created by PyInstaller might be flagged by antivirus software (false positive). This is a known issue with how PyInstaller bundles applications. You may need to create an exception in your antivirus program.
 *   **Permissions:** Ensure the script has read permissions for input files/directories and write permissions for the output location and temporary directories.
 
-```
 ```
