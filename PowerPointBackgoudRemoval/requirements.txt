@@ -1,0 +1,27 @@
+# requirements.txt
+# Use 'pip install -r requirements.txt' to install these packages.
+
+# Core library for reading and manipulating .pptx files
+python-pptx>=0.6.18
+
+# Library for image processing (used for background image validation and potentially by python-pptx)
+Pillow>=9.0.0
+
+# lxml is a dependency of python-pptx, explicitly listing it can sometimes help resolve environment issues,
+# but usually pip handles it automatically when installing python-pptx. Optional.
+# lxml>=4.9.0
+
+# --- Notes ---
+# 1. Tkinter (for the GUI) is part of the Python standard library on Windows/macOS.
+#    On Linux, you might need to install it separately using your system's package manager
+#    (e.g., 'sudo apt-get update && sudo apt-get install python3-tk' on Debian/Ubuntu).
+#    It is NOT installed via pip.
+#
+# 2. LibreOffice (or OpenOffice) with 'soffice' accessible in the system PATH is required
+#    for converting .ppt files. This must be installed separately and is NOT managed by pip.
+#
+# 3. The version numbers (>=X.Y.Z) indicate minimum compatible versions based on common usage.
+#    For strict reproducibility, you might want to freeze specific versions, e.g.:
+#    python-pptx==0.6.21
+#    Pillow==10.0.1
+#    You can find your current versions using 'pip freeze'.
