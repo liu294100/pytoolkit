@@ -35,4 +35,10 @@ python textbook_downloader_cli.py https://book.pep.com.cn/12345678 textbook.pdf
 - 下载速度取决于网络状况
 - 程序会在当前目录创建临时文件夹，处理完成后自动删除
 - 如果遇到错误，请检查URL是否正确
+
+"E:\Program Files\Python\Python313\python.exe" -m pip install python-pptx Pillow pyinstaller
+
+
 "E:\Program Files\Python\Python313\Scripts\pyinstaller.exe" --onefile --windowed --name pepdownload run.py
+
+pip install pywin32 psutil
