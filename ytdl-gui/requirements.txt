@@ -1,0 +1,30 @@
+# requirements.txt
+# Use 'pip install -r requirements.txt' to install these packages.
+
+# Core YouTube download library
+yt-dlp>=2023.11.16
+
+# GUI framework
+PySimpleGUI>=4.60.4
+
+# For video thumbnail generation
+Pillow>=10.0.0
+
+# For system tray integration
+pystray>=0.19.0
+
+# For HTTP requests
+requests>=2.31.0
+
+# For configuration file handling
+configparser>=5.3.0
+
+# --- Notes ---
+# 1. Tkinter (for the GUI) is part of the Python standard library on Windows/macOS.
+#    On Linux, you might need to install it separately using your system's package manager
+#    (e.g., 'sudo apt-get update && sudo apt-get install python3-tk' on Debian/Ubuntu).
+#    It is NOT installed via pip.
+
+# 2. The version numbers (>=X.Y.Z) indicate minimum compatible versions based on common usage.
+#    For strict reproducibility, you might want to freeze specific versions using:
+#    pip freeze > requirements.txt
