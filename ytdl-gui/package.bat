@@ -11,7 +11,7 @@ set PYTHON_SCRIPT=run.py
 
 :: --- Output Executable Name ---
 :: The desired name for the final .exe file (without the .exe extension).
-set OUTPUT_NAME=YoutubeDownloader          
+set OUTPUT_NAME=YoutubeDownloader
 
 :: --- Path to PyInstaller ---
 :: The full path to your pyinstaller.exe. Ensure this is correct for your system.
