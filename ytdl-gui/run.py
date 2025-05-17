@@ -111,7 +111,7 @@ class YoutubeDownloaderApp:
         proxy_presets_frame.pack(fill=tk.X, pady=2)
         
         ttk.Label(proxy_presets_frame, text="常用配置:").pack(side=tk.LEFT, padx=5)
-        presets = [("Clash", "127.0.0.1:7890"), ("V2Ray", "127.0.0.1:10809"), ("自定义", "")]
+        presets = [("Clash", "127.0.0.1:7890"), ("ClashVerge", "127.0.0.1:7897"),("V2Ray", "127.0.0.1:10809"), ("自定义", "")]
         
         self.proxy_preset = tk.StringVar()
         proxy_preset_combo = ttk.Combobox(proxy_presets_frame, textvariable=self.proxy_preset, 
