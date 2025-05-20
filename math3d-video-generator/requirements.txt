@@ -1,0 +1,23 @@
+# 基础依赖
+python-dotenv>=0.19.0
+requests>=2.26.0
+
+# AI 解题
+openai>=1.0.0
+sympy>=1.10.1
+
+# 绘图和动画
+manim>=0.17.2
+matplotlib>=3.5.1
+numpy>=1.22.0
+
+# 文本转语音
+edge-tts>=6.1.9
+
+# 视频处理
+moviepy>=1.0.3
+ffmpeg-python>=0.2.0
+
+# 工具类
+tqdm>=4.62.3
+pydub>=0.25.1
