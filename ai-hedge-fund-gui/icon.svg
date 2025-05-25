@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- 背景 -->
+  <rect width="128" height="128" rx="16" fill="#2c3e50" />
+
+  <!-- 股票图表 -->
+  <polyline points="20,90 40,70 60,80 80,50 100,60" stroke="#3498db" stroke-width="4" fill="none" />
+  
+  <!-- 上升趋势 -->
+  <polyline points="20,70 40,60 60,50 80,30 100,20" stroke="#2ecc71" stroke-width="4" fill="none" />
+  
+  <!-- 大脑图标 -->
+  <circle cx="64" cy="50" r="20" fill="#9b59b6" opacity="0.7" />
+  <path d="M54,50 C54,44 58,40 64,40 C70,40 74,44 74,50 C74,56 70,60 64,60 L64,70" stroke="#ecf0f1" stroke-width="3" fill="none" />
+  
+  <!-- 美元符号 -->
+  <text x="64" y="100" font-family="Arial" font-size="40" font-weight="bold" text-anchor="middle" fill="#f1c40f">$</text>
+  
+  <!-- AI文字 -->
+  <text x="64" y="30" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#ecf0f1">AI HEDGE</text>
+</svg>
