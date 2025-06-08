@@ -731,7 +731,7 @@ class TradingAgentsGUI:
             trading_signals = self.technical_analyzer_advanced.get_trading_signals(analysis_results)
             
             # Traditional technical analysis
-            prices = [market_data.current_price] * 20  # Simplified for demo
+            prices = [market_data.price] * 20  # Simplified for demo
             rsi = self.technical_analyzer.calculate_rsi(prices)
             sma = self.technical_analyzer.calculate_sma(prices, 10)
             
@@ -744,7 +744,7 @@ class TradingAgentsGUI:
                 'technical': {
                     'rsi': rsi,
                     'sma': sma,
-                    'price': market_data.current_price
+                    'price': market_data.price
                 },
                 'advanced_technical': analysis_results,
                 'trading_signals': trading_signals,
@@ -1023,7 +1023,7 @@ Trading Signals:
         # In a real implementation, this would fetch historical data
         # For demo purposes, we'll generate some sample data
         ohlcv_data = []
-        base_price = market_data.current_price
+        base_price = market_data.price
         
         for i in range(50):  # Generate 50 data points
             # Simulate price movement
