@@ -79,7 +79,9 @@ class TradingAgentsGUI:
     def __init__(self):
         self.root = tk.Tk()
         self.config = Config()
-        self.logger = ThreadSafeLogger()
+        # Initialize logger with log level from config
+        log_level = getattr(self.config, 'DEFAULT_SETTINGS', {}).get('log_level', 'INFO')
+        self.logger = ThreadSafeLogger(log_level=log_level)
         
         # Initialize data providers
         self.data_provider: Optional[DataProvider] = None
@@ -377,7 +379,7 @@ class TradingAgentsGUI:
         ttk.Label(controls_frame, text="Level:").pack(side=tk.LEFT, padx=(20, 5))
         self.log_level_var = tk.StringVar(value="ALL")
         log_level_combo = ttk.Combobox(controls_frame, textvariable=self.log_level_var, 
-                                      values=["ALL", "INFO", "WARNING", "ERROR"], width=10)
+                                      values=["ALL", "DEBUG", "INFO", "WARNING", "ERROR"], width=10)
         log_level_combo.pack(side=tk.LEFT)
         
         # Logs display
@@ -391,10 +393,12 @@ class TradingAgentsGUI:
         # Configure log colors
         try:
             log_colors = getattr(self.config, 'LOG_COLORS', {})
+            self.logs_text.tag_configure("DEBUG", foreground=log_colors.get('DEBUG', 'gray'))
             self.logs_text.tag_configure("INFO", foreground=log_colors.get('INFO', 'green'))
             self.logs_text.tag_configure("WARNING", foreground=log_colors.get('WARNING', 'orange'))
             self.logs_text.tag_configure("ERROR", foreground=log_colors.get('ERROR', 'red'))
         except Exception:
+            self.logs_text.tag_configure("DEBUG", foreground='gray')
             self.logs_text.tag_configure("INFO", foreground='green')
             self.logs_text.tag_configure("WARNING", foreground='orange')
             self.logs_text.tag_configure("ERROR", foreground='red')
@@ -547,10 +551,19 @@ class TradingAgentsGUI:
                                  command=self._apply_language_change)
         apply_button.grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=(20, 10))
         
+        # Log level setting
+        ttk.Label(config_frame, text="Log Level:").grid(row=2, column=0, sticky=tk.W, pady=(10, 5))
+        self.log_level_setting_var = tk.StringVar(value=self.logger.log_level)
+        log_level_setting_combo = ttk.Combobox(config_frame, textvariable=self.log_level_setting_var,
+                                             values=['DEBUG', 'INFO', 'WARNING', 'ERROR'], 
+                                             width=20, state='readonly')
+        log_level_setting_combo.grid(row=2, column=1, sticky=tk.W, padx=(10, 0), pady=(10, 5))
+        log_level_setting_combo.bind('<<ComboboxSelected>>', self._on_log_level_change)
+        
         # Info label
         info_label = ttk.Label(config_frame, text=self.get_text("restart_required"), 
                               font=('Arial', 9), foreground='gray')
-        info_label.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=(0, 10))
+        info_label.grid(row=3, column=0, columnspan=2, sticky=tk.W, pady=(0, 10))
     
     def _apply_language_change(self):
         """Apply language change."""
@@ -563,6 +576,18 @@ class TradingAgentsGUI:
                 self.get_text("info"), 
                 self.get_text("restart_required")
             )
+    
+    def _on_log_level_change(self, event=None):
+        """Handle log level change."""
+        new_level = self.log_level_setting_var.get()
+        self.logger.set_log_level(new_level)
+        self.logger.info(f"Log level changed to: {new_level}")
+        
+        # Update config
+        if hasattr(self.config, 'DEFAULT_SETTINGS'):
+            self.config.DEFAULT_SETTINGS['log_level'] = new_level
+        
+        self._add_log("INFO", f"Log level set to: {new_level}")
     
     def _update_tab_texts(self):
         """Update tab texts with current language."""
@@ -579,41 +604,57 @@ class TradingAgentsGUI:
     def _start_trading(self):
         """Start the trading system."""
         if self.is_trading:
+            self.logger.debug("Trading already active, ignoring start request")
             return
         
+        symbol = self.current_symbol.get()
+        self.logger.debug(f"Initiating trading start for symbol: {symbol}")
+        
         # Validate settings
+        self.logger.debug("Validating settings...")
         if not self._validate_settings():
+            self.logger.debug("Settings validation failed")
             return
         
         # Initialize data provider
+        self.logger.debug("Initializing data provider...")
         self._initialize_data_provider()
         
         # Update UI
         self.is_trading = True
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
+        self.logger.debug("UI updated for trading state")
         
         # Start trading thread
+        self.logger.debug("Starting trading thread...")
         self.trading_thread = threading.Thread(target=self._trading_loop, daemon=True)
         self.trading_thread.start()
         
-        self.logger.info(f"Trading started for symbol: {self.current_symbol.get()}")
+        self.logger.info(f"Trading started for symbol: {symbol}")
+        self.logger.debug("Trading system fully initialized and running")
         self._add_log("INFO", "Trading system started")
     
     def _stop_trading(self):
         """Stop the trading system."""
         if not self.is_trading:
+            self.logger.debug("Trading not active, ignoring stop request")
             return
         
+        self.logger.debug("Initiating trading stop...")
         self.is_trading = False
+        
+        self.logger.debug("Updating UI for stopped state...")
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
         
         # Reset agent statuses
+        self.logger.debug("Resetting agent statuses...")
         for agent in self.agents.values():
             agent.update_status("Idle", "Trading stopped")
         
         self.logger.info("Trading stopped")
+        self.logger.debug("Trading system fully stopped")
         self._add_log("INFO", "Trading system stopped")
     
     def _validate_settings(self) -> bool:
@@ -650,42 +691,58 @@ class TradingAgentsGUI:
     
     def _trading_loop(self):
         """Main trading loop running in separate thread."""
+        self.logger.debug("Trading loop started")
         while self.is_trading:
             try:
                 symbol = self.current_symbol.get()
+                self.logger.debug(f"Trading loop iteration for symbol: {symbol}")
                 
                 # Use performance optimizer for background tasks
+                self.logger.debug("Submitting background agent activities task")
                 self.performance_optimizer.submit_background_task(
                     lambda: self._simulate_agent_activities(symbol),
                     callback=lambda result: self.update_queue.put(('agent_update', result))
                 )
                 
                 # Get market data
+                self.logger.debug("Fetching market data...")
                 market_data = self.data_provider.get_market_data(symbol)
                 if market_data:
+                    self.logger.debug(f"Market data received: {symbol} @ {market_data.price}")
                     self.update_queue.put(('market_data', market_data))
+                else:
+                    self.logger.debug("No market data received")
                 
                 # Perform analysis with caching
+                self.logger.debug("Starting analysis with caching...")
                 analysis_key = f"analysis_{symbol}_{int(time.time() // 60)}"  # Cache for 1 minute
                 analysis = self.performance_optimizer.optimize_data_operation(
                     analysis_key,
                     lambda: self._perform_analysis(symbol, market_data)
                 )
                 if analysis:
+                    self.logger.debug(f"Analysis completed: RSI={analysis.get('rsi', 'N/A')}, SMA={analysis.get('sma', 'N/A')}")
                     self.update_queue.put(('analysis', analysis))
+                else:
+                    self.logger.debug("Analysis failed or returned None")
                 
                 # Update portfolio
+                self.logger.debug("Updating portfolio...")
                 portfolio_summary = self.portfolio_tracker.get_summary()
                 self.update_queue.put(('portfolio', portfolio_summary))
                 
                 # Process completed background tasks
+                self.logger.debug("Processing background task results...")
                 self.performance_optimizer.task_manager.process_results()
                 
                 # Sleep for update interval
-                time.sleep(self.update_interval_var.get())
+                update_interval = self.update_interval_var.get()
+                self.logger.debug(f"Trading loop iteration completed, sleeping for {update_interval} seconds")
+                time.sleep(update_interval)
                 
             except Exception as e:
                 self.logger.error(f"Error in trading loop: {e}")
+                self.logger.debug(f"Trading loop error details: {type(e).__name__}: {str(e)}")
                 self.update_queue.put(('error', str(e)))
                 time.sleep(5)  # Wait before retrying
     
@@ -716,27 +773,37 @@ class TradingAgentsGUI:
     def _perform_analysis(self, symbol: str, market_data) -> Optional[Dict]:
         """Perform technical and sentiment analysis with advanced indicators."""
         if not market_data:
+            self.logger.debug("No market data provided for analysis")
             return None
         
         try:
+            self.logger.debug(f"Starting analysis for {symbol} at price {market_data.price}")
+            
             # Create OHLCV data for technical analysis
             # In a real implementation, you would get historical data
             # For demo, we'll simulate some data
+            self.logger.debug("Generating sample OHLCV data...")
             ohlcv_data = self._generate_sample_ohlcv_data(market_data)
             
             # Perform comprehensive technical analysis
+            self.logger.debug("Performing advanced technical analysis...")
             analysis_results = self.technical_analyzer_advanced.analyze_ohlcv_data(ohlcv_data)
             
             # Generate trading signals
+            self.logger.debug("Generating trading signals...")
             trading_signals = self.technical_analyzer_advanced.get_trading_signals(analysis_results)
             
             # Traditional technical analysis
+            self.logger.debug("Calculating traditional technical indicators...")
             prices = [market_data.price] * 20  # Simplified for demo
             rsi = self.technical_analyzer.calculate_rsi(prices)
             sma = self.technical_analyzer.calculate_sma(prices, 10)
+            self.logger.debug(f"Traditional indicators calculated: RSI={rsi}, SMA={sma}")
             
             # Sentiment analysis (mock)
-            sentiment_score = self.sentiment_analyzer.analyze_text(f"Analysis for {symbol}")
+            self.logger.debug("Performing sentiment analysis...")
+            sentiment_score = self.sentiment_analyzer.analyze_text_sentiment(f"Analysis for {symbol}")
+            self.logger.debug(f"Sentiment analysis completed: score={sentiment_score}")
             
             analysis = {
                 'symbol': symbol,
@@ -756,17 +823,23 @@ class TradingAgentsGUI:
             
             # Store analysis results
             self.current_analysis = analysis
+            self.logger.debug(f"Analysis results stored for {symbol}")
             
             # Log significant signals
             if trading_signals and trading_signals.get('overall_signal') != 'NEUTRAL':
                 confidence = trading_signals.get('confidence', 0)
                 signal = trading_signals.get('overall_signal')
+                self.logger.debug(f"Significant trading signal detected: {signal} (Confidence: {confidence:.2f})")
                 self._add_log("INFO", f"Trading Signal: {signal} (Confidence: {confidence:.2f})")
+            else:
+                self.logger.debug("No significant trading signals detected")
             
+            self.logger.debug(f"Analysis completed successfully for {symbol}")
             return analysis
             
         except Exception as e:
             self.logger.error(f"Error in analysis: {e}")
+            self.logger.debug(f"Analysis error details: {type(e).__name__}: {str(e)}")
             return None
     
     def _process_updates(self):
@@ -788,6 +861,9 @@ class TradingAgentsGUI:
                     
         except queue.Empty:
             pass
+        
+        # Update logs display
+        self._update_logs_display()
         
         # Schedule next update
         self.root.after(100, self._process_updates)
@@ -937,6 +1013,43 @@ Trading Signals:
         else:
             self.finnhub_status.config(text="FinnHub: Not Connected", 
                                       foreground=error_color)
+    
+    def _update_logs_display(self):
+        """Update logs display from ThreadSafeLogger."""
+        try:
+            # Get current log level filter
+            selected_level = self.log_level_var.get()
+            
+            # Get all log entries
+            if selected_level == "ALL":
+                entries = self.logger.get_entries()
+            else:
+                entries = self.logger.get_entries(selected_level)
+            
+            # Get current content to avoid unnecessary updates
+            current_content = self.logs_text.get(1.0, tk.END).strip()
+            
+            # Build new content
+            new_content = ""
+            for entry in entries:
+                timestamp = entry['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+                new_content += f"[{timestamp}] {entry['level']}: {entry['message']}\n"
+            
+            # Only update if content changed
+            if new_content.strip() != current_content:
+                self.logs_text.delete(1.0, tk.END)
+                
+                # Insert entries with proper tags
+                for entry in entries:
+                    timestamp = entry['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+                    log_entry = f"[{timestamp}] {entry['level']}: {entry['message']}\n"
+                    self.logs_text.insert(tk.END, log_entry, entry['level'])
+                
+                self.logs_text.see(tk.END)
+                
+        except Exception as e:
+            # Fallback to old method if there's an error
+            pass
     
     def _add_log(self, level: str, message: str):
         """Add a log message to the logs display."""

@@ -463,13 +463,37 @@ def truncate_text(text: str, max_length: int = 100) -> str:
 class ThreadSafeLogger:
     """Thread-safe logger for GUI applications."""
     
-    def __init__(self, max_entries: int = 1000):
+    def __init__(self, max_entries: int = 1000, log_level: str = "INFO"):
         self.max_entries = max_entries
         self.entries = []
         self.lock = threading.Lock()
+        self.log_level = log_level
+        
+        # Define log level hierarchy
+        self.level_hierarchy = {
+            'DEBUG': 0,
+            'INFO': 1,
+            'WARNING': 2,
+            'ERROR': 3
+        }
+    
+    def set_log_level(self, level: str) -> None:
+        """Set the minimum log level."""
+        if level in self.level_hierarchy:
+            self.log_level = level
+    
+    def _should_log(self, level: str) -> bool:
+        """Check if message should be logged based on current log level."""
+        current_level_value = self.level_hierarchy.get(self.log_level, 1)
+        message_level_value = self.level_hierarchy.get(level, 1)
+        return message_level_value >= current_level_value
     
     def log(self, level: str, message: str) -> None:
         """Add log entry."""
+        # Check if this message should be logged
+        if not self._should_log(level):
+            return
+            
         with self.lock:
             entry = {
                 'timestamp': datetime.now(),
