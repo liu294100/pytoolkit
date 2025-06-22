@@ -77,6 +77,48 @@ class YoutubeDownloaderApp:
         self.format_combo = ttk.Combobox(format_frame, width=40, state="readonly")
         self.format_combo.pack(side=tk.LEFT, padx=5)
         
+        # 音频格式选择（仅在音频模式下显示）
+        self.audio_format_frame = ttk.Frame(options_frame)
+        
+        ttk.Label(self.audio_format_frame, text="输出格式:").pack(side=tk.LEFT, padx=5)
+        self.audio_format_var = tk.StringVar(value="mp3")
+        audio_formats = [("MP3", "mp3"), ("AAC", "aac"), ("OGG", "ogg"), ("FLAC", "flac"), ("WAV", "wav")]
+        
+        for text, value in audio_formats:
+            ttk.Radiobutton(self.audio_format_frame, text=text, variable=self.audio_format_var, 
+                           value=value).pack(side=tk.LEFT, padx=5)
+        
+        # 音频质量选择
+        quality_frame = ttk.Frame(self.audio_format_frame)
+        quality_frame.pack(side=tk.RIGHT, padx=10)
+        
+        ttk.Label(quality_frame, text="音质:").pack(side=tk.LEFT, padx=5)
+        self.audio_quality_var = tk.StringVar(value="192")
+        quality_combo = ttk.Combobox(quality_frame, textvariable=self.audio_quality_var, 
+                                   values=["320", "256", "192", "128", "96", "64"], 
+                                   width=8, state="readonly")
+        quality_combo.pack(side=tk.LEFT, padx=2)
+        quality_combo.current(2)  # 默认选择192
+        ttk.Label(quality_frame, text="kbps").pack(side=tk.LEFT, padx=2)
+        
+        # 音轨选择（仅在视频模式下显示）
+        self.audio_track_frame = ttk.Frame(options_frame)
+        
+        ttk.Label(self.audio_track_frame, text="音轨选择:").pack(side=tk.LEFT, padx=5)
+        self.audio_track_combo = ttk.Combobox(self.audio_track_frame, width=30, state="readonly")
+        self.audio_track_combo.pack(side=tk.LEFT, padx=5)
+        
+        # 字幕选择
+        subtitle_frame = ttk.Frame(self.audio_track_frame)
+        subtitle_frame.pack(side=tk.RIGHT, padx=10)
+        
+        self.include_subtitles_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(subtitle_frame, text="包含字幕", variable=self.include_subtitles_var).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Label(subtitle_frame, text="字幕语言:").pack(side=tk.LEFT, padx=5)
+        self.subtitle_lang_combo = ttk.Combobox(subtitle_frame, width=15, state="readonly")
+        self.subtitle_lang_combo.pack(side=tk.LEFT, padx=2)
+        
         # 代理设置
         proxy_frame = ttk.LabelFrame(options_frame, text="代理设置", padding="5")
         proxy_frame.pack(fill=tk.X, pady=5)
@@ -407,43 +449,249 @@ class YoutubeDownloaderApp:
         
         download_type = self.download_type.get()
         
+        # 控制音频格式选择控件和音轨选择控件的显示
+        if download_type == "audio":
+            self.audio_format_frame.pack(fill=tk.X, pady=5)
+            self.audio_track_frame.pack_forget()
+        else:
+            self.audio_format_frame.pack_forget()
+            self.audio_track_frame.pack(fill=tk.X, pady=5)
+            self._update_audio_tracks()
+        
         if download_type == "video":
-            # 视频格式
-            for f in self.video_info.get('formats', []):
-                if f.get('vcodec') != 'none' and f.get('acodec') != 'none':  # 同时有视频和音频的格式
-                    format_note = f.get('format_note', '')
-                    resolution = f.get('resolution', '')
-                    ext = f.get('ext', '')
-                    format_id = f.get('format_id', '')
-                    
-                    format_str = f"{resolution} ({format_note}) [{ext}] - ID: {format_id}"
-                    self.formats.append(format_str)
-                    self.format_ids.append(format_id)
+            # 添加预设的高质量选项
+            preset_formats = [
+                ("最佳质量 (自动选择)", "best"),
+                ("4K 2160p (最高画质)", "bestvideo[height<=2160]+bestaudio/best[height<=2160]"),
+                ("2K 1440p (超高清)", "bestvideo[height<=1440]+bestaudio/best[height<=1440]"),
+                ("1080p (全高清)", "bestvideo[height<=1080]+bestaudio/best[height<=1080]"),
+                ("720p (高清)", "bestvideo[height<=720]+bestaudio/best[height<=720]"),
+                ("480p (标清)", "bestvideo[height<=480]+bestaudio/best[height<=480]"),
+                ("360p (低画质)", "bestvideo[height<=360]+bestaudio/best[height<=360]")
+            ]
             
-            # 添加最佳质量选项
-            self.formats.insert(0, "最佳质量 (自动选择)")
-            self.format_ids.insert(0, "best")
+            for format_name, format_id in preset_formats:
+                self.formats.append(format_name)
+                self.format_ids.append(format_id)
+            
+            # 添加分隔符
+            self.formats.append("--- 可用的具体格式 ---")
+            self.format_ids.append("separator")
+            
+            # 获取所有可用的视频格式（包括仅视频的高清格式）
+            video_formats = []
+            combined_formats = []
+            
+            for f in self.video_info.get('formats', []):
+                format_note = f.get('format_note', '')
+                resolution = f.get('resolution', '')
+                ext = f.get('ext', '')
+                format_id = f.get('format_id', '')
+                vcodec = f.get('vcodec', '')
+                acodec = f.get('acodec', '')
+                fps = f.get('fps', '')
+                vbr = f.get('vbr', 0)
+                
+                # 构建格式描述
+                format_desc_parts = []
+                if resolution:
+                    format_desc_parts.append(resolution)
+                if format_note:
+                    format_desc_parts.append(f"({format_note})")
+                if fps:
+                    format_desc_parts.append(f"{fps}fps")
+                if vbr:
+                    format_desc_parts.append(f"{vbr:.0f}k")
+                
+                format_desc = " ".join(format_desc_parts)
+                format_str = f"{format_desc} [{ext}] - ID: {format_id}"
+                
+                # 分类格式
+                if vcodec != 'none' and acodec != 'none':  # 同时有视频和音频
+                    combined_formats.append((format_str, format_id))
+                elif vcodec != 'none' and acodec == 'none':  # 仅视频（通常是高清格式）
+                    video_formats.append((format_str + " (仅视频)", format_id))
+            
+            # 按分辨率排序（高到低）
+            def get_resolution_value(format_tuple):
+                format_str = format_tuple[0]
+                # 提取分辨率数字
+                import re
+                match = re.search(r'(\d+)p', format_str)
+                return int(match.group(1)) if match else 0
+            
+            video_formats.sort(key=get_resolution_value, reverse=True)
+            combined_formats.sort(key=get_resolution_value, reverse=True)
+            
+            # 添加仅视频格式（通常包含最高画质）
+            for format_str, format_id in video_formats:
+                self.formats.append(format_str)
+                self.format_ids.append(format_id)
+            
+            # 添加组合格式
+            for format_str, format_id in combined_formats:
+                self.formats.append(format_str)
+                self.format_ids.append(format_id)
         else:  # audio
-            # 音频格式
+            # 添加预设的音频质量选项
+            preset_audio_formats = [
+                ("最佳音质 (自动选择)", "bestaudio"),
+                ("高音质 MP3 320kbps", "bestaudio[ext=m4a]/bestaudio"),
+                ("标准 MP3 192kbps", "bestaudio[abr<=192]/bestaudio"),
+                ("压缩 MP3 128kbps", "bestaudio[abr<=128]/bestaudio"),
+                ("低音质 MP3 96kbps", "bestaudio[abr<=96]/bestaudio")
+            ]
+            
+            for format_name, format_id in preset_audio_formats:
+                self.formats.append(format_name)
+                self.format_ids.append(format_id)
+            
+            # 添加分隔符
+            self.formats.append("--- 可用的音频格式 ---")
+            self.format_ids.append("separator")
+            
+            # 获取所有可用的音频格式，按语言和质量分组
+            audio_formats = []
+            language_formats = {}
+            
             for f in self.video_info.get('formats', []):
                 if f.get('vcodec') == 'none' and f.get('acodec') != 'none':  # 只有音频的格式
                     format_note = f.get('format_note', '')
                     abr = f.get('abr', 0)
                     ext = f.get('ext', '')
                     format_id = f.get('format_id', '')
+                    language = f.get('language', '') or f.get('language_preference', '')
+                    acodec = f.get('acodec', '')
                     
-                    format_str = f"{format_note} {abr}kbps [{ext}] - ID: {format_id}"
+                    # 构建格式描述
+                    format_desc_parts = []
+                    if format_note:
+                        format_desc_parts.append(format_note)
+                    if abr:
+                        format_desc_parts.append(f"{abr}kbps")
+                    if acodec:
+                        format_desc_parts.append(f"({acodec})")
+                    
+                    format_desc = " ".join(format_desc_parts)
+                    format_str = f"{format_desc} [{ext}] - ID: {format_id}"
+                    
+                    # 如果有语言信息，按语言分组
+                    if language:
+                        lang_name = self._get_language_name(language)
+                        if lang_name not in language_formats:
+                            language_formats[lang_name] = []
+                        language_formats[lang_name].append((f"{format_str} ({lang_name})", format_id, abr or 0))
+                    else:
+                        audio_formats.append((format_str, format_id, abr or 0))
+            
+            # 按音质排序（高到低）
+            audio_formats.sort(key=lambda x: x[2], reverse=True)
+            
+            # 添加按语言分组的音频格式
+            for lang_name, formats in sorted(language_formats.items()):
+                if formats:
+                    self.formats.append(f"--- {lang_name} 配音 ---")
+                    self.format_ids.append("separator")
+                    
+                    # 按音质排序
+                    formats.sort(key=lambda x: x[2], reverse=True)
+                    for format_str, format_id, _ in formats:
+                        self.formats.append(format_str)
+                        self.format_ids.append(format_id)
+            
+            # 添加其他音频格式
+            if audio_formats:
+                self.formats.append("--- 其他音频格式 ---")
+                self.format_ids.append("separator")
+                
+                for format_str, format_id, _ in audio_formats:
                     self.formats.append(format_str)
                     self.format_ids.append(format_id)
-            
-            # 添加最佳音质选项
-            self.formats.insert(0, "最佳音质 (自动选择)")
-            self.format_ids.insert(0, "bestaudio")
         
         # 更新下拉框
         self.format_combo['values'] = self.formats
         if self.formats:
             self.format_combo.current(0)
+    
+    def _get_language_name(self, language_code):
+        """将语言代码转换为中文名称"""
+        language_map = {
+            'en': '英语',
+            'zh': '中文',
+            'zh-CN': '中文(简体)',
+            'zh-TW': '中文(繁体)',
+            'ja': '日语',
+            'ko': '韩语',
+            'fr': '法语',
+            'de': '德语',
+            'es': '西班牙语',
+            'it': '意大利语',
+            'pt': '葡萄牙语',
+            'ru': '俄语',
+            'ar': '阿拉伯语',
+            'hi': '印地语',
+            'th': '泰语',
+            'vi': '越南语',
+            'tr': '土耳其语',
+            'pl': '波兰语',
+            'nl': '荷兰语',
+            'sv': '瑞典语',
+            'da': '丹麦语',
+            'no': '挪威语',
+            'fi': '芬兰语'
+        }
+        return language_map.get(language_code.lower(), f'未知语言({language_code})')
+    
+    def _update_audio_tracks(self):
+        """更新音轨和字幕选择选项"""
+        if not self.video_info:
+            return
+        
+        # 获取音轨信息
+        audio_tracks = []
+        audio_languages = set()
+        
+        for f in self.video_info.get('formats', []):
+            if f.get('acodec') != 'none':  # 有音频的格式
+                language = f.get('language', '') or f.get('audio_language', '')
+                if language:
+                    audio_languages.add(language)
+        
+        # 添加默认选项
+        audio_tracks.append("默认音轨 (自动选择)")
+        
+        # 添加具体语言的音轨
+        for lang in sorted(audio_languages):
+            lang_name = self._get_language_name(lang)
+            audio_tracks.append(f"{lang_name} ({lang})")
+        
+        # 更新音轨下拉框
+        self.audio_track_combo['values'] = audio_tracks
+        if audio_tracks:
+            self.audio_track_combo.current(0)
+        
+        # 获取字幕信息
+        subtitles = self.video_info.get('subtitles', {})
+        automatic_captions = self.video_info.get('automatic_captions', {})
+        
+        subtitle_languages = []
+        subtitle_languages.append("自动选择")
+        
+        # 添加手动字幕
+        for lang in sorted(subtitles.keys()):
+            lang_name = self._get_language_name(lang)
+            subtitle_languages.append(f"{lang_name} (手动) ({lang})")
+        
+        # 添加自动生成字幕
+        for lang in sorted(automatic_captions.keys()):
+            if lang not in subtitles:  # 避免重复
+                lang_name = self._get_language_name(lang)
+                subtitle_languages.append(f"{lang_name} (自动) ({lang})")
+        
+        # 更新字幕下拉框
+        self.subtitle_lang_combo['values'] = subtitle_languages
+        if subtitle_languages:
+            self.subtitle_lang_combo.current(0)
     
     def start_download(self):
         if not self.video_info:
@@ -462,6 +710,11 @@ class YoutubeDownloaderApp:
             return
         
         format_id = self.format_ids[format_index]
+        
+        # 检查是否选择了分隔符
+        if format_id == "separator":
+            messagebox.showwarning("提示", "请选择一个有效的下载格式，而不是分隔符")
+            return
         
         # 禁用按钮，防止重复点击
         self.download_btn.config(state="disabled")
@@ -482,11 +735,47 @@ class YoutubeDownloaderApp:
             # 准备文件名模板
             outtmpl = os.path.join(save_path, '%(title)s.%(ext)s')
             
+            # 处理特殊的格式选择器
+            if "(仅视频)" in self.formats[self.format_combo.current()]:
+                # 如果选择的是仅视频格式，需要与最佳音频合并
+                format_id = f"{format_id}+bestaudio/best"
+            
             ydl_opts = {
                 'format': format_id,
                 'outtmpl': outtmpl,
                 'progress_hooks': [self._progress_hook],
+                'merge_output_format': 'mp4',  # 确保合并后的格式为mp4
             }
+            
+            # 处理音轨选择（仅视频模式）
+            if self.download_type.get() == "video":
+                audio_track_selection = self.audio_track_combo.get()
+                if audio_track_selection and "(" in audio_track_selection and audio_track_selection != "默认音轨 (自动选择)":
+                    # 提取语言代码
+                    import re
+                    lang_match = re.search(r'\(([a-z-]+)\)$', audio_track_selection)
+                    if lang_match:
+                        audio_lang = lang_match.group(1)
+                        # 修改格式选择器以包含特定语言的音频
+                        if format_selector.startswith('bestvideo'):
+                            format_selector = f"bestvideo+bestaudio[language={audio_lang}]/bestvideo+bestaudio/best"
+                        ydl_opts['format'] = format_selector
+                
+                # 处理字幕下载
+                if self.include_subtitles_var.get():
+                    subtitle_selection = self.subtitle_lang_combo.get()
+                    if subtitle_selection == "自动选择":
+                        ydl_opts['writesubtitles'] = True
+                        ydl_opts['writeautomaticsub'] = True
+                    elif "(" in subtitle_selection:
+                        # 提取语言代码
+                        lang_match = re.search(r'\(([a-z-]+)\)$', subtitle_selection)
+                        if lang_match:
+                            subtitle_lang = lang_match.group(1)
+                            ydl_opts['writesubtitles'] = True
+                            ydl_opts['subtitleslangs'] = [subtitle_lang]
+                            if "(自动)" in subtitle_selection:
+                                ydl_opts['writeautomaticsub'] = True
             
             # 添加代理设置
             if self.use_proxy.get():
@@ -499,11 +788,27 @@ class YoutubeDownloaderApp:
             
             # 如果是仅音频，添加音频后处理器
             if self.download_type.get() == "audio":
-                ydl_opts['postprocessors'] = [{
+                audio_format = self.audio_format_var.get()
+                audio_quality = self.audio_quality_var.get()
+                
+                postprocessor = {
                     'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }]
+                    'preferredcodec': audio_format,
+                    'preferredquality': audio_quality,
+                }
+                
+                # 为不同格式设置特定参数
+                if audio_format == 'flac':
+                    # FLAC是无损格式，不需要质量设置
+                    postprocessor.pop('preferredquality', None)
+                elif audio_format == 'wav':
+                    # WAV是无损格式，不需要质量设置
+                    postprocessor.pop('preferredquality', None)
+                elif audio_format == 'aac':
+                    # AAC格式的特殊处理
+                    postprocessor['preferredcodec'] = 'm4a'
+                
+                ydl_opts['postprocessors'] = [postprocessor]
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
