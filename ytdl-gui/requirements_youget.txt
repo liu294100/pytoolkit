@@ -1,0 +1,7 @@
+# You-Get GUI 依赖包
+you-get>=0.4.1650
+requests>=2.25.1
+
+# 可选依赖（用于更好的功能支持）
+ffmpeg-python>=0.2.0
+Pillow>=8.0.0
