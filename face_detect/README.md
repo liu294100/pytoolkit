@@ -1,107 +1,166 @@
-# 人脸检测GUI工具
+# 人脸检测与活体检测系统
 
-这是一个基于Python和tkinter的人脸检测GUI应用程序，可以检测图片中的人脸并进行多项质量评估。
+一个集成了人脸检测和活体检测功能的Python应用程序，支持多种GUI界面和多语言切换。
 
 ## 功能特性
 
-- **人脸检测**: 检测图片中是否存在人脸
-- **多人脸检测**: 检测是否存在多张人脸
-- **图片质量检测**: 
-  - 亮度检测
-  - 模糊度检测
-  - 人脸完整度检测
-- **面部特征检测**:
-  - 墨镜检测
-  - 闭眼检测
-  - 口罩检测
-  - 表情检测（闭嘴/微笑/大笑）
-- **头部姿态检测**: 检测头部的俯仰、偏航、翻滚角度
-- **遮挡检测**: 检测鼻子、嘴部、眼部、脸颊是否被遮挡
+- **人脸检测**: 基于MediaPipe的高精度人脸检测
+- **活体检测**: 实时眨眼检测防止照片欺骗
+- **多GUI版本**: 提供简单版、轻量版、活体检测版等多种界面
+- **多语言支持**: 支持中英文界面切换
+- **跨平台**: 支持Windows、Linux、macOS
 
-## 安装依赖
-
-```bash
-pip install -r requirements.txt
-```
-
-## 使用方法
-
-### 启动GUI应用
-
-```bash
-python face_detect_gui.py
-```
-
-### 使用命令行版本
-
-```bash
-python detect.py <图片路径>
-```
-
-## GUI界面说明
-
-1. **选择图片**: 点击"选择图片"按钮选择要检测的图片文件
-2. **开始检测**: 选择图片后，点击"开始检测"按钮进行人脸检测
-3. **查看结果**: 检测结果会显示在左侧的结果面板中，包括：
-   - 总体合规性结果
-   - 各项检测的详细结果
-   - 置信度信息
-   - 遮挡检测结果
-
-## 检测标准
-
-### 图片要求
-- 人脸检测置信度 ≥ 0.7
-- 图片亮度 ≥ 130
-- 图片清晰度 ≥ 100
-- 人脸完整度 ≥ 0.9
-- 头部姿态角度 ≤ 30°
-
-### 面部要求
-- 不能佩戴墨镜
-- 不能闭眼
-- 不能有明显遮挡
-- 表情自然（不能大笑）
-
-## 文件结构
+## 项目结构
 
 ```
 face_detect/
-├── detect.py              # 核心检测算法
-├── resp_entity.py          # 响应实体类
-├── face_detect_gui.py      # GUI应用程序
-├── requirements.txt        # 依赖包列表
-└── README.md              # 说明文档
+├── main.py                 # 主入口文件
+├── requirements.txt        # 依赖配置
+├── src/                    # 源代码目录
+│   ├── core/              # 核心功能模块
+│   │   ├── detect.py      # 人脸检测引擎
+│   │   ├── liveness_detection.py  # 活体检测引擎
+│   │   └── resp_entity.py # 响应实体类
+│   ├── gui/               # GUI界面模块
+│   │   ├── face_detect_gui.py                    # 简单GUI
+│   │   ├── face_detect_gui_lite.py               # 轻量级GUI
+│   │   ├── face_detect_with_liveness_gui.py      # 活体检测GUI(中文)
+│   │   ├── face_detect_with_liveness_gui_en.py   # 活体检测GUI(英文)
+│   │   └── face_detect_with_liveness_gui_multilang.py # 多语言GUI(推荐)
+│   └── utils/             # 工具模块
+├── tests/                 # 测试文件
+├── scripts/               # 启动脚本
+│   ├── windows/          # Windows批处理脚本
+│   └── unix/             # Unix shell脚本
+├── docs/                  # 文档目录
+│   ├── zh/               # 中文文档
+│   └── en/               # 英文文档
+└── config/                # 配置文件目录
 ```
 
-## 技术栈
+## 快速开始
 
-- **OpenCV**: 图像处理和计算机视觉
-- **MediaPipe**: Google的机器学习框架，用于人脸检测和关键点检测
-- **tkinter**: Python标准GUI库
-- **PIL/Pillow**: 图像处理库
-- **Pydantic**: 数据验证和设置管理
-- **NumPy**: 数值计算库
-
-## 注意事项
-
-1. 支持的图片格式：JPG, JPEG, PNG, BMP, TIFF
-2. 建议图片分辨率不要过大，以免影响检测速度
-3. 检测算法对光照条件较为敏感，建议在良好光照条件下拍摄
-4. 美颜或磨皮处理可能会影响模糊度检测结果
-
-## 故障排除
-
-如果遇到导入错误，请确保已安装所有依赖包：
+### 1. 安装依赖
 
 ```bash
-pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-如果在Windows系统上遇到OpenCV相关问题，可以尝试：
+### 2. 运行应用
+
+#### 使用主入口文件（推荐）
 
 ```bash
-pip uninstall opencv-python
-pip install opencv-python-headless
+# 启动多语言GUI（默认）
+python main.py
+
+# 启动简单GUI
+python main.py --gui simple
+
+# 启动轻量级GUI
+python main.py --gui lite
+
+# 启动活体检测GUI
+python main.py --gui liveness
+
+# 启动英文活体检测GUI
+python main.py --gui liveness-en
+
+# 启动英文界面
+python main.py --lang en
 ```
+
+#### 使用启动脚本
+
+**Windows:**
+```bash
+scripts\windows\run_gui.bat
+```
+
+**Linux/macOS:**
+```bash
+scripts/unix/run_gui.sh
+```
+
+### 3. 使用说明
+
+1. **静态图片检测**: 点击"选择图片"按钮，选择要检测的图片文件
+2. **实时活体检测**: 点击"开始活体检测"按钮，对着摄像头进行眨眼动作
+3. **语言切换**: 在多语言版本中可以切换中英文界面
+
+## 系统要求
+
+- Python 3.7+
+- OpenCV 4.0+
+- MediaPipe 0.8+
+- Tkinter (通常随Python安装)
+- 摄像头设备（用于活体检测）
+
+## 依赖包
+
+- `opencv-python`: 图像处理
+- `mediapipe`: 人脸检测和关键点检测
+- `Pillow`: 图像格式支持
+- `numpy`: 数值计算
+- `pydantic`: 数据验证
+- `scipy`: 科学计算
+- `scikit-learn`: 机器学习工具
+
+## 开发指南
+
+### 添加新的GUI版本
+
+1. 在 `src/gui/` 目录下创建新的GUI文件
+2. 在 `main.py` 中添加相应的启动选项
+3. 更新 `src/gui/__init__.py` 文件
+
+### 扩展检测功能
+
+1. 在 `src/core/` 目录下添加新的检测模块
+2. 更新 `src/core/__init__.py` 文件
+3. 在GUI中集成新功能
+
+## 故障排除
+
+### 常见问题
+
+1. **MediaPipe安装失败**
+   - 参考 `docs/zh/MediaPipe安装指南.md`
+
+2. **摄像头无法打开**
+   - 检查摄像头是否被其他应用占用
+   - 确认摄像头驱动正常
+
+3. **导入模块失败**
+   - 确保所有依赖已正确安装
+   - 检查Python路径配置
+
+## 许可证
+
+本项目采用MIT许可证，详见LICENSE文件。
+
+## 贡献
+
+欢迎提交Issue和Pull Request来改进项目。
+
+## 更新日志
+
+### v1.0.0 (2025-06-25)
+- 重构项目结构
+- 添加主入口文件
+- 优化导入路径
+- 完善文档结构
+- 修复眨眼检测功能
+
+
+## Next Steps Priority
+1. High Priority : Add comprehensive logging and error handling
+2. Medium Priority : Implement unit tests and configuration management
+3. Low Priority : Add performance monitoring and async processing
+## 💡 Additional Suggestions
+- Code Quality Tools : Add black , flake8 , mypy , pre-commit
+- Version Management : Implement semantic versioning
+- User Feedback : Add telemetry for usage analytics
+- Internationalization : Expand language support beyond zh/en
+- Plugin Architecture : Allow custom detection algorithms
+Your project has excellent structure! These enhancements will make it production-ready and highly maintainable

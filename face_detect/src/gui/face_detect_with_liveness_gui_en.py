@@ -17,9 +17,9 @@ from datetime import datetime
 
 # Import custom modules
 try:
-    from detect import main as detect_faces
-    from resp_entity import ImageStatus
-    from liveness_detection import LivenessDetector, LivenessStatus
+    from core.detect import main as detect_faces
+    from core.resp_entity import ImageStatus
+    from core.liveness_detection import LivenessDetector, LivenessStatus
 except ImportError as e:
     print(f"Module import failed: {e}")
     print("Please ensure all dependency modules are in the same directory")

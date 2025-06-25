@@ -3,15 +3,24 @@ from tkinter import ttk, filedialog, messagebox
 from PIL import Image, ImageTk
 import cv2
 import json
-from detect import main as detect_main
-from resp_entity import ImageStatus
 import os
+import sys
+
+# 尝试导入MediaPipe相关模块
+try:
+    from core.detect import main as detect_main
+    MEDIAPIPE_AVAILABLE = True
+except ImportError as e:
+    MEDIAPIPE_AVAILABLE = False
+    IMPORT_ERROR = str(e)
+
+from core.resp_entity import ImageStatus
 
 
-class FaceDetectGUI:
+class FaceDetectGUILite:
     def __init__(self, root):
         self.root = root
-        self.root.title("人脸检测工具")
+        self.root.title("人脸检测工具 (轻量版)")
         self.root.geometry("1000x700")
         
         # 当前选择的图片路径
@@ -19,6 +28,29 @@ class FaceDetectGUI:
         self.current_image = None
         
         self.setup_ui()
+        
+        # 检查MediaPipe可用性
+        if not MEDIAPIPE_AVAILABLE:
+            self.show_compatibility_warning()
+    
+    def show_compatibility_warning(self):
+        """显示兼容性警告"""
+        warning_msg = f"""⚠️ MediaPipe不可用
+
+错误信息: {IMPORT_ERROR}
+
+可能的原因：
+1. Python版本不兼容（当前: {sys.version.split()[0]}）
+2. MediaPipe未安装或安装失败
+
+解决方案：
+1. 使用Python 3.11或3.12
+2. 安装MediaPipe: pip install mediapipe
+3. 查看COMPATIBILITY.md获取详细说明
+
+当前只能使用基础图片查看功能。"""
+        
+        messagebox.showwarning("兼容性警告", warning_msg)
     
     def setup_ui(self):
         # 主框架
@@ -39,21 +71,47 @@ class FaceDetectGUI:
         ttk.Button(control_frame, text="选择图片", command=self.select_image).pack(pady=5, fill=tk.X)
         
         # 检测按钮
-        self.detect_btn = ttk.Button(control_frame, text="开始检测", command=self.detect_face, state=tk.DISABLED)
+        self.detect_btn = ttk.Button(
+            control_frame, 
+            text="开始检测" if MEDIAPIPE_AVAILABLE else "检测不可用", 
+            command=self.detect_face, 
+            state=tk.DISABLED
+        )
         self.detect_btn.pack(pady=5, fill=tk.X)
+        
+        # 兼容性信息按钮
+        if not MEDIAPIPE_AVAILABLE:
+            ttk.Button(
+                control_frame, 
+                text="查看兼容性说明", 
+                command=self.show_compatibility_info
+            ).pack(pady=5, fill=tk.X)
         
         # 分隔线
         ttk.Separator(control_frame, orient='horizontal').pack(fill=tk.X, pady=10)
         
+        # 系统信息
+        info_frame = ttk.LabelFrame(control_frame, text="系统信息", padding="5")
+        info_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Label(info_frame, text=f"Python版本: {sys.version.split()[0]}").pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"MediaPipe: {'✅ 可用' if MEDIAPIPE_AVAILABLE else '❌ 不可用'}").pack(anchor=tk.W)
+        
+        try:
+            import cv2
+            ttk.Label(info_frame, text=f"OpenCV: ✅ {cv2.__version__}").pack(anchor=tk.W)
+        except ImportError:
+            ttk.Label(info_frame, text="OpenCV: ❌ 不可用").pack(anchor=tk.W)
+        
         # 检测结果标签
-        ttk.Label(control_frame, text="检测结果:", font=('Arial', 12, 'bold')).pack(anchor=tk.W)
+        ttk.Label(control_frame, text="检测结果:", font=('Arial', 12, 'bold')).pack(anchor=tk.W, pady=(10, 0))
         
         # 结果显示区域
         result_frame = ttk.Frame(control_frame)
         result_frame.pack(fill=tk.BOTH, expand=True, pady=5)
         
         # 创建滚动文本框显示结果
-        self.result_text = tk.Text(result_frame, height=20, width=40, wrap=tk.WORD)
+        self.result_text = tk.Text(result_frame, height=15, width=40, wrap=tk.WORD)
         scrollbar = ttk.Scrollbar(result_frame, orient=tk.VERTICAL, command=self.result_text.yview)
         self.result_text.configure(yscrollcommand=scrollbar.set)
         
@@ -80,6 +138,75 @@ class FaceDetectGUI:
         # 进度条
         self.progress = ttk.Progressbar(status_frame, mode='indeterminate')
         self.progress.pack(side=tk.RIGHT, padx=(10, 0))
+        
+        # 初始化结果显示
+        if not MEDIAPIPE_AVAILABLE:
+            self.result_text.insert(tk.END, "⚠️ MediaPipe不可用\n\n")
+            self.result_text.insert(tk.END, "当前只能使用图片查看功能。\n\n")
+            self.result_text.insert(tk.END, "要启用人脸检测功能，请：\n")
+            self.result_text.insert(tk.END, "1. 使用Python 3.11或3.12\n")
+            self.result_text.insert(tk.END, "2. 安装MediaPipe\n")
+            self.result_text.insert(tk.END, "3. 查看COMPATIBILITY.md\n")
+    
+    def show_compatibility_info(self):
+        """显示兼容性信息窗口"""
+        info_window = tk.Toplevel(self.root)
+        info_window.title("兼容性说明")
+        info_window.geometry("600x500")
+        info_window.transient(self.root)
+        info_window.grab_set()
+        
+        # 创建滚动文本框
+        text_frame = ttk.Frame(info_window, padding="10")
+        text_frame.pack(fill=tk.BOTH, expand=True)
+        
+        text_widget = tk.Text(text_frame, wrap=tk.WORD, font=('Consolas', 10))
+        scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scrollbar.set)
+        
+        # 兼容性信息内容
+        info_content = f"""Python版本兼容性说明
+{'='*50}
+
+当前环境：
+- Python版本: {sys.version}
+- MediaPipe状态: {'可用' if MEDIAPIPE_AVAILABLE else '不可用'}
+- 错误信息: {IMPORT_ERROR if not MEDIAPIPE_AVAILABLE else '无'}
+
+问题原因：
+MediaPipe目前不支持Python 3.13，支持的版本为Python 3.8-3.12。
+
+解决方案：
+
+方案1：降级Python版本（推荐）
+- 安装Python 3.11或3.12
+- 重新安装依赖包
+
+方案2：使用conda虚拟环境
+conda create -n face_detect python=3.11
+conda activate face_detect
+pip install -r requirements.txt
+
+方案3：使用pyenv（Linux/macOS）
+pyenv install 3.11.0
+pyenv local 3.11.0
+pip install -r requirements.txt
+
+安装验证：
+安装完成后运行 test_gui.py 验证所有依赖是否正常。
+
+更多信息：
+请查看项目目录下的 COMPATIBILITY.md 文件获取详细说明。
+"""
+        
+        text_widget.insert(tk.END, info_content)
+        text_widget.config(state=tk.DISABLED)
+        
+        text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # 关闭按钮
+        ttk.Button(info_window, text="关闭", command=info_window.destroy).pack(pady=10)
     
     def select_image(self):
         """选择图片文件"""
@@ -98,11 +225,46 @@ class FaceDetectGUI:
         if file_path:
             self.current_image_path = file_path
             self.load_and_display_image(file_path)
-            self.detect_btn.config(state=tk.NORMAL)
+            
+            if MEDIAPIPE_AVAILABLE:
+                self.detect_btn.config(state=tk.NORMAL)
+            
             self.status_label.config(text=f"已选择: {os.path.basename(file_path)}")
             
-            # 清空之前的检测结果
+            # 显示图片基本信息
+            self.show_image_info(file_path)
+    
+    def show_image_info(self, image_path):
+        """显示图片基本信息"""
+        try:
+            with Image.open(image_path) as img:
+                width, height = img.size
+                mode = img.mode
+                format_name = img.format
+            
+            file_size = os.path.getsize(image_path) / 1024  # KB
+            
+            info_text = f"""图片信息：
+{'='*20}
+文件名: {os.path.basename(image_path)}
+尺寸: {width} x {height}
+颜色模式: {mode}
+格式: {format_name}
+文件大小: {file_size:.1f} KB
+
+"""
+            
+            # 清空之前的结果并显示图片信息
             self.result_text.delete(1.0, tk.END)
+            self.result_text.insert(tk.END, info_text)
+            
+            if not MEDIAPIPE_AVAILABLE:
+                self.result_text.insert(tk.END, "⚠️ 人脸检测功能不可用\n")
+                self.result_text.insert(tk.END, "请查看兼容性说明解决依赖问题。\n")
+            
+        except Exception as e:
+            self.result_text.delete(1.0, tk.END)
+            self.result_text.insert(tk.END, f"读取图片信息失败: {str(e)}\n")
     
     def load_and_display_image(self, image_path):
         """加载并显示图片"""
@@ -135,6 +297,10 @@ class FaceDetectGUI:
     
     def detect_face(self):
         """执行人脸检测"""
+        if not MEDIAPIPE_AVAILABLE:
+            messagebox.showerror("错误", "MediaPipe不可用，无法进行人脸检测。\n请查看兼容性说明解决依赖问题。")
+            return
+        
         if not self.current_image_path:
             messagebox.showwarning("警告", "请先选择图片")
             return
@@ -242,31 +408,11 @@ class FaceDetectGUI:
                     self.result_text.insert(tk.END, f"{name}: {value:.3f}\n")
                 else:
                     self.result_text.insert(tk.END, f"{name}: {value}\n")
-        
-        # 遮挡检测结果
-        extra = status.get('extra', {})
-        if any(extra.values()):
-            self.result_text.insert(tk.END, "\n遮挡检测:\n")
-            self.result_text.insert(tk.END, "-" * 30 + "\n")
-            
-            occlude_names = {
-                "nose_occlude": "鼻子遮挡",
-                "mouth_occlude": "嘴部遮挡",
-                "left_eye_occlude": "左眼遮挡",
-                "right_eye_occlude": "右眼遮挡",
-                "cheek_occlude": "脸颊遮挡"
-            }
-            
-            for key, name in occlude_names.items():
-                value = extra.get(key)
-                if value is not None:
-                    status_text = "❌ 检测到遮挡" if value else "✅ 无遮挡"
-                    self.result_text.insert(tk.END, f"{name}: {status_text}\n")
 
 
 def main():
     root = tk.Tk()
-    app = FaceDetectGUI(root)
+    app = FaceDetectGUILite(root)
     root.mainloop()
 
 

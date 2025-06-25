@@ -429,6 +429,34 @@ def main(image_path):
     return status, confidence
 
 
+class FaceDetector:
+    """人脸检测器类"""
+    
+    def __init__(self):
+        self.threshold = threshold
+    
+    def detect_faces(self, image_path):
+        """检测人脸的主要方法"""
+        return main(image_path)
+    
+    def detect_from_image(self, image):
+        """从图像对象检测人脸"""
+        # 保存临时图像并检测
+        import tempfile
+        import os
+        
+        with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_file:
+            cv2.imwrite(tmp_file.name, image)
+            result = main(tmp_file.name)
+            os.unlink(tmp_file.name)
+            return result
+
+
+def detect_faces(image_path):
+    """检测人脸的便捷函数"""
+    return main(image_path)
+
+
 if __name__ == "__main__":
     status, confidence = main(sys.argv[1])
     print(status)

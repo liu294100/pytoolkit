@@ -20,9 +20,9 @@ import os
 
 # 导入自定义模块
 try:
-    from detect import main as detect_faces
-    from resp_entity import ImageStatus
-    from liveness_detection import LivenessDetector, LivenessStatus
+    from core.detect import main as detect_faces
+    from core.resp_entity import ImageStatus
+    from core.liveness_detection import LivenessDetector, LivenessStatus
 except ImportError as e:
     print(f"导入模块失败: {e}")
     print("请确保所有依赖模块都在同一目录下")
