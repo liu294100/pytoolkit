@@ -406,7 +406,7 @@ class YouGetDownloaderApp:
             
             try:
                 proxies = {"http": proxy_url, "https": proxy_url}
-                response = requests.get("https://www.baidu.com", 
+                response = requests.get("https://www.google.com", 
                                        proxies=proxies, 
                                        timeout=10)
                 
