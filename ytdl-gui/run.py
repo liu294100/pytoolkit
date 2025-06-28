@@ -745,6 +745,18 @@ class YoutubeDownloaderApp:
                 'outtmpl': outtmpl,
                 'progress_hooks': [self._progress_hook],
                 'merge_output_format': 'mp4',  # 确保合并后的格式为mp4
+                # 网络优化设置
+                'socket_timeout': 30,  # 增加socket超时时间
+                'retries': 3,  # 设置重试次数
+                'fragment_retries': 3,  # 分片重试次数
+                'extractor_retries': 3,  # 提取器重试次数
+                # SSL相关设置
+                'nocheckcertificate': True,  # 跳过SSL证书验证
+                'prefer_insecure': False,  # 优先使用安全连接
+                # 用户代理设置
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                }
             }
             
             # 处理音轨选择（仅视频模式）
@@ -757,25 +769,25 @@ class YoutubeDownloaderApp:
                     if lang_match:
                         audio_lang = lang_match.group(1)
                         # 修改格式选择器以包含特定语言的音频
-                        if format_selector.startswith('bestvideo'):
-                            format_selector = f"bestvideo+bestaudio[language={audio_lang}]/bestvideo+bestaudio/best"
-                        ydl_opts['format'] = format_selector
-                
-                # 处理字幕下载
-                if self.include_subtitles_var.get():
-                    subtitle_selection = self.subtitle_lang_combo.get()
-                    if subtitle_selection == "自动选择":
+                        if format_id.startswith('bestvideo'):
+                            format_id = f"bestvideo+bestaudio[language={audio_lang}]/bestvideo+bestaudio/best"
+                        ydl_opts['format'] = format_id
+            
+            # 处理字幕下载
+            if self.include_subtitles_var.get():
+                subtitle_selection = self.subtitle_lang_combo.get()
+                if subtitle_selection == "自动选择":
+                    ydl_opts['writesubtitles'] = True
+                    ydl_opts['writeautomaticsub'] = True
+                elif "(" in subtitle_selection:
+                    # 提取语言代码
+                    lang_match = re.search(r'\(([a-z-]+)\)$', subtitle_selection)
+                    if lang_match:
+                        subtitle_lang = lang_match.group(1)
                         ydl_opts['writesubtitles'] = True
-                        ydl_opts['writeautomaticsub'] = True
-                    elif "(" in subtitle_selection:
-                        # 提取语言代码
-                        lang_match = re.search(r'\(([a-z-]+)\)$', subtitle_selection)
-                        if lang_match:
-                            subtitle_lang = lang_match.group(1)
-                            ydl_opts['writesubtitles'] = True
-                            ydl_opts['subtitleslangs'] = [subtitle_lang]
-                            if "(自动)" in subtitle_selection:
-                                ydl_opts['writeautomaticsub'] = True
+                        ydl_opts['subtitleslangs'] = [subtitle_lang]
+                        if "(自动)" in subtitle_selection:
+                            ydl_opts['writeautomaticsub'] = True
             
             # 添加代理设置
             if self.use_proxy.get():
