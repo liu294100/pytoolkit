@@ -406,7 +406,7 @@ class YouGetDownloaderApp:
             
             try:
                 proxies = {"http": proxy_url, "https": proxy_url}
-                response = requests.get("https://www.baidu.com", 
+                response = requests.get("https://www.google.com", 
                                        proxies=proxies, 
                                        timeout=10)
                 
@@ -765,19 +765,23 @@ class YouGetDownloaderApp:
             try:
                 connections = int(self.connections.get())
                 if 1 <= connections <= 20:
-                    cmd.extend(['--timeout', '120'])  # 增加超时时间
+                    cmd.extend(['--timeout', '180'])  # 增加超时时间到3分钟
                     if connections > 5:
                         cmd.append('--force')  # 强制下载模式
             except ValueError:
-                pass
+                # 默认超时设置
+                cmd.extend(['--timeout', '180'])
             
-            # 注意：you-get不支持--retry参数，使用内置重试机制
-            
-            # 添加其他优化参数
+            # 添加网络优化和SSL相关参数
             cmd.extend([
-                '--debug',         # 启用调试信息
-                '--insecure'       # 忽略SSL证书错误
+                '--insecure',      # 忽略SSL证书错误
+                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',  # 设置用户代理
+                '--no-check-certificate',  # 不检查SSL证书
             ])
+            
+            # 添加调试信息（可选）
+            if hasattr(self, 'debug_mode') and self.debug_mode:
+                cmd.append('--debug')
             
             # 确保音视频合并（默认行为，但明确指定）
             if self.download_type.get() == "video":
