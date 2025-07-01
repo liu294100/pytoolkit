@@ -1,0 +1,195 @@
+{
+  "client": {
+    "server_host": "127.0.0.1",
+    "server_port": 8888,
+    "protocol": "tcp",
+    "timeout": 30,
+    "reconnect": {
+      "enable": true,
+      "max_attempts": 5,
+      "interval": 5,
+      "backoff": "exponential"
+    },
+    "buffer_size": 65536
+  },
+  "display": {
+    "window": {
+      "title": "RDPTool Client",
+      "width": 1024,
+      "height": 768,
+      "resizable": true,
+      "fullscreen": false,
+      "always_on_top": false
+    },
+    "scaling": {
+      "mode": "fit",
+      "factor": 1.0,
+      "smooth": true,
+      "maintain_aspect": true
+    },
+    "quality": {
+      "preferred": "high",
+      "adaptive": true,
+      "min_fps": 15,
+      "max_fps": 60
+    },
+    "cursor": {
+      "show_local": true,
+      "show_remote": true,
+      "sync_position": true
+    }
+  },
+  "input": {
+    "mouse": {
+      "enable": true,
+      "sensitivity": 1.0,
+      "acceleration": true,
+      "right_click_menu": true
+    },
+    "keyboard": {
+      "enable": true,
+      "layout": "auto",
+      "shortcuts": {
+        "disconnect": "ctrl+alt+d",
+        "fullscreen": "f11",
+        "screenshot": "ctrl+alt+s",
+        "settings": "ctrl+alt+p"
+      },
+      "passthrough_keys": ["alt+tab", "ctrl+esc"]
+    },
+    "touch": {
+      "enable": true,
+      "gestures": {
+        "pinch_zoom": true,
+        "two_finger_scroll": true,
+        "tap_to_click": true
+      }
+    }
+  },
+  "security": {
+    "encryption_type": "aes_256_cbc",
+    "verify_server": true,
+    "save_credentials": false,
+    "auto_login": false,
+    "certificate": {
+      "verify_ssl": true,
+      "ca_file": null,
+      "cert_file": null,
+      "key_file": null
+    },
+    "authentication": {
+      "username": "",
+      "password": "",
+      "remember_username": true,
+      "use_keyring": true
+    }
+  },
+  "network": {
+    "compression": {
+      "enable": true,
+      "algorithm": "zlib",
+      "level": 6
+    },
+    "bandwidth": {
+      "limit_mbps": 0,
+      "adaptive": true,
+      "priority": "balanced"
+    },
+    "proxy": {
+      "enable": false,
+      "type": "http",
+      "host": "127.0.0.1",
+      "port": 8080,
+      "username": null,
+      "password": null
+    },
+    "keepalive": {
+      "enable": true,
+      "interval": 30,
+      "timeout": 10
+    }
+  },
+  "ui": {
+    "theme": "system",
+    "language": "auto",
+    "toolbar": {
+      "show": true,
+      "position": "top",
+      "auto_hide": false
+    },
+    "statusbar": {
+      "show": true,
+      "show_fps": true,
+      "show_bandwidth": true,
+      "show_latency": true
+    },
+    "notifications": {
+      "enable": true,
+      "connection_status": true,
+      "errors": true,
+      "warnings": false
+    }
+  },
+  "features": {
+    "file_transfer": {
+      "enable": true,
+      "default_local_dir": "downloads/",
+      "default_remote_dir": "uploads/",
+      "auto_open_folder": true
+    },
+    "clipboard": {
+      "enable": true,
+      "sync_interval": 1,
+      "bidirectional": true
+    },
+    "audio": {
+      "enable": false,
+      "volume": 100,
+      "mute_on_disconnect": true
+    },
+    "recording": {
+      "enable": false,
+      "hotkey": "ctrl+shift+r",
+      "format": "mp4",
+      "quality": "medium",
+      "save_dir": "recordings/"
+    },
+    "screenshot": {
+      "enable": true,
+      "hotkey": "ctrl+alt+s",
+      "format": "png",
+      "save_dir": "screenshots/",
+      "auto_save": true
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/client.log",
+    "max_size": "10MB",
+    "backup_count": 3,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "console": false,
+    "colored": true
+  },
+  "performance": {
+    "enable_monitoring": false,
+    "stats_interval": 60,
+    "memory_limit": "512MB",
+    "cpu_limit": 50,
+    "gpu_acceleration": "auto",
+    "hardware_decoding": "auto"
+  },
+  "advanced": {
+    "debug_mode": false,
+    "profile_performance": false,
+    "enable_plugins": true,
+    "plugin_dir": "plugins/",
+    "experimental_features": {
+      "webrtc": false,
+      "p2p_connection": false,
+      "multi_monitor": true
+    },
+    "custom_protocols": [],
+    "fallback_servers": []
+  }
+}

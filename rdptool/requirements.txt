@@ -1,0 +1,78 @@
+# 核心依赖（可选，工具会自动处理缺失的依赖）
+
+# 图像处理和屏幕捕获
+Pillow>=9.0.0
+opencv-python>=4.5.0
+mss>=6.1.0
+numpy>=1.21.0
+
+# 输入控制
+pynput>=1.7.0
+pyautogui>=0.9.53
+
+# 系统监控
+psutil>=5.8.0
+
+# 加密和安全
+cryptography>=3.4.0
+pycryptodome>=3.15.0
+
+# 网络和协议
+websockets>=10.0
+paramiko>=2.8.0
+requests>=2.25.0
+aiohttp>=3.8.0
+uvloop>=0.17.0; sys_platform != "win32"
+
+# 数据处理和压缩
+lz4>=3.1.0
+zstandard>=0.15.0
+
+# SOCKS和代理
+socks>=1.7.1
+pysocks>=1.7.1
+
+# GUI界面（可选）
+tkinter-tooltip>=2.0.0
+
+# 开发和测试依赖
+pytest>=6.0.0
+pytest-asyncio>=0.18.0
+pytest-cov>=2.12.0
+black>=21.0.0
+flake8>=3.9.0
+mypy>=0.910
+isort>=5.9.0
+
+# 文档生成
+sphinx>=4.0.0
+sphinx-rtd-theme>=0.5.0
+
+# 性能分析
+memory-profiler>=0.60.0
+line-profiler>=3.3.0
+
+# 日志和监控
+coloredlogs>=15.0
+rich>=10.0.0
+
+# 配置文件处理
+PyYAML>=5.4.0
+toml>=0.10.0
+
+# 注意：
+# 1. 所有依赖都是可选的，工具内置了纯Python实现
+# 2. 如果安装了这些依赖，工具会优先使用它们以获得更好的性能
+# 3. 在无法安装依赖的环境中，工具仍然可以正常运行
+# 4. uvloop仅在Linux/macOS上可用，Windows会自动跳过
+# 5. 某些GUI相关的依赖可能需要系统级别的支持
+
+# 最小化安装（仅核心功能）：
+# pip install pillow psutil cryptography
+
+# 完整安装（所有功能）：
+# pip install -r requirements.txt
+
+# 开发环境安装：
+# pip install -r requirements.txt
+# pip install -e .
