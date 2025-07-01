@@ -1,6 +1,32 @@
-# RDPTool - 多协议远程桌面工具
+# RDP工具
 
-一个功能强大的纯Python远程桌面工具，支持多种网络协议和代理功能。
+一个功能强大的远程桌面连接工具，支持多种协议和部署方式。
+
+## 快速开始
+
+### Docker部署（推荐）
+
+```bash
+# 克隆项目
+git clone <your-repo-url>
+cd rdptool
+
+# 启动RDP服务端
+docker-compose up -d rdp-server
+
+# 验证部署
+curl http://localhost:8888/api/status
+```
+
+### 传统部署
+
+```bash
+# 安装依赖
+pip install -r requirements.txt
+
+# 启动服务端
+python server.py --config configs/server_config.json
+```
 
 ## 🚀 特性
 
@@ -338,6 +364,15 @@ python -c "from network.network_monitor import NetworkMonitor; m=NetworkMonitor(
 - 参考了 [pproxy](https://github.com/qwj/python-proxy) 的设计理念
 - 感谢所有开源项目的贡献者
 - 特别感谢测试和反馈的用户
+
+## 📚 文档
+
+- [用户手册](docs/USER_MANUAL.md)
+- [开发指南](docs/DEVELOPMENT.md)
+- [API文档](docs/API.md)
+- [部署指南](docs/DEPLOYMENT.md)
+- [云服务器部署](docs/CLOUD_DEPLOYMENT.md)
+- [Docker部署指南](docs/DOCKER_DEPLOYMENT.md)
 
 ## 📞 联系方式
 

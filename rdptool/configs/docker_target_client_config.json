@@ -1,0 +1,71 @@
+{
+  "client": {
+    "mode": "target",
+    "server_host": "rdp-server",
+    "server_port": 8888,
+    "device_id": "docker_target_001",
+    "device_name": "Docker Target Desktop",
+    "auto_reconnect": true,
+    "reconnect_interval": 5,
+    "heartbeat_interval": 30,
+    "connection_timeout": 60,
+    "authentication": {
+      "username": "target_user",
+      "password": "target_password",
+      "token": ""
+    },
+    "screen_sharing": {
+      "enable": true,
+      "capture_method": "xvfb",
+      "resolution": "1920x1080",
+      "color_depth": 24,
+      "fps": 30,
+      "quality": "medium",
+      "compression": {
+        "enable": true,
+        "format": "jpeg",
+        "quality": 75
+      },
+      "display": ":99"
+    },
+    "input_control": {
+      "enable": true,
+      "mouse": {
+        "enable": true,
+        "sensitivity": 1.0
+      },
+      "keyboard": {
+        "enable": true,
+        "layout": "us"
+      }
+    },
+    "network": {
+      "buffer_size": 8192,
+      "compression": true,
+      "encryption": false,
+      "nat_traversal": {
+        "enable": true,
+        "keep_alive": true,
+        "keep_alive_interval": 30
+      }
+    },
+    "logging": {
+      "level": "INFO",
+      "file": "/var/log/rdptool/target_client.log",
+      "max_size": "50MB",
+      "backup_count": 3
+    },
+    "performance": {
+      "worker_threads": 4,
+      "memory_limit": "512MB",
+      "cpu_limit": "50%"
+    },
+    "docker": {
+      "container_mode": true,
+      "xvfb_display": ":99",
+      "xvfb_resolution": "1920x1080x24",
+      "vnc_enable": false,
+      "vnc_port": 5900
+    }
+  }
+}

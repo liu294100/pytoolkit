@@ -1,0 +1,91 @@
+{
+  "client": {
+    "mode": "controller",
+    "server_host": "rdp-server",
+    "server_port": 8888,
+    "target_device_id": "docker_target_001",
+    "user_id": "controller_001",
+    "session_name": "Docker Controller Session",
+    "auto_reconnect": true,
+    "reconnect_interval": 5,
+    "connection_timeout": 60,
+    "authentication": {
+      "username": "controller_user",
+      "password": "controller_password",
+      "token": ""
+    },
+    "display": {
+      "resolution": "1920x1080",
+      "color_depth": 24,
+      "fullscreen": false,
+      "scaling": 1.0,
+      "compression": {
+        "enable": true,
+        "quality": "medium",
+        "format": "jpeg"
+      }
+    },
+    "input": {
+      "mouse": {
+        "enable": true,
+        "sensitivity": 1.0,
+        "acceleration": true
+      },
+      "keyboard": {
+        "enable": true,
+        "layout": "us",
+        "shortcuts": {
+          "enable": true,
+          "ctrl_alt_del": "ctrl+alt+end",
+          "alt_tab": "alt+page_down"
+        }
+      },
+      "clipboard": {
+        "enable": true,
+        "sync_bidirectional": true
+      }
+    },
+    "network": {
+      "buffer_size": 8192,
+      "compression": true,
+      "encryption": false,
+      "bandwidth_limit": {
+        "enable": false,
+        "upload_kbps": 1000,
+        "download_kbps": 5000
+      }
+    },
+    "gui": {
+      "enable": true,
+      "theme": "dark",
+      "toolbar": {
+        "enable": true,
+        "position": "top",
+        "auto_hide": false
+      },
+      "status_bar": {
+        "enable": true,
+        "show_fps": true,
+        "show_latency": true,
+        "show_bandwidth": true
+      }
+    },
+    "logging": {
+      "level": "INFO",
+      "file": "/var/log/rdptool/controller_client.log",
+      "max_size": "50MB",
+      "backup_count": 3
+    },
+    "performance": {
+      "fps_limit": 60,
+      "quality_auto_adjust": true,
+      "latency_optimization": true,
+      "prefetch_frames": 2
+    },
+    "docker": {
+      "container_mode": true,
+      "x11_forwarding": true,
+      "display": ":0"
+    }
+  }
+}
