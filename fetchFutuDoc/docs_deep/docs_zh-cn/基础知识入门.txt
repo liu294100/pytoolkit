@@ -1,0 +1,40 @@
+标题: 基础知识入门
+URL: https://support.futunn.com/categories/2186
+分类: 
+描述: 立即了解港股/美股/基金/期权/期货投资神器使用方法
+字数: 40
+内容哈希: 67706f72ec544710a2fea700797e889f
+爬取时间: 2025-07-08T00:12:15.554973
+
+子项链接 (27 个):
+  - 股份简称命名守则: https://support.futunn.com/topic107
+  - 股息红利和除权除息: https://support.futunn.com/topic113
+  - 从形态上判断个股调整性质: https://support.futunn.com/topic269
+  - 股市术语集锦: https://support.futunn.com/topic114
+  - 什么是除权、除息: https://support.futunn.com/topic115
+  - 换手率向我们发出了什么信号: https://support.futunn.com/topic117
+  - 什么是高水低水: https://support.futunn.com/topic119
+  - 股票摘要字段介绍: https://support.futunn.com/topic120
+  - 持仓字段介绍: https://support.futunn.com/topic122
+  - 什么是上市保荐人: https://support.futunn.com/topic274
+  - 什么是上市聆讯: https://support.futunn.com/topic285
+  - 什么是首次公开募股: https://support.futunn.com/topic288
+  - 介绍上市的独特之处: https://support.futunn.com/topic289
+  - IPO路演：投资意向大调查: https://support.futunn.com/topic290
+  - 红鲱鱼是什么: https://support.futunn.com/topic291
+  - 什么是同股不同权: https://support.futunn.com/topic292
+  - 什么是申购倍数: https://support.futunn.com/topic294
+  - “顶头槌”是槌吗: https://support.futunn.com/topic295
+  - 窝轮入门: https://support.futunn.com/topic209
+  - 公有摘要字段: https://support.futunn.com/topic211
+  - 认股证的价值评估: https://support.futunn.com/topic212
+  - 窝轮与期权区别之处: https://support.futunn.com/topic213
+  - 窝轮的杠杆效应: https://support.futunn.com/topic214
+  - 认股权证: https://support.futunn.com/topic219
+  - 买认股证与买正股的区别: https://support.futunn.com/topic233
+  - 期权希腊值含义及用法: https://support.futunn.com/topic473
+  - 常用期权组合简介: https://support.futunn.com/topic474
+
+================================================================================
+
+客户端功能 帐户安全 模拟交易 市场介绍 基础知识入门 量化与Open API 富途反欺诈专区 基础知识入门 股票入门 股份简称命名守则 股息红利和除权除息 从形态上判断个股调整性质 股市术语集锦 什么是除权、除息 换手率向我们发出了什么信号 什么是高水低水 股票摘要字段介绍 持仓字段介绍 新股入门 什么是上市保荐人 什么是上市聆讯 什么是首次公开募股 介绍上市的独特之处 IPO路演：投资意向大调查 红鲱鱼是什么 什么是同股不同权 什么是申购倍数 “顶头槌”是槌吗 窝轮入门 窝轮入门 公有摘要字段 认股证的价值评估 窝轮与期权区别之处 窝轮的杠杆效应 认股权证 买认股证与买正股的区别 期权入门 期权希腊值含义及用法 常用期权组合简介

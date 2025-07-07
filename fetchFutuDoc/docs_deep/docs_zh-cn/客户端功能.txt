@@ -1,0 +1,70 @@
+标题: 客户端功能
+URL: https://support.futunn.com/categories/2183
+分类: 
+描述: 立即了解港股/美股/基金/期权/期货投资神器使用方法
+字数: 92
+内容哈希: 9049fab22bb736996f53fb5d57df04d0
+爬取时间: 2025-07-08T00:12:18.501467
+
+子项链接 (57 个):
+  - 自选股添加及删除: https://support.futunn.com/topic78
+  - 自选列表如何查看涨跌额: https://support.futunn.com/topic79
+  - 自选列表的图标什么意义: https://support.futunn.com/topic81
+  - 自选介绍: https://support.futunn.com/topic75
+  - 历史最低价为负数是什么原因: https://support.futunn.com/topic15
+  - IPO竞价分析: https://support.futunn.com/topic546
+  - 为什么美股行情中出现199999.99的卖出价: https://support.futunn.com/topic35
+  - 债券类型: https://support.futunn.com/topic398
+  - 港股中午休市期间为什么会有摆盘更新: https://support.futunn.com/topic36
+  - 个股报价: https://support.futunn.com/topic38
+  - 股票价格的颜色为什么与日K线颜色不一样: https://support.futunn.com/topic40
+  - 美股盘前盘后行情: https://support.futunn.com/topic46
+  - 行情权限互踢: https://support.futunn.com/topic66
+  - 行情图表如何查看历史K线的每日分时图表: https://support.futunn.com/topic43
+  - 多股同列: https://support.futunn.com/topic47
+  - 品种叠加: https://support.futunn.com/topic49
+  - 平均K线图: https://support.futunn.com/topic590
+  - 图表单击效果设置: https://support.futunn.com/topic62
+  - K线图十字线摘要: https://support.futunn.com/topic63
+  - 图表高度: https://support.futunn.com/topic64
+  - 技术指标: https://support.futunn.com/topic68
+  - 逐笔明细和成交统计: https://support.futunn.com/topic699
+  - 十大净买入/卖出经纪商: https://support.futunn.com/topic80
+  - 为什么股票的资金流入和流出金额不相等: https://support.futunn.com/topic92
+  - 经纪商持股比例: https://support.futunn.com/topic98
+  - 港股通持股比例: https://support.futunn.com/topic99
+  - 美股摆盘: https://support.futunn.com/topic479
+  - 公司估值: https://support.futunn.com/topic497
+  - 盘前盘后榜: https://support.futunn.com/topic45
+  - 热力图: https://support.futunn.com/topic540
+  - 选股器: https://support.futunn.com/topic105
+  - 智能盯盘: https://support.futunn.com/topic106
+  - 机构追踪: https://support.futunn.com/topic700
+  - 走势预测: https://support.futunn.com/topic701
+  - 到价提醒: https://support.futunn.com/topic597
+  - iPhone和iPad新消息通知操作指引: https://support.futunn.com/topic703
+  - Android 新消息通知操作指引: https://support.futunn.com/topic354
+  - 华为手机新消息通知操作指引: https://support.futunn.com/topic358
+  - 小米手机新消息通知操作指引: https://support.futunn.com/topic355
+  - OPPO手机新消息通知操作指引: https://support.futunn.com/topic357
+  - vivo 手机新消息通知操作指引: https://support.futunn.com/topic359
+  - 三星手机新消息通知操作指引: https://support.futunn.com/topic356
+  - 积分介绍: https://support.futunn.com/topic95
+  - 积分商城介绍: https://support.futunn.com/topic97
+  - 任务中心介绍: https://support.futunn.com/topic545
+  - 如何设置屏幕阅读器: https://support.futunn.com/topic686
+  - 如何设置单声道音频: https://support.futunn.com/topic687
+  - 如何设置开关控制: https://support.futunn.com/topic688
+  - 投资组合介绍: https://support.futunn.com/topic283
+  - 新版小组件操作指引: https://support.futunn.com/topic408
+  - 小组件操作指引: https://support.futunn.com/topic409
+  - 安卓小组件操作指引: https://support.futunn.com/topic536
+  - 牛牛桌面端WEB组件使用指引: https://support.futunn.com/topic596
+  - 锁屏小组件操作指引: https://support.futunn.com/topic702
+  - 导出市场列表信息: https://support.futunn.com/topic697
+  - SSL连接错误操作指引: https://support.futunn.com/topic704
+  - 牛牛AI: https://support.futunn.com/topic831
+
+================================================================================
+
+客户端功能 帐户安全 模拟交易 市场介绍 基础知识入门 量化与Open API 富途反欺诈专区 客户端功能 自选列表 自选股添加及删除 自选列表如何查看涨跌额 自选列表的图标什么意义 自选介绍 个股报价 历史最低价为负数是什么原因 IPO竞价分析 为什么美股行情中出现199999.99的卖出价 债券类型 港股中午休市期间为什么会有摆盘更新 个股报价 股票价格的颜色为什么与日K线颜色不一样 美股盘前盘后行情 行情权限互踢 个股图表 行情图表如何查看历史K线的每日分时图表 多股同列 品种叠加 图表 平均K线图 图表单击效果设置 K线图十字线摘要 图表高度 技术指标 个股分析 逐笔明细和成交统计 十大净买入/卖出经纪商 财报 财年 为什么股票的资金流入和流出金额不相等 经纪商持股比例 港股通持股比例 美股摆盘 公司估值 选股功能 盘前盘后榜 热力图 选股器 智能盯盘 机构追踪 走势预测 消息通知 到价提醒 iPhone和iPad新消息通知操作指引 Android 新消息通知操作指引 华为手机新消息通知操作指引 小米手机新消息通知操作指引 OPPO手机新消息通知操作指引 vivo 手机新消息通知操作指引 三星手机新消息通知操作指引 社区 牛牛勋章 牛牛社区 积分任务 积分介绍 积分商城介绍 任务中心介绍 无障碍设置 如何设置屏幕阅读器 如何设置单声道音频 如何设置开关控制 技术面 技术面解读 个股形态 量价理论 指标介绍 投资组合介绍 投资组合介绍 牛牛组件 新版小组件操作指引 小组件操作指引 安卓小组件操作指引 牛牛桌面端WEB组件使用指引 锁屏小组件操作指引 导出市场列表信息 导出市场列表信息 SSL连接错误操作指引 SSL连接错误操作指引 牛牛AI 牛牛AI

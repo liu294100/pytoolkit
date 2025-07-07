@@ -1,0 +1,609 @@
+{
+  "https://support.futunn.com/zh-cn/categories/360000010781": {
+    "title": "我们有什么可以帮您？",
+    "content": "问题分类 客户端功能 十大净买入/卖出经纪商 逐笔明细和成交统计 筹码分布 到价提醒 财年 帐户安全 登录过程遇到常见问题 如何修改已认证的手机号 什么是富途令牌 如何使用富途令牌 富途如何保障隐私数据 模拟交易 如何创建模拟账户 如何进行模拟交易 股票模拟交易规则 期货模拟交易规则 期权模拟交易规则 市场介绍 美股市场介绍 港股盘前指的是什么 如何查看期货 行情卡相关 什么是市场波动调节机制 (VCM) 基础知识入门 什么是除权、除息 窝轮与期权区别之处 股份简称命名守则 股息红利和除权除息 从形态上判断个股调整性质 量化与Open API 如何玩转量化交易 量化支持哪些品类 如何零基础构建策略 量化学习视频 如何排查策略的问题 富途反欺诈专区 富途如何保护我的个人信息 如何预防 富途反欺诈专区 富途公示 安全课堂",
+    "category": "",
+    "tags": [],
+    "url": "https://support.futunn.com/zh-cn/categories/360000010781",
+    "crawl_time": "2025-07-08T00:12:11.288686",
+    "language": "zh-cn",
+    "meta_description": "立即了解港股/美股/基金/期权/期货投资神器使用方法",
+    "content_hash": "488fa0d0aa45ea9ae5b4a36f321f423d",
+    "word_count": 45,
+    "related_links": [],
+    "sub_items": [
+      {
+        "title": "十大净买入/卖出经纪商",
+        "url": "https://support.futunn.com/topic80"
+      },
+      {
+        "title": "逐笔明细和成交统计",
+        "url": "https://support.futunn.com/topic699"
+      },
+      {
+        "title": "筹码分布",
+        "url": "https://support.futunn.com/topic585"
+      },
+      {
+        "title": "到价提醒",
+        "url": "https://support.futunn.com/topic597"
+      },
+      {
+        "title": "登录过程遇到常见问题",
+        "url": "https://support.futunn.com/topic22"
+      },
+      {
+        "title": "如何修改已认证的手机号",
+        "url": "https://support.futunn.com/topic537"
+      },
+      {
+        "title": "什么是富途令牌",
+        "url": "https://support.futunn.com/topic12"
+      },
+      {
+        "title": "如何使用富途令牌",
+        "url": "https://support.futunn.com/topic16"
+      },
+      {
+        "title": "富途如何保障隐私数据",
+        "url": "https://support.futunn.com/topic24"
+      },
+      {
+        "title": "如何创建模拟账户",
+        "url": "https://support.futunn.com/topic28"
+      },
+      {
+        "title": "如何进行模拟交易",
+        "url": "https://support.futunn.com/topic29"
+      },
+      {
+        "title": "股票模拟交易规则",
+        "url": "https://support.futunn.com/topic692"
+      },
+      {
+        "title": "期货模拟交易规则",
+        "url": "https://support.futunn.com/topic693"
+      },
+      {
+        "title": "期权模拟交易规则",
+        "url": "https://support.futunn.com/topic694"
+      },
+      {
+        "title": "美股市场介绍",
+        "url": "https://support.futunn.com/topic480"
+      },
+      {
+        "title": "港股盘前指的是什么",
+        "url": "https://support.futunn.com/topic37"
+      },
+      {
+        "title": "如何查看期货",
+        "url": "https://support.futunn.com/topic387"
+      },
+      {
+        "title": "行情卡相关",
+        "url": "https://support.futunn.com/topic56"
+      },
+      {
+        "title": "什么是市场波动调节机制 (VCM)",
+        "url": "https://support.futunn.com/topic53"
+      },
+      {
+        "title": "什么是除权、除息",
+        "url": "https://support.futunn.com/topic115"
+      },
+      {
+        "title": "窝轮与期权区别之处",
+        "url": "https://support.futunn.com/topic213"
+      },
+      {
+        "title": "股份简称命名守则",
+        "url": "https://support.futunn.com/topic107"
+      },
+      {
+        "title": "股息红利和除权除息",
+        "url": "https://support.futunn.com/topic113"
+      },
+      {
+        "title": "从形态上判断个股调整性质",
+        "url": "https://support.futunn.com/topic269"
+      },
+      {
+        "title": "如何玩转量化交易",
+        "url": "https://support.futunn.com/topic605"
+      },
+      {
+        "title": "量化支持哪些品类",
+        "url": "https://support.futunn.com/topic638"
+      },
+      {
+        "title": "如何零基础构建策略",
+        "url": "https://support.futunn.com/topic641"
+      },
+      {
+        "title": "量化学习视频",
+        "url": "https://support.futunn.com/topic643"
+      },
+      {
+        "title": "如何排查策略的问题",
+        "url": "https://support.futunn.com/topic691"
+      },
+      {
+        "title": "富途如何保护我的个人信息",
+        "url": "https://support.futunn.com/topic609"
+      },
+      {
+        "title": "如何预防",
+        "url": "https://support.futunn.com/topic610"
+      }
+    ]
+  },
+  "https://support.futunn.com/categories/2186": {
+    "title": "基础知识入门",
+    "content": "客户端功能 帐户安全 模拟交易 市场介绍 基础知识入门 量化与Open API 富途反欺诈专区 基础知识入门 股票入门 股份简称命名守则 股息红利和除权除息 从形态上判断个股调整性质 股市术语集锦 什么是除权、除息 换手率向我们发出了什么信号 什么是高水低水 股票摘要字段介绍 持仓字段介绍 新股入门 什么是上市保荐人 什么是上市聆讯 什么是首次公开募股 介绍上市的独特之处 IPO路演：投资意向大调查 红鲱鱼是什么 什么是同股不同权 什么是申购倍数 “顶头槌”是槌吗 窝轮入门 窝轮入门 公有摘要字段 认股证的价值评估 窝轮与期权区别之处 窝轮的杠杆效应 认股权证 买认股证与买正股的区别 期权入门 期权希腊值含义及用法 常用期权组合简介",
+    "category": "",
+    "tags": [],
+    "url": "https://support.futunn.com/categories/2186",
+    "crawl_time": "2025-07-08T00:12:15.554973",
+    "language": "zh-cn",
+    "meta_description": "立即了解港股/美股/基金/期权/期货投资神器使用方法",
+    "content_hash": "67706f72ec544710a2fea700797e889f",
+    "word_count": 40,
+    "related_links": [],
+    "sub_items": [
+      {
+        "title": "股份简称命名守则",
+        "url": "https://support.futunn.com/topic107"
+      },
+      {
+        "title": "股息红利和除权除息",
+        "url": "https://support.futunn.com/topic113"
+      },
+      {
+        "title": "从形态上判断个股调整性质",
+        "url": "https://support.futunn.com/topic269"
+      },
+      {
+        "title": "股市术语集锦",
+        "url": "https://support.futunn.com/topic114"
+      },
+      {
+        "title": "什么是除权、除息",
+        "url": "https://support.futunn.com/topic115"
+      },
+      {
+        "title": "换手率向我们发出了什么信号",
+        "url": "https://support.futunn.com/topic117"
+      },
+      {
+        "title": "什么是高水低水",
+        "url": "https://support.futunn.com/topic119"
+      },
+      {
+        "title": "股票摘要字段介绍",
+        "url": "https://support.futunn.com/topic120"
+      },
+      {
+        "title": "持仓字段介绍",
+        "url": "https://support.futunn.com/topic122"
+      },
+      {
+        "title": "什么是上市保荐人",
+        "url": "https://support.futunn.com/topic274"
+      },
+      {
+        "title": "什么是上市聆讯",
+        "url": "https://support.futunn.com/topic285"
+      },
+      {
+        "title": "什么是首次公开募股",
+        "url": "https://support.futunn.com/topic288"
+      },
+      {
+        "title": "介绍上市的独特之处",
+        "url": "https://support.futunn.com/topic289"
+      },
+      {
+        "title": "IPO路演：投资意向大调查",
+        "url": "https://support.futunn.com/topic290"
+      },
+      {
+        "title": "红鲱鱼是什么",
+        "url": "https://support.futunn.com/topic291"
+      },
+      {
+        "title": "什么是同股不同权",
+        "url": "https://support.futunn.com/topic292"
+      },
+      {
+        "title": "什么是申购倍数",
+        "url": "https://support.futunn.com/topic294"
+      },
+      {
+        "title": "“顶头槌”是槌吗",
+        "url": "https://support.futunn.com/topic295"
+      },
+      {
+        "title": "窝轮入门",
+        "url": "https://support.futunn.com/topic209"
+      },
+      {
+        "title": "公有摘要字段",
+        "url": "https://support.futunn.com/topic211"
+      },
+      {
+        "title": "认股证的价值评估",
+        "url": "https://support.futunn.com/topic212"
+      },
+      {
+        "title": "窝轮与期权区别之处",
+        "url": "https://support.futunn.com/topic213"
+      },
+      {
+        "title": "窝轮的杠杆效应",
+        "url": "https://support.futunn.com/topic214"
+      },
+      {
+        "title": "认股权证",
+        "url": "https://support.futunn.com/topic219"
+      },
+      {
+        "title": "买认股证与买正股的区别",
+        "url": "https://support.futunn.com/topic233"
+      },
+      {
+        "title": "期权希腊值含义及用法",
+        "url": "https://support.futunn.com/topic473"
+      },
+      {
+        "title": "常用期权组合简介",
+        "url": "https://support.futunn.com/topic474"
+      }
+    ]
+  },
+  "https://support.futunn.com/categories/2192": {
+    "title": "富途反欺诈专区",
+    "content": "客户端功能 帐户安全 模拟交易 市场介绍 基础知识入门 量化与Open API 富途反欺诈专区 富途反欺诈专区 富途反欺诈专区 富途如何保护我的个人信息 如何预防 富途反欺诈专区 富途公示 安全课堂",
+    "category": "",
+    "tags": [],
+    "url": "https://support.futunn.com/categories/2192",
+    "crawl_time": "2025-07-08T00:12:16.272412",
+    "language": "zh-cn",
+    "meta_description": "立即了解港股/美股/基金/期权/期货投资神器使用方法",
+    "content_hash": "d35f5429b9a406f4b0ea6c96088bcf7f",
+    "word_count": 15,
+    "related_links": [],
+    "sub_items": [
+      {
+        "title": "富途如何保护我的个人信息",
+        "url": "https://support.futunn.com/topic609"
+      },
+      {
+        "title": "如何预防",
+        "url": "https://support.futunn.com/topic610"
+      }
+    ]
+  },
+  "https://support.futunn.com/categories/2405": {
+    "title": "帐户安全",
+    "content": "客户端功能 帐户安全 模拟交易 市场介绍 基础知识入门 量化与Open API 富途反欺诈专区 帐户安全 富途令牌 什么是富途令牌 如何使用富途令牌 如何停用令牌 忘记令牌的解锁密码了 通过移动端富途牛牛绑定富途令牌操作指引 通过扫码方式绑定富途令牌操作指引 已经启用的令牌应用被删除或重新安装了 账户安全 如何修改已认证的手机号 短信验证时，手机不在身边或收不到验证码，怎么办 账户访问通知 登录过程遇到常见问题 富途如何保障隐私数据 如何绑定富途公众号绑定牛牛号 个人信息获取 关于《降低及纾减与互联网交易相关的黑客入侵风险指引》的说明 登录设备管理说明",
+    "category": "",
+    "tags": [],
+    "url": "https://support.futunn.com/categories/2405",
+    "crawl_time": "2025-07-08T00:12:18.135536",
+    "language": "zh-cn",
+    "meta_description": "立即了解港股/美股/基金/期权/期货投资神器使用方法",
+    "content_hash": "1c64e2e9bfc7b258d7973666e12c7716",
+    "word_count": 27,
+    "related_links": [],
+    "sub_items": [
+      {
+        "title": "什么是富途令牌",
+        "url": "https://support.futunn.com/topic12"
+      },
+      {
+        "title": "如何使用富途令牌",
+        "url": "https://support.futunn.com/topic16"
+      },
+      {
+        "title": "如何停用令牌",
+        "url": "https://support.futunn.com/topic17"
+      },
+      {
+        "title": "忘记令牌的解锁密码了",
+        "url": "https://support.futunn.com/topic18"
+      },
+      {
+        "title": "通过移动端富途牛牛绑定富途令牌操作指引",
+        "url": "https://support.futunn.com/topic19"
+      },
+      {
+        "title": "通过扫码方式绑定富途令牌操作指引",
+        "url": "https://support.futunn.com/topic20"
+      },
+      {
+        "title": "已经启用的令牌应用被删除或重新安装了",
+        "url": "https://support.futunn.com/topic14"
+      },
+      {
+        "title": "如何修改已认证的手机号",
+        "url": "https://support.futunn.com/topic537"
+      },
+      {
+        "title": "短信验证时，手机不在身边或收不到验证码，怎么办",
+        "url": "https://support.futunn.com/topic533"
+      },
+      {
+        "title": "账户访问通知",
+        "url": "https://support.futunn.com/topic626"
+      },
+      {
+        "title": "登录过程遇到常见问题",
+        "url": "https://support.futunn.com/topic22"
+      },
+      {
+        "title": "富途如何保障隐私数据",
+        "url": "https://support.futunn.com/topic24"
+      },
+      {
+        "title": "如何绑定富途公众号绑定牛牛号",
+        "url": "https://support.futunn.com/topic494"
+      },
+      {
+        "title": "个人信息获取",
+        "url": "https://support.futunn.com/topic547"
+      },
+      {
+        "title": "关于《降低及纾减与互联网交易相关的黑客入侵风险指引》的说明",
+        "url": "https://support.futunn.com/topic21"
+      },
+      {
+        "title": "登录设备管理说明",
+        "url": "https://support.futunn.com/topic768"
+      }
+    ]
+  },
+  "https://support.futunn.com/categories/2183": {
+    "title": "客户端功能",
+    "content": "客户端功能 帐户安全 模拟交易 市场介绍 基础知识入门 量化与Open API 富途反欺诈专区 客户端功能 自选列表 自选股添加及删除 自选列表如何查看涨跌额 自选列表的图标什么意义 自选介绍 个股报价 历史最低价为负数是什么原因 IPO竞价分析 为什么美股行情中出现199999.99的卖出价 债券类型 港股中午休市期间为什么会有摆盘更新 个股报价 股票价格的颜色为什么与日K线颜色不一样 美股盘前盘后行情 行情权限互踢 个股图表 行情图表如何查看历史K线的每日分时图表 多股同列 品种叠加 图表 平均K线图 图表单击效果设置 K线图十字线摘要 图表高度 技术指标 个股分析 逐笔明细和成交统计 十大净买入/卖出经纪商 财报 财年 为什么股票的资金流入和流出金额不相等 经纪商持股比例 港股通持股比例 美股摆盘 公司估值 选股功能 盘前盘后榜 热力图 选股器 智能盯盘 机构追踪 走势预测 消息通知 到价提醒 iPhone和iPad新消息通知操作指引 Android 新消息通知操作指引 华为手机新消息通知操作指引 小米手机新消息通知操作指引 OPPO手机新消息通知操作指引 vivo 手机新消息通知操作指引 三星手机新消息通知操作指引 社区 牛牛勋章 牛牛社区 积分任务 积分介绍 积分商城介绍 任务中心介绍 无障碍设置 如何设置屏幕阅读器 如何设置单声道音频 如何设置开关控制 技术面 技术面解读 个股形态 量价理论 指标介绍 投资组合介绍 投资组合介绍 牛牛组件 新版小组件操作指引 小组件操作指引 安卓小组件操作指引 牛牛桌面端WEB组件使用指引 锁屏小组件操作指引 导出市场列表信息 导出市场列表信息 SSL连接错误操作指引 SSL连接错误操作指引 牛牛AI 牛牛AI",
+    "category": "",
+    "tags": [],
+    "url": "https://support.futunn.com/categories/2183",
+    "crawl_time": "2025-07-08T00:12:18.501467",
+    "language": "zh-cn",
+    "meta_description": "立即了解港股/美股/基金/期权/期货投资神器使用方法",
+    "content_hash": "9049fab22bb736996f53fb5d57df04d0",
+    "word_count": 92,
+    "related_links": [],
+    "sub_items": [
+      {
+        "title": "自选股添加及删除",
+        "url": "https://support.futunn.com/topic78"
+      },
+      {
+        "title": "自选列表如何查看涨跌额",
+        "url": "https://support.futunn.com/topic79"
+      },
+      {
+        "title": "自选列表的图标什么意义",
+        "url": "https://support.futunn.com/topic81"
+      },
+      {
+        "title": "自选介绍",
+        "url": "https://support.futunn.com/topic75"
+      },
+      {
+        "title": "历史最低价为负数是什么原因",
+        "url": "https://support.futunn.com/topic15"
+      },
+      {
+        "title": "IPO竞价分析",
+        "url": "https://support.futunn.com/topic546"
+      },
+      {
+        "title": "为什么美股行情中出现199999.99的卖出价",
+        "url": "https://support.futunn.com/topic35"
+      },
+      {
+        "title": "债券类型",
+        "url": "https://support.futunn.com/topic398"
+      },
+      {
+        "title": "港股中午休市期间为什么会有摆盘更新",
+        "url": "https://support.futunn.com/topic36"
+      },
+      {
+        "title": "个股报价",
+        "url": "https://support.futunn.com/topic38"
+      },
+      {
+        "title": "股票价格的颜色为什么与日K线颜色不一样",
+        "url": "https://support.futunn.com/topic40"
+      },
+      {
+        "title": "美股盘前盘后行情",
+        "url": "https://support.futunn.com/topic46"
+      },
+      {
+        "title": "行情权限互踢",
+        "url": "https://support.futunn.com/topic66"
+      },
+      {
+        "title": "行情图表如何查看历史K线的每日分时图表",
+        "url": "https://support.futunn.com/topic43"
+      },
+      {
+        "title": "多股同列",
+        "url": "https://support.futunn.com/topic47"
+      },
+      {
+        "title": "品种叠加",
+        "url": "https://support.futunn.com/topic49"
+      },
+      {
+        "title": "平均K线图",
+        "url": "https://support.futunn.com/topic590"
+      },
+      {
+        "title": "图表单击效果设置",
+        "url": "https://support.futunn.com/topic62"
+      },
+      {
+        "title": "K线图十字线摘要",
+        "url": "https://support.futunn.com/topic63"
+      },
+      {
+        "title": "图表高度",
+        "url": "https://support.futunn.com/topic64"
+      },
+      {
+        "title": "技术指标",
+        "url": "https://support.futunn.com/topic68"
+      },
+      {
+        "title": "逐笔明细和成交统计",
+        "url": "https://support.futunn.com/topic699"
+      },
+      {
+        "title": "十大净买入/卖出经纪商",
+        "url": "https://support.futunn.com/topic80"
+      },
+      {
+        "title": "为什么股票的资金流入和流出金额不相等",
+        "url": "https://support.futunn.com/topic92"
+      },
+      {
+        "title": "经纪商持股比例",
+        "url": "https://support.futunn.com/topic98"
+      },
+      {
+        "title": "港股通持股比例",
+        "url": "https://support.futunn.com/topic99"
+      },
+      {
+        "title": "美股摆盘",
+        "url": "https://support.futunn.com/topic479"
+      },
+      {
+        "title": "公司估值",
+        "url": "https://support.futunn.com/topic497"
+      },
+      {
+        "title": "盘前盘后榜",
+        "url": "https://support.futunn.com/topic45"
+      },
+      {
+        "title": "热力图",
+        "url": "https://support.futunn.com/topic540"
+      },
+      {
+        "title": "选股器",
+        "url": "https://support.futunn.com/topic105"
+      },
+      {
+        "title": "智能盯盘",
+        "url": "https://support.futunn.com/topic106"
+      },
+      {
+        "title": "机构追踪",
+        "url": "https://support.futunn.com/topic700"
+      },
+      {
+        "title": "走势预测",
+        "url": "https://support.futunn.com/topic701"
+      },
+      {
+        "title": "到价提醒",
+        "url": "https://support.futunn.com/topic597"
+      },
+      {
+        "title": "iPhone和iPad新消息通知操作指引",
+        "url": "https://support.futunn.com/topic703"
+      },
+      {
+        "title": "Android 新消息通知操作指引",
+        "url": "https://support.futunn.com/topic354"
+      },
+      {
+        "title": "华为手机新消息通知操作指引",
+        "url": "https://support.futunn.com/topic358"
+      },
+      {
+        "title": "小米手机新消息通知操作指引",
+        "url": "https://support.futunn.com/topic355"
+      },
+      {
+        "title": "OPPO手机新消息通知操作指引",
+        "url": "https://support.futunn.com/topic357"
+      },
+      {
+        "title": "vivo 手机新消息通知操作指引",
+        "url": "https://support.futunn.com/topic359"
+      },
+      {
+        "title": "三星手机新消息通知操作指引",
+        "url": "https://support.futunn.com/topic356"
+      },
+      {
+        "title": "积分介绍",
+        "url": "https://support.futunn.com/topic95"
+      },
+      {
+        "title": "积分商城介绍",
+        "url": "https://support.futunn.com/topic97"
+      },
+      {
+        "title": "任务中心介绍",
+        "url": "https://support.futunn.com/topic545"
+      },
+      {
+        "title": "如何设置屏幕阅读器",
+        "url": "https://support.futunn.com/topic686"
+      },
+      {
+        "title": "如何设置单声道音频",
+        "url": "https://support.futunn.com/topic687"
+      },
+      {
+        "title": "如何设置开关控制",
+        "url": "https://support.futunn.com/topic688"
+      },
+      {
+        "title": "投资组合介绍",
+        "url": "https://support.futunn.com/topic283"
+      },
+      {
+        "title": "新版小组件操作指引",
+        "url": "https://support.futunn.com/topic408"
+      },
+      {
+        "title": "小组件操作指引",
+        "url": "https://support.futunn.com/topic409"
+      },
+      {
+        "title": "安卓小组件操作指引",
+        "url": "https://support.futunn.com/topic536"
+      },
+      {
+        "title": "牛牛桌面端WEB组件使用指引",
+        "url": "https://support.futunn.com/topic596"
+      },
+      {
+        "title": "锁屏小组件操作指引",
+        "url": "https://support.futunn.com/topic702"
+      },
+      {
+        "title": "导出市场列表信息",
+        "url": "https://support.futunn.com/topic697"
+      },
+      {
+        "title": "SSL连接错误操作指引",
+        "url": "https://support.futunn.com/topic704"
+      },
+      {
+        "title": "牛牛AI",
+        "url": "https://support.futunn.com/topic831"
+      }
+    ]
+  }
+}
