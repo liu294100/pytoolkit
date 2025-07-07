@@ -1,0 +1,35 @@
+{
+  "urls": [
+    "https://support.futunn.com/categories/2186",
+    "https://support.futunn.com/categories/2185",
+    "https://support.futunn.com/categories/2187",
+    "https://support.futunn.com/categories/2188"
+  ],
+  "max_articles": 30,
+  "output_dir": "docs",
+  "languages": {
+    "zh-cn": true,
+    "zh-hk": true,
+    "en": true
+  },
+  "crawler_settings": {
+    "request_timeout": 30,
+    "retry_count": 3,
+    "delay_between_requests": 1,
+    "delay_between_categories": 2
+  },
+  "content_filters": {
+    "min_content_length": 50,
+    "exclude_keywords": [
+      "advertisement",
+      "广告",
+      "推广"
+    ]
+  },
+  "output_formats": {
+    "json": true,
+    "markdown": true,
+    "html": false,
+    "csv": false
+  }
+}

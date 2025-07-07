@@ -1,0 +1,29 @@
+# 核心依赖
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+html5lib>=1.1
+chardet>=5.0.0
+urllib3>=1.26.0
+
+# 多线程和并发处理
+concurrent.futures>=3.1.1
+threading>=1.0
+
+# GUI依赖（可选）
+# tkinter 通常随Python标准库安装
+# 如果需要更现代的GUI，可以考虑：
+# PyQt5>=5.15.0
+# tkinter-tooltip>=2.0.0
+
+# 日志和配置
+logging>=0.4.9.6
+json>=2.0.9
+
+# 数据处理
+dataclasses>=0.8  # Python 3.7+内置
+typing>=3.7.4     # Python 3.7+内置
+
+# 开发和测试依赖（可选）
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
