@@ -243,7 +243,7 @@ class DeepFutuDocCrawler:
         return None
     
     def extract_content_from_page(self, soup: BeautifulSoup, url: str) -> Dict[str, Union[str, List[str]]]:
-        """从页面提取内容，增强的HTML解析精度"""
+        """从页面提取内容，增强的HTML解析精度，包含链接提取"""
         content = {
             'title': '',
             'content': '',
@@ -254,7 +254,9 @@ class DeepFutuDocCrawler:
             'language': self.detect_language_from_url(url),
             'meta_description': '',
             'content_hash': '',
-            'word_count': 0
+            'word_count': 0,
+            'related_links': [],  # 新增：相关链接
+            'sub_items': []       # 新增：子项链接
         }
         
         # 移除噪音元素
@@ -275,6 +277,10 @@ class DeepFutuDocCrawler:
         content['meta_description'] = self._extract_meta_description(soup)
         content['category'] = self._extract_category(soup)
         content['tags'] = self._extract_tags(soup)
+        
+        # 提取相关链接和子项
+        content['related_links'] = self._extract_related_links(soup, url)
+        content['sub_items'] = self._extract_sub_items(soup, url)
         
         return content
     
@@ -417,6 +423,98 @@ class DeepFutuDocCrawler:
         
         return []
     
+    def _extract_related_links(self, soup: BeautifulSoup, base_url: str) -> List[Dict[str, str]]:
+        """提取页面中的相关链接"""
+        related_links = []
+        base_domain = 'https://support.futunn.com'
+        
+        # 富途帮助中心特定的链接选择器
+        link_selectors = [
+            '.related-articles a',
+            '.see-also a',
+            '.help-links a',
+            '.topic-links a',
+            '.content a[href*="/topic"]',
+            '.futu-richTextContent a[href*="/topic"]'
+        ]
+        
+        for selector in link_selectors:
+            links = soup.select(selector)
+            for link in links:
+                href = link.get('href')
+                if not href:
+                    continue
+                    
+                full_url = urljoin(base_url, href)
+                
+                # 只处理富途帮助中心的链接
+                if not full_url.startswith(base_domain):
+                    continue
+                    
+                link_text = self.clean_text(link.get_text())
+                if link_text and len(link_text) > 2:  # 确保链接文本有意义
+                    related_links.append({
+                        'title': link_text,
+                        'url': full_url
+                    })
+        
+        # 去重
+        seen_urls = set()
+        unique_links = []
+        for link in related_links:
+            if link['url'] not in seen_urls:
+                seen_urls.add(link['url'])
+                unique_links.append(link)
+        
+        return unique_links
+    
+    def _extract_sub_items(self, soup: BeautifulSoup, base_url: str) -> List[Dict[str, str]]:
+        """提取页面中的子项链接（如分类页面中的文章列表）"""
+        sub_items = []
+        base_domain = 'https://support.futunn.com'
+        
+        # 富途帮助中心分类页面的子项选择器
+        sub_item_selectors = [
+            '.category-articles a',
+            '.article-list a',
+            '.topic-list a',
+            '.help-list a',
+            '.content-list a',
+            'ul li a[href*="/topic"]',
+            '.list-group a[href*="/topic"]',
+            '.nav-list a[href*="/topic"]'
+        ]
+        
+        for selector in sub_item_selectors:
+            links = soup.select(selector)
+            for link in links:
+                href = link.get('href')
+                if not href:
+                    continue
+                    
+                full_url = urljoin(base_url, href)
+                
+                # 只处理富途帮助中心的topic链接
+                if not full_url.startswith(base_domain) or '/topic' not in full_url:
+                    continue
+                    
+                link_text = self.clean_text(link.get_text())
+                if link_text and len(link_text) > 2:  # 确保链接文本有意义
+                    sub_items.append({
+                        'title': link_text,
+                        'url': full_url
+                    })
+        
+        # 去重
+        seen_urls = set()
+        unique_items = []
+        for item in sub_items:
+            if item['url'] not in seen_urls:
+                seen_urls.add(item['url'])
+                unique_items.append(item)
+        
+        return unique_items
+    
     def clean_text(self, text: str) -> str:
         """清理文本内容"""
         if not text:
@@ -466,8 +564,8 @@ class DeepFutuDocCrawler:
                 links['categories'].append(full_url)
                 self.stats['categories_found'] += 1
             
-            # 文章链接
-            elif any(pattern in full_url for pattern in ['/articles/', '/help/', '/learn/']):
+            # 文章链接 - 富途帮助中心使用 /topic 格式
+            elif any(pattern in full_url for pattern in ['/topic', '/articles/', '/help/', '/learn/']):
                 links['articles'].append(full_url)
                 self.stats['articles_found'] += 1
             
@@ -649,6 +747,22 @@ class DeepFutuDocCrawler:
                         
                     if content.get('tags'):
                         f.write(f"**标签**: {', '.join(content['tags'])}\n\n")
+                    
+                    # 子项链接
+                    sub_items = content.get('sub_items', [])
+                    if sub_items:
+                        f.write(f"**子项链接** ({len(sub_items)} 个):\n\n")
+                        for item in sub_items:
+                            f.write(f"- [{item['title']}]({item['url']})\n")
+                        f.write("\n")
+                    
+                    # 相关链接
+                    related_links = content.get('related_links', [])
+                    if related_links:
+                        f.write(f"**相关链接** ({len(related_links)} 个):\n\n")
+                        for link in related_links:
+                            f.write(f"- [{link['title']}]({link['url']})\n")
+                        f.write("\n")
                         
                     f.write(f"{content['content']}\n\n")
                     f.write("---\n\n")
@@ -727,7 +841,7 @@ class DeepFutuDocCrawler:
         return filepath
     
     def _format_content_for_file(self, content: Dict) -> str:
-        """格式化内容用于文件保存"""
+        """格式化内容用于文件保存，包含链接信息"""
         lines = []
         
         # 基本信息
@@ -747,6 +861,20 @@ class DeepFutuDocCrawler:
         lines.append(f"字数: {content.get('word_count', 0)}")
         lines.append(f"内容哈希: {content.get('content_hash', '')}")
         lines.append(f"爬取时间: {content.get('crawl_time', '')}")
+        
+        # 子项链接
+        sub_items = content.get('sub_items', [])
+        if sub_items:
+            lines.append(f"\n子项链接 ({len(sub_items)} 个):")
+            for item in sub_items:
+                lines.append(f"  - {item['title']}: {item['url']}")
+        
+        # 相关链接
+        related_links = content.get('related_links', [])
+        if related_links:
+            lines.append(f"\n相关链接 ({len(related_links)} 个):")
+            for link in related_links:
+                lines.append(f"  - {link['title']}: {link['url']}")
         
         # 分隔线
         lines.append("\n" + "="*80 + "\n")
