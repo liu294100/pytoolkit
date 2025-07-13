@@ -580,7 +580,7 @@ class DeepFutuDocCrawler:
         return links
     
     def crawl_single_page(self, url: str) -> Optional[Dict]:
-        """爬取单个页面，集成质量检测、去重和阶段性保存"""
+        """爬取单个页面，集成质量检测和去重"""
         if url in self.visited_urls:
             self.logger.debug(f"URL已访问，跳过: {url}")
             return None
@@ -608,20 +608,9 @@ class DeepFutuDocCrawler:
         if self._is_duplicate_content(content_hash):
             self.logger.warning(f"发现重复内容，跳过: {url}")
             return None
-        
-        # 检测语言并保存到对应的数据结构中
-        lang = self.detect_language_from_url(url)
-        self.docs_data[lang][url] = content
-        
-        # 阶段性保存：立即保存单个文档到文件
-        try:
-            self.save_to_file(content, lang)
-            self.logger.debug(f"已阶段性保存文档: {content['title'][:30]}...")
-        except Exception as e:
-            self.logger.warning(f"阶段性保存失败: {e}")
             
         self.stats['quality_passed'] += 1
-        self.logger.info(f"成功爬取并保存 (质量评分: {quality.score:.1f}): {content['title'][:50]}...")
+        self.logger.info(f"成功爬取 (质量评分: {quality.score:.1f}): {content['title'][:50]}...")
         return content
     
     def _is_duplicate_content(self, content_hash: str) -> bool:
@@ -715,12 +704,7 @@ class DeepFutuDocCrawler:
         return all_content
     
     def save_documents(self, output_dir: str = 'docs_deep'):
-        """保存文档，增强文件保存功能和错误处理（已弃用，使用save_summary_documents）"""
-        self.logger.warning("save_documents方法已弃用，请使用save_summary_documents进行汇总保存")
-        return self.save_summary_documents(output_dir)
-    
-    def save_summary_documents(self, output_dir: str = 'docs_deep'):
-        """生成汇总的JSON和Markdown文件"""
+        """保存文档，增强文件保存功能和错误处理"""
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
@@ -734,13 +718,13 @@ class DeepFutuDocCrawler:
             if not os.path.exists(lang_dir):
                 os.makedirs(lang_dir)
                 
-            # 保存汇总JSON格式
-            json_file = os.path.join(lang_dir, f'futu_docs_summary_{timestamp}.json')
+            # 保存JSON格式
+            json_file = os.path.join(lang_dir, f'futu_docs_deep_{timestamp}.json')
             with open(json_file, 'w', encoding='utf-8') as f:
                 json.dump(docs, f, ensure_ascii=False, indent=2)
                 
-            # 保存汇总Markdown格式
-            md_file = os.path.join(lang_dir, f'futu_docs_summary_{timestamp}.md')
+            # 保存Markdown格式
+            md_file = os.path.join(lang_dir, f'futu_docs_deep_{timestamp}.md')
             with open(md_file, 'w', encoding='utf-8') as f:
                 lang_names = {
                     'zh-cn': '简体中文',
@@ -748,10 +732,9 @@ class DeepFutuDocCrawler:
                     'en': 'English'
                 }
                 
-                f.write(f"# 富途牛牛帮助中心文档汇总 - {lang_names.get(lang, lang.upper())}\n\n")
+                f.write(f"# 富途牛牛帮助中心深度爬取文档 - {lang_names.get(lang, lang.upper())}\n\n")
                 f.write(f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"文档数量: {len(docs)}\n")
-                f.write(f"保存模式: 阶段性保存 + 汇总\n\n")
+                f.write(f"文档数量: {len(docs)}\n\n")
                 f.write("---\n\n")
                 
                 for url, content in docs.items():
@@ -784,9 +767,13 @@ class DeepFutuDocCrawler:
                     f.write(f"{content['content']}\n\n")
                     f.write("---\n\n")
                     
-            self.logger.info(f"已保存 {lang} 汇总文档: {len(docs)} 篇")
-            self.logger.info(f"汇总JSON文件: {json_file}")
-            self.logger.info(f"汇总Markdown文件: {md_file}")
+            # 保存单个文档文件
+            for url, content in docs.items():
+                self.save_to_file(content, lang)
+                    
+            self.logger.info(f"已保存 {lang} 文档: {len(docs)} 篇")
+            self.logger.info(f"JSON文件: {json_file}")
+            self.logger.info(f"Markdown文件: {md_file}")
     
     def save_to_file(self, content: Dict, language: str = 'zh') -> bool:
         """保存内容到文件，支持多种格式和增强错误处理"""
@@ -902,14 +889,13 @@ class DeepFutuDocCrawler:
         return '\n'.join(lines)
     
     def run_deep_crawl(self, urls: List[str], max_depth: int = 3, max_articles_per_category: int = 50):
-        """运行深度爬虫，支持阶段性保存和最终汇总"""
+        """运行深度爬虫，增加统计信息和性能监控"""
         self.stats['start_time'] = time.time()
-        self.logger.info("开始运行深度富途牛牛帮助中心文档爬虫（阶段性保存模式）...")
+        self.logger.info("开始运行深度富途牛牛帮助中心文档爬虫...")
         self.logger.info(f"目标URL数量: {len(urls)}")
         self.logger.info(f"最大深度: {max_depth}")
         self.logger.info(f"每个分类最大文章数: {max_articles_per_category}")
         self.logger.info(f"并发设置: 最大工作线程={self.settings.max_workers}, 延迟范围={self.settings.delay_range}")
-        self.logger.info(f"阶段性保存: 每个文档爬取后立即保存到单独文件")
         
         successful_categories = 0
         failed_categories = 0
@@ -924,7 +910,7 @@ class DeepFutuDocCrawler:
                 lang = self.detect_language_from_url(url)
                 self.logger.info(f"检测到语言: {lang}")
                 
-                # 深度爬取分类和文章（文档会在crawl_single_page中自动保存）
+                # 深度爬取分类和文章
                 articles = self.deep_crawl_category(url, max_depth, max_articles_per_category)
                 
                 if articles:
@@ -932,7 +918,11 @@ class DeepFutuDocCrawler:
                     category_time = time.time() - category_start_time
                     self.logger.info(f"分类 {i} 完成，耗时 {category_time:.1f}秒，获得 {len(articles)} 篇文章")
                     
-                    # 实时统计更新（文档已在crawl_single_page中保存到docs_data）
+                    # 保存到对应语言的数据中
+                    for article in articles:
+                        self.docs_data[lang][article['url']] = article
+                        
+                    # 实时统计更新
                     self.stats['categories_processed'] = successful_categories
                     self.stats['total_articles'] = sum(len(docs) for docs in self.docs_data.values())
                     
@@ -958,14 +948,14 @@ class DeepFutuDocCrawler:
         self.stats['end_time'] = time.time()
         total_time = self.stats['end_time'] - self.stats['start_time']
         
-        # 汇总保存：生成JSON和Markdown汇总文件
+        # 保存文档
         self.logger.info(f"\n{'='*60}")
-        self.logger.info("开始生成汇总文档（JSON和Markdown）...")
+        self.logger.info("开始保存文档...")
         try:
-            self.save_summary_documents()
-            self.logger.info("汇总文档生成完成")
+            self.save_documents()
+            self.logger.info("文档保存完成")
         except Exception as e:
-            self.logger.error(f"生成汇总文档时出错: {e}")
+            self.logger.error(f"保存文档时出错: {e}")
         
         # 输出详细统计信息
         self._print_final_statistics(successful_categories, failed_categories, total_time)
