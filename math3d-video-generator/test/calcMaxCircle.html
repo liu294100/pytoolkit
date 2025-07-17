@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>长方形中任意角度最大半圆 - 完整版</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .calculation-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .calculation-box h2 {
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+        .formula {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            backdrop-filter: blur(5px);
+        }
+        .result {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .stats-box {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .control-group:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        .control-group label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .control-group input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .control-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        .slider-container {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .slider:hover {
+            opacity: 1;
+        }
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .button-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        .button-success {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        }
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            position: relative;
+        }
+        canvas {
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            cursor: crosshair;
+        }
+        .canvas-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 200px;
+        }
+        .optimization-info {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .optimization-info h3 {
+            color: #81c784;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress-container {
+            background: #4a5568;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #2d3748;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .highlight {
+            background: rgba(129, 199, 132, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #4a5568;
+            padding: 8px;
+            text-align: center;
+        }
+        .data-table th {
+            background: #4a5568;
+            color: #e2e8f0;
+        }
+        .data-table tr:nth-child(even) {
+            background: #3a4556;
+        }
+        .comparison-section {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            color: #2d3436;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .comparison-item {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #e17055;
+        }
+        .export-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 长方形中任意角度最大半圆 - 完整版</h1>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="calculation-box">
+                    <h2>📐 当前最优解</h2>
+                    <div class="formula">
+                        <strong>长方形尺寸:</strong> 长 = <span id="length-display">8</span>, 宽 = <span id="width-display">6</span>
+                    </div>
+                    <div class="formula">
+                        <strong>最大半圆参数:</strong><br>
+                        • 半径: <span id="optimal-radius">0</span><br>
+                        • 角度: <span id="optimal-angle">0</span>°<br>
+                        • 圆心: (<span id="optimal-x">0</span>, <span id="optimal-y">0</span>)<br>
+                        • 面积: <span id="optimal-area">0</span>
+                    </div>
+                    <div class="formula">
+                        <strong>周长计算:</strong> πr + 2r = <span id="perimeter-formula">0</span>
+                    </div>
+                    <div class="result">
+                        最大半圆周长 = <span id="perimeter-result">0</span>
+                    </div>
+                </div>
+
+                <div class="stats-box">
+                    <h3>📊 统计信息</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="efficiency-ratio">0%</div>
+                            <div class="stat-label">空间利用率</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="compute-time">0ms</div>
+                            <div class="stat-label">计算时间</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="tested-angles">0</div>
+                            <div class="stat-label">测试角度数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="improvement">0%</div>
+                            <div class="stat-label">vs 标准解</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="comparison-section">
+                    <h3>🔍 方案对比</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-item">
+                            <h4>水平放置 (0°)</h4>
+                            <div>半径: <span id="horizontal-radius">0</span></div>
+                            <div>周长: <span id="horizontal-perimeter">0</span></div>
+                        </div>
+                        <div class="comparison-item">
+                            <h4>垂直放置 (90°)</h4>
+                            <div>半径: <span id="vertical-radius">0</span></div>
+                            <div>周长: <span id="vertical-perimeter">0</span></div>
+                        </div>
+                        <div class="comparison-item">
+                            <h4>最优角度</h4>
+                            <div>半径: <span id="optimal-radius-comp">0</span></div>
+                            <div>周长: <span id="optimal-perimeter-comp">0</span></div>
+                        </div>
+                        <div class="comparison-item">
+                            <h4>改进幅度</h4>
+                            <div>半径: +<span id="radius-improvement">0</span>%</div>
+                            <div>周长: +<span id="perimeter-improvement">0</span>%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="length">长方形长度:</label>
+                <input type="number" id="length" value="8" min="1" max="50" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="width">长方形宽度:</label>
+                <input type="number" id="width" value="6" min="1" max="50" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="angle">
+                    <span class="tooltip">半圆角度 (手动调整):
+                        <span class="tooltiptext">0°=水平，90°=垂直，其他角度为倾斜</span>
+                    </span>
+                </label>
+                <input type="number" id="angle" value="0" min="0" max="180" step="1">
+                <div class="slider-container">
+                    <input type="range" id="angle-slider" class="slider" min="0" max="180" value="0">
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="precision">
+                    <span class="tooltip">优化精度:
+                        <span class="tooltiptext">数值越小精度越高，但计算时间更长</span>
+                    </span>
+                </label>
+                <input type="number" id="precision" value="1" min="0.1" max="10" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="center-step">中心搜索步长:</label>
+                <input type="number" id="center-step" value="0.1" min="0.01" max="1" step="0.01">
+            </div>
+            <div class="control-group">
+                <label for="radius-precision">半径精度:</label>
+                <input type="number" id="radius-precision" value="0.001" min="0.0001" max="0.1" step="0.0001">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="findOptimalSemicircle()" id="optimize-btn">
+                <span id="optimize-text">🔍 寻找最优解</span>
+            </button>
+            <button onclick="animateOptimization()" id="animate-btn">🎬 动画演示</button>
+            <button onclick="stopAnimation()" class="button-danger" id="stop-btn">⏹️ 停止</button>
+            <button onclick="updateVisualization()" class="button-success">🔄 更新显示</button>
+            <button onclick="resetToDefault()">🔄 重置默认</button>
+            <button onclick="generateReport()">📊 生成报告</button>
+            <button onclick="exportData()">💾 导出数据</button>
+        </div>
+
+        <div class="optimization-info">
+            <h3>🎯 优化进度</h3>
+            <div class="progress-container">
+                <div>当前测试角度: <span id="current-angle">0</span>°</div>
+                <div>当前最大半径: <span id="current-radius">0</span></div>
+                <div>剩余时间: <span id="remaining-time">--</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+                </div>
+                <div>已测试: <span id="tested-count">0</span> / <span id="total-count">0</span> 个角度</div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="canvas-overlay" id="canvas-info">
+                <div><strong>图例:</strong></div>
+                <div>🟢 最优解</div>
+                <div>🔴 当前手动</div>
+                <div>📏 尺寸标注</div>
+                <div>🎯 点击画布查看坐标</div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h3>📤 数据导出</h3>
+            <p>导出计算结果和详细数据</p>
+            <div class="export-buttons">
+                <button onclick="exportToCSV()">📊 CSV格式</button>
+                <button onclick="exportToJSON()">📋 JSON格式</button>
+                <button onclick="exportImage()">🖼️ 图片格式</button>
+                <button onclick="printResults()">🖨️ 打印结果</button>
+            </div>
+        </div>
+
+        <div class="optimization-info">
+            <h3>💻 详细分析结果</h3>
+            <div id="analysis-details">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>角度 (°)</th>
+                            <th>半径</th>
+                            <th>周长</th>
+                            <th>面积</th>
+                            <th>中心X</th>
+                            <th>中心Y</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="optimization-info">
+            <h3>🔬 算法详解</h3>
+            <pre><code><span class="highlight">完整算法流程：</span>
+
+1. <span class="highlight">初始化参数</span>
+   - 长方形尺寸: L × W
+   - 角度范围: [0°, 180°]
+   - 搜索精度: Δθ
+
+2. <span class="highlight">角度遍历</span>
+   for θ in [0°, 180°] step Δθ:
+       max_radius = 0
+       best_center = (0, 0)
+       
+3. <span class="highlight">中心位置优化</span>
+   for cx in [0, L] step Δx:
+       for cy in [0, W] step Δy:
+           r = binary_search_max_radius(cx, cy, θ)
+           if r > max_radius:
+               max_radius = r
+               best_center = (cx, cy)
+
+4. <span class="highlight">约束验证</span>
+   检查半圆所有点是否满足:
+   - 0 ≤ x ≤ L
+   - 0 ≤ y ≤ W
+   
+5. <span class="highlight">全局最优</span>
+   返回使周长 π*r + 2*r 最大的解
+
+<span class="highlight">时间复杂度：</span> O(n_θ × n_x × n_y × log(r_max))
+<span class="highlight">空间复杂度：</span> O(1)
+</code></pre>
+        </div>
+    </div>
+
+    <script>
+        let isAnimating = false;
+        let currentOptimal = { radius: 0, angle: 0, centerX: 0, centerY: 0 };
+        let calculationHistory = [];
+        let startTime = 0;
+
+        // 高精度数学计算
+        function checkSemicircleInRectangle(centerX, centerY, radius, angle, length, width) {
+            const angleRad = angle * Math.PI / 180;
+            const numPoints = 100; // 增加检查点数量
+            
+            // 检查半圆弧上的点
+            for (let i = 0; i <= numPoints; i++) {
+                const t = i * Math.PI / numPoints;
+                
+                // 半圆上的点（未旋转）
+                let x = radius * Math.cos(t);
+                let y = radius * Math.sin(t);
+                
+                // 应用旋转
+                const rotatedX = x * Math.cos(angleRad) - y * Math.sin(angleRad);
+                const rotatedY = x * Math.sin(angleRad) + y * Math.cos(angleRad);
+                
+                // 平移到中心位置
+                const finalX = centerX + rotatedX;
+                const finalY = centerY + rotatedY;
+                
+                // 检查是否在长方形内
+                if (finalX < 0 || finalX > length || finalY < 0 || finalY > width) {
+                    return false;
+                }
+            }
+            
+            // 检查直径端点
+            const diameterEndX1 = centerX + radius * Math.cos(angleRad);
+            const diameterEndY1 = centerY + radius * Math.sin(angleRad);
+            const diameterEndX2 = centerX - radius * Math.cos(angleRad);
+            const diameterEndY2 = centerY - radius * Math.sin(angleRad);
+            
+            return (diameterEndX1 >= 0 && diameterEndX1 <= length && 
+                    diameterEndY1 >= 0 && diameterEndY1 <= width &&
+                    diameterEndX2 >= 0 && diameterEndX2 <= length && 
+                    diameterEndY2 >= 0 && diameterEndY2 <= width);
+        }
+
+        function findMaxRadiusForAngle(angle, length, width) {
+            const centerStep = parseFloat(document.getElementById('center-step').value);
+            const radiusPrecision = parseFloat(document.getElementById('radius-precision').value);
+            
+            let maxRadius = 0;
+            let bestCenter = { x: 0, y: 0 };
+            
+            // 遍历可能的中心位置
+            for (let cx = 0; cx <= length; cx += centerStep) {
+                for (let cy = 0; cy <= width; cy += centerStep) {
+                    // 二分查找最大半径
+                    let left = 0;
+                    let right = Math.min(length, width);
+                    
+                    while (right - left > radiusPrecision) {
+                        const mid = (left + right) / 2;
+                        if (checkSemicircleInRectangle(cx, cy, mid, angle, length, width)) {
+                            left = mid;
+                        } else {
+                            right = mid;
+                        }
+                    }
+                    
+                    if (left > maxRadius) {
+                        maxRadius = left;
+                        bestCenter = { x: cx, y: cy };
+                    }
+                }
+            }
+            
+            return { radius: maxRadius, center: bestCenter };
+        }
+
+        async function findOptimalSemicircle() {
+            const optimizeBtn = document.getElementById('optimize-btn');
+            const optimizeText = document.getElementById('optimize-text');
+            
+            optimizeBtn.disabled = true;
+            optimizeText.innerHTML = '<div class="loading-spinner"></div>计算中...';
+            
+            startTime = Date.now();
+            
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const precision = parseFloat(document.getElementById('precision').value);
+            
+            let bestRadius = 0;
+            let bestAngle = 0;
+            let bestCenter = { x: 0, y: 0 };
+            
+            const totalAngles = Math.floor(180 / precision) + 1;
+            document.getElementById('total-count').textContent = totalAngles;
+            
+            let testedCount = 0;
+            calculationHistory = [];
+            
+            const results = [];
+            
+            for (let angle = 0; angle <= 180; angle += precision) {
+                if (!optimizeBtn.disabled) break; // 如果被停止
+                
+                document.getElementById('current-angle').textContent = angle.toFixed(1);
+                
+                const result = findMaxRadiusForAngle(angle, length, width);
+                
+                // 保存结果
+                results.push({
+                    angle: angle,
+                    radius: result.radius,
+                    centerX: result.center.x,
+                    centerY: result.center.y,
+                    perimeter: result.radius * (Math.PI + 2),
+                    area: result.radius * result.radius * Math.PI / 2
+                });
+                
+                document.getElementById('current-radius').textContent = result.radius.toFixed(4);
+                
+                if (result.radius > bestRadius) {
+                    bestRadius = result.radius;
+                    bestAngle = angle;
+                    bestCenter = result.center;
+                }
+                
+                testedCount++;
+                const progress = testedCount / totalAngles * 100;
+                document.getElementById('tested-count').textContent = testedCount;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                document.getElementById('progress-fill').textContent = progress.toFixed(1) + '%';
+                
+                // 估算剩余时间
+                const elapsed = Date.now() - startTime;
+                const remaining = (elapsed / testedCount) * (totalAngles - testedCount);
+                document.getElementById('remaining-time').textContent = 
+                    remaining > 1000 ? (remaining / 1000).toFixed(1) + 's' : remaining.toFixed(0) + 'ms';
+                
+                // 让浏览器有时间更新UI
+                if (testedCount % 5 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+            }
+            
+            // 更新最优解
+            currentOptimal = {
+                radius: bestRadius,
+                angle: bestAngle,
+                centerX: bestCenter.x,
+                centerY: bestCenter.y
+            };
+            
+            calculationHistory = results;
+            
+            const computeTime = Date.now() - startTime;
+            document.getElementById('compute-time').textContent = computeTime + 'ms';
+            
+            // 更新显示
+            updateOptimalDisplay();
+            updateComparisonDisplay();
+            updateVisualization();
+            updateResultsTable();
+            
+            optimizeBtn.disabled = false;
+            optimizeText.innerHTML = '🔍 寻找最优解';
+        }
+
+        function updateOptimalDisplay() {
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            
+            document.getElementById('length-display').textContent = length;
+            document.getElementById('width-display').textContent = width;
+            document.getElementById('optimal-radius').textContent = currentOptimal.radius.toFixed(4);
+            document.getElementById('optimal-angle').textContent = currentOptimal.angle.toFixed(1);
+            document.getElementById('optimal-x').textContent = currentOptimal.centerX.toFixed(2);
+            document.getElementById('optimal-y').textContent = currentOptimal.centerY.toFixed(2);
+            
+            const area = currentOptimal.radius * currentOptimal.radius * Math.PI / 2;
+            document.getElementById('optimal-area').textContent = area.toFixed(4);
+            
+            const perimeter = currentOptimal.radius * (Math.PI + 2);
+            document.getElementById('perimeter-formula').textContent = 
+                `π × ${currentOptimal.radius.toFixed(4)} + 2 × ${currentOptimal.radius.toFixed(4)} = ${perimeter.toFixed(4)}`;
+            document.getElementById('perimeter-result').textContent = perimeter.toFixed(4);
+            
+            // 计算空间利用率
+            const rectangleArea = length * width;
+            const efficiency = (area / rectangleArea * 100);
+            document.getElementById('efficiency-ratio').textContent = efficiency.toFixed(1) + '%';
+            
+            document.getElementById('tested-angles').textContent = calculationHistory.length;
+        }
+
+        function updateComparisonDisplay() {
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            
+            // 水平放置 (0°)
+            const horizontalResult = findMaxRadiusForAngle(0, length, width);
+            const horizontalPerimeter = horizontalResult.radius * (Math.PI + 2);
+            document.getElementById('horizontal-radius').textContent = horizontalResult.radius.toFixed(4);
+            document.getElementById('horizontal-perimeter').textContent = horizontalPerimeter.toFixed(4);
+            
+            // 垂直放置 (90°)
+            const verticalResult = findMaxRadiusForAngle(90, length, width);
+            const verticalPerimeter = verticalResult.radius * (Math.PI + 2);
+            document.getElementById('vertical-radius').textContent = verticalResult.radius.toFixed(4);
+            document.getElementById('vertical-perimeter').textContent = verticalPerimeter.toFixed(4);
+            
+            // 最优角度
+            const optimalPerimeter = currentOptimal.radius * (Math.PI + 2);
+            document.getElementById('optimal-radius-comp').textContent = currentOptimal.radius.toFixed(4);
+            document.getElementById('optimal-perimeter-comp').textContent = optimalPerimeter.toFixed(4);
+            
+            // 改进幅度
+            const bestStandard = Math.max(horizontalResult.radius, verticalResult.radius);
+            const bestStandardPerimeter = Math.max(horizontalPerimeter, verticalPerimeter);
+            
+            const radiusImprovement = ((currentOptimal.radius - bestStandard) / bestStandard * 100);
+            const perimeterImprovement = ((optimalPerimeter - bestStandardPerimeter) / bestStandardPerimeter * 100);
+            
+            document.getElementById('radius-improvement').textContent = Math.max(0, radiusImprovement).toFixed(2);
+            document.getElementById('perimeter-improvement').textContent = Math.max(0, perimeterImprovement).toFixed(2);
+            document.getElementById('improvement').textContent = Math.max(0, perimeterImprovement).toFixed(1) + '%';
+        }
+
+        function updateResultsTable() {
+            const tbody = document.getElementById('results-table-body');
+            tbody.innerHTML = '';
+            
+            // 显示前10个最佳结果
+            const sortedResults = [...calculationHistory].sort((a, b) => b.radius - a.radius).slice(0, 10);
+            
+            sortedResults.forEach(result => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = result.angle.toFixed(1);
+                row.insertCell(1).textContent = result.radius.toFixed(4);
+                row.insertCell(2).textContent = result.perimeter.toFixed(4);
+                row.insertCell(3).textContent = result.area.toFixed(4);
+                row.insertCell(4).textContent = result.centerX.toFixed(2);
+                row.insertCell(5).textContent = result.centerY.toFixed(2);
+                
+                if (result.angle === currentOptimal.angle) {
+                    row.style.backgroundColor = 'rgba(129, 199, 132, 0.3)';
+                }
+            });
+        }
+
+        function updateVisualization() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const angle = parseFloat(document.getElementById('angle').value);
+            
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 计算缩放比例
+            const margin = 80;
+            const scaleX = (canvas.width - 2 * margin) / length;
+            const scaleY = (canvas.height - 2 * margin) / width;
+            const scale = Math.min(scaleX, scaleY);
+            
+            // 计算偏移量使图形居中
+            const offsetX = (canvas.width - length * scale) / 2;
+            const offsetY = (canvas.height - width * scale) / 2;
+            
+            // 绘制坐标轴
+            drawAxes(ctx, offsetX, offsetY, length * scale, width * scale, scale);
+            
+            // 绘制长方形
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(offsetX, offsetY, length * scale, width * scale);
+            
+            // 绘制长方形标注
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`长: ${length}`, offsetX + length * scale / 2, offsetY - 10);
+            ctx.save();
+            ctx.translate(offsetX - 20, offsetY + width * scale / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(`宽: ${width}`, 0, 0);
+            ctx.restore();
+            
+            // 绘制当前手动调整的半圆
+            const manualResult = findMaxRadiusForAngle(angle, length, width);
+            if (manualResult.radius > 0) {
+                drawSemicircle(ctx, manualResult.center.x * scale + offsetX, 
+                              manualResult.center.y * scale + offsetY, 
+                              manualResult.radius * scale, angle, '#ff4444', '手动调整');
+            }
+            
+            // 绘制最优解半圆
+            if (currentOptimal.radius > 0) {
+                drawSemicircle(ctx, currentOptimal.centerX * scale + offsetX, 
+                              currentOptimal.centerY * scale + offsetY, 
+                              currentOptimal.radius * scale, currentOptimal.angle, '#44ff44', '最优解');
+            }
+            
+            // 绘制网格
+            drawGrid(ctx, offsetX, offsetY, length * scale, width * scale, scale);
+        }
+
+        function drawAxes(ctx, offsetX, offsetY, rectWidth, rectHeight, scale) {
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            
+            // X轴
+            ctx.beginPath();
+            ctx.moveTo(offsetX - 20, offsetY + rectHeight + 20);
+            ctx.lineTo(offsetX + rectWidth + 20, offsetY + rectHeight + 20);
+            ctx.stroke();
+            
+            // X轴箭头
+            ctx.beginPath();
+            ctx.moveTo(offsetX + rectWidth + 20, offsetY + rectHeight + 20);
+            ctx.lineTo(offsetX + rectWidth + 15, offsetY + rectHeight + 15);
+            ctx.moveTo(offsetX + rectWidth + 20, offsetY + rectHeight + 20);
+            ctx.lineTo(offsetX + rectWidth + 15, offsetY + rectHeight + 25);
+            ctx.stroke();
+            
+            // X轴标签
+            ctx.fillText('X', offsetX + rectWidth + 30, offsetY + rectHeight + 25);
+            
+            // Y轴
+            ctx.beginPath();
+            ctx.moveTo(offsetX - 20, offsetY + rectHeight + 20);
+            ctx.lineTo(offsetX - 20, offsetY - 20);
+            ctx.stroke();
+            
+            // Y轴箭头
+            ctx.beginPath();
+            ctx.moveTo(offsetX - 20, offsetY - 20);
+            ctx.lineTo(offsetX - 25, offsetY - 15);
+            ctx.moveTo(offsetX - 20, offsetY - 20);
+            ctx.lineTo(offsetX - 15, offsetY - 15);
+            ctx.stroke();
+            
+            // Y轴标签
+            ctx.fillText('Y', offsetX - 30, offsetY - 10);
+            
+            // 刻度标记
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            
+            // X轴刻度
+            for (let i = 0; i <= length; i += Math.max(1, Math.floor(length / 10))) {
+                const x = offsetX + i * scale;
+                ctx.beginPath();
+                ctx.moveTo(x, offsetY + rectHeight + 15);
+                ctx.lineTo(x, offsetY + rectHeight + 25);
+                ctx.stroke();
+                ctx.fillText(i.toString(), x, offsetY + rectHeight + 40);
+            }
+            
+            // Y轴刻度
+            for (let i = 0; i <= width; i += Math.max(1, Math.floor(width / 10))) {
+                const y = offsetY + rectHeight - i * scale;
+                ctx.beginPath();
+                ctx.moveTo(offsetX - 25, y);
+                ctx.lineTo(offsetX - 15, y);
+                ctx.stroke();
+                ctx.textAlign = 'right';
+                ctx.fillText(i.toString(), offsetX - 30, y + 4);
+            }
+        }
+
+        function drawGrid(ctx, offsetX, offsetY, rectWidth, rectHeight, scale) {
+            ctx.strokeStyle = '#eee';
+            ctx.lineWidth = 0.5;
+            
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            
+            // 垂直网格线
+            for (let i = 0; i <= length; i++) {
+                const x = offsetX + i * scale;
+                ctx.beginPath();
+                ctx.moveTo(x, offsetY);
+                ctx.lineTo(x, offsetY + rectHeight);
+                ctx.stroke();
+            }
+            
+            // 水平网格线
+            for (let i = 0; i <= width; i++) {
+                const y = offsetY + rectHeight - i * scale;
+                ctx.beginPath();
+                ctx.moveTo(offsetX, y);
+                ctx.lineTo(offsetX + rectWidth, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawSemicircle(ctx, centerX, centerY, radius, angle, color, label) {
+            const angleRad = angle * Math.PI / 180;
+            
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(angleRad);
+            
+            // 绘制半圆弧
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color + '40'; // 半透明填充
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // 绘制直径
+            ctx.beginPath();
+            ctx.moveTo(-radius, 0);
+            ctx.lineTo(radius, 0);
+            ctx.stroke();
+            
+            // 绘制中心点
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(0, 0, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // 绘制标签
+            ctx.fillStyle = color;
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(label + ` (r=${(radius / parseFloat(document.getElementById('length').value) * 8).toFixed(2)})`, 
+                        centerX + radius + 5, centerY - 5);
+        }
+
+        // 事件监听器
+        document.getElementById('length').addEventListener('input', updateVisualization);
+        document.getElementById('width').addEventListener('input', updateVisualization);
+        document.getElementById('angle').addEventListener('input', function() {
+            document.getElementById('angle-slider').value = this.value;
+            updateVisualization();
+        });
+        document.getElementById('angle-slider').addEventListener('input', function() {
+            document.getElementById('angle').value = this.value;
+            updateVisualization();
+        });
+
+        function resetToDefault() {
+            document.getElementById('length').value = 8;
+            document.getElementById('width').value = 6;
+            document.getElementById('angle').value = 0;
+            document.getElementById('angle-slider').value = 0;
+            document.getElementById('precision').value = 1;
+            document.getElementById('center-step').value = 0.1;
+            document.getElementById('radius-precision').value = 0.001;
+            updateVisualization();
+        }
+
+        function animateOptimization() {
+            // 动画演示功能
+            isAnimating = true;
+            const animateBtn = document.getElementById('animate-btn');
+            animateBtn.disabled = true;
+            
+            let currentAngle = 0;
+            const step = 5;
+            
+            function animate() {
+                if (!isAnimating || currentAngle > 180) {
+                    animateBtn.disabled = false;
+                    isAnimating = false;
+                    return;
+                }
+                
+                document.getElementById('angle').value = currentAngle;
+                document.getElementById('angle-slider').value = currentAngle;
+                updateVisualization();
+                
+                currentAngle += step;
+                setTimeout(animate, 200);
+            }
+            
+            animate();
+        }
+
+        function stopAnimation() {
+            isAnimating = false;
+            document.getElementById('animate-btn').disabled = false;
+            document.getElementById('optimize-btn').disabled = false;
+        }
+
+        function generateReport() {
+            const report = {
+                rectangle: {
+                    length: parseFloat(document.getElementById('length').value),
+                    width: parseFloat(document.getElementById('width').value)
+                },
+                optimal: currentOptimal,
+                perimeter: currentOptimal.radius * (Math.PI + 2),
+                area: currentOptimal.radius * currentOptimal.radius * Math.PI / 2,
+                calculationHistory: calculationHistory
+            };
+            
+            console.log('计算报告:', report);
+            alert('报告已生成，请查看控制台');
+        }
+
+        function exportData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                rectangle: {
+                    length: parseFloat(document.getElementById('length').value),
+                    width: parseFloat(document.getElementById('width').value)
+                },
+                optimal: currentOptimal,
+                results: calculationHistory
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'semicircle_optimization_data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToCSV() {
+            if (calculationHistory.length === 0) {
+                alert('请先运行优化计算');
+                return;
+            }
+            
+            let csv = 'Angle,Radius,Perimeter,Area,CenterX,CenterY\n';
+            calculationHistory.forEach(result => {
+                csv += `${result.angle},${result.radius},${result.perimeter},${result.area},${result.centerX},${result.centerY}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'semicircle_results.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToJSON() {
+            exportData();
+        }
+
+        function exportImage() {
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = 'semicircle_visualization.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function printResults() {
+            window.print();
+        }
+
+        // 画布点击事件
+        document.getElementById('canvas').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const margin = 80;
+            const scaleX = (this.width - 2 * margin) / length;
+            const scaleY = (this.height - 2 * margin) / width;
+            const scale = Math.min(scaleX, scaleY);
+            const offsetX = (this.width - length * scale) / 2;
+            const offsetY = (this.height - width * scale) / 2;
+            
+            const realX = (x - offsetX) / scale;
+            const realY = (this.height - y - (this.height - offsetY - width * scale)) / scale;
+            
+            document.getElementById('canvas-info').innerHTML = `
+                <div><strong>图例:</strong></div>
+                <div>🟢 最优解</div>
+                <div>🔴 当前手动</div>
+                <div>📏 尺寸标注</div>
+                <div>🎯 点击坐标: (${realX.toFixed(2)}, ${realY.toFixed(2)})</div>
+            `;
+        });
+
+        // 初始化
+        updateVisualization();
+    </script>
+</body>
+</html>
