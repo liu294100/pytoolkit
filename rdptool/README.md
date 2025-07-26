@@ -1,385 +1,210 @@
-# RDP工具
+# 远程桌面工具 (Remote Desktop Tool)
 
-一个功能强大的远程桌面连接工具，支持多种协议和部署方式。
+一个基于Python和Web技术的跨平台远程桌面控制工具，支持多种客户端类型和实时屏幕共享。
 
-## 快速开始
+## 功能特性
 
-### Docker部署（推荐）
+### 🖥️ 多端支持
+- **Python GUI控制端**: 使用tkinter构建的桌面应用程序
+- **Python GUI被控端**: 支持屏幕捕获和远程控制
+- **Web控制端**: 基于浏览器的远程控制界面
+- **Web服务端**: FastAPI + WebSocket实现的通信服务器
 
-```bash
-# 克隆项目
-git clone <your-repo-url>
-cd rdptool
+### 🚀 核心功能
+- 实时屏幕共享和控制
+- 鼠标和键盘事件传输
+- 设备发现和连接管理
+- 权限控制和密码保护
+- 多设备同时在线
+- 响应式Web界面
 
-# 启动RDP服务端
-docker-compose up -d rdp-server
+### 🔧 技术特性
+- WebSocket实时通信
+- 屏幕压缩和优化传输
+- 跨平台兼容性
+- 现代化UI设计
+- 安全的连接机制
 
-# 验证部署
-curl http://localhost:8888/api/status
-```
+## 项目结构
 
-### 传统部署
-
-```bash
-# 安装依赖
-pip install -r requirements.txt
-
-# 启动服务端
-python server.py --config configs/server_config.json
-```
-
-## 🚀 特性
-
-### 远程桌面功能
-- **屏幕共享**: 实时屏幕捕获和传输
-- **远程控制**: 鼠标和键盘事件转发
-- **多显示器支持**: 支持多显示器环境
-- **图像压缩**: 多种压缩格式（JPEG、PNG、WebP）
-- **自适应质量**: 根据网络状况自动调整图像质量
-
-### 多协议代理
-- **HTTP/HTTPS代理**: 支持HTTP/1.1和HTTPS隧道
-- **SOCKS代理**: 完整的SOCKS4/SOCKS5支持（含UDP）
-- **WebSocket隧道**: 基于WebSocket的数据隧道
-- **SSH隧道**: SSH端口转发和动态代理
-- **原始套接字**: 底层网络数据包处理
-
-### 安全特性
-- **端到端加密**: AES-256加密保护
-- **身份认证**: 多种认证方式（密码、证书）
-- **会话管理**: 安全的会话建立和管理
-- **权限控制**: 细粒度的访问控制
-
-### 网络功能
-- **连接管理**: 智能连接池和负载均衡
-- **自动重连**: 网络中断自动恢复
-- **流量监控**: 实时网络流量统计
-- **性能优化**: 数据压缩和缓存机制
-
-## 📦 安装
-
-### 系统要求
-- Python 3.8+
-- Windows/Linux/macOS
-
-### 依赖安装
-```bash
-# 基础依赖（可选，工具会自动处理）
-pip install pillow opencv-python mss pynput psutil cryptography
-
-# 或者使用纯Python实现（无外部依赖）
-# 工具内置了所有必要的纯Python实现
-```
-
-### 快速安装
-```bash
-git clone <repository-url>
-cd rdptool
-python main.py --help
-```
-
-## 🎯 使用方法
-
-### 1. 启动远程桌面服务端
-```bash
-# 使用默认配置
-python main.py server
-
-# 使用自定义配置
-python main.py server --config server_config.json
-
-# 后台运行
-python main.py server --daemon
-```
-
-### 2. 启动远程桌面客户端
-```bash
-# GUI模式
-python main.py client --gui
-
-# 命令行模式
-python main.py client --host 192.168.1.100 --port 8888 --username admin
-```
-
-### 3. 启动代理服务器
-```bash
-# 启动多协议代理
-python main.py proxy --config proxy_config.json
-
-# 后台运行
-python main.py proxy --daemon
-```
-
-### 4. 生成配置文件
-```bash
-# 生成服务端配置
-python main.py config --type server --output server.json
-
-# 生成客户端配置
-python main.py config --type client --output client.json
-
-# 生成代理配置
-python main.py config --type proxy --output proxy.json
-```
-
-## ⚙️ 配置说明
-
-### 服务端配置示例
-```json
-{
-  "server": {
-    "host": "0.0.0.0",
-    "port": 8888,
-    "protocol": "tcp",
-    "max_clients": 10
-  },
-  "screen": {
-    "method": "pil",
-    "format": "jpeg",
-    "quality": 80,
-    "fps": 30,
-    "scale_factor": 1.0
-  },
-  "security": {
-    "encryption_type": "aes_256_cbc",
-    "auth_method": "password",
-    "require_encryption": true,
-    "session_timeout": 3600
-  }
-}
-```
-
-### 代理配置示例
-```json
-{
-  "proxy": {
-    "host": "0.0.0.0",
-    "protocols": {
-      "http": {
-        "enabled": true,
-        "port": 8080
-      },
-      "socks5": {
-        "enabled": true,
-        "port": 1080,
-        "auth_required": false
-      },
-      "websocket": {
-        "enabled": true,
-        "port": 8888,
-        "path": "/ws"
-      }
-    }
-  }
-}
-```
-
-## 🏗️ 架构设计
-
-### 模块结构
 ```
 rdptool/
-├── core/                   # 核心功能模块
-│   ├── network.py         # 网络管理
-│   ├── protocol.py        # 协议处理
-│   ├── screen.py          # 屏幕捕获
-│   ├── input.py           # 输入控制
-│   └── security.py        # 安全管理
-├── protocols/             # 协议实现
-│   ├── http_proxy.py      # HTTP/HTTPS代理
-│   ├── socks_proxy.py     # SOCKS代理
-│   ├── websocket_proxy.py # WebSocket代理
-│   ├── ssh_tunnel.py      # SSH隧道
-│   └── raw_socket.py      # 原始套接字
-├── network/               # 网络层
-│   ├── connection_manager.py # 连接管理
-│   ├── tcp_handler.py     # TCP处理
-│   ├── udp_handler.py     # UDP处理
-│   └── network_monitor.py # 网络监控
-├── utils/                 # 工具模块
-│   ├── logger.py          # 日志系统
-│   ├── config.py          # 配置管理
-│   ├── compression.py     # 数据压缩
-│   ├── performance.py     # 性能监控
-│   └── helpers.py         # 辅助函数
-├── client.py              # 客户端
-├── server.py              # 服务端
-├── proxy_server.py        # 代理服务器
-└── main.py                # 主入口
+├── server/
+│   └── main.py              # FastAPI Web服务端
+├── client/
+│   ├── controlled_client.py # Python GUI被控端
+│   └── controller_client.py # Python GUI控制端
+├── templates/
+│   └── index.html          # Web前端页面
+├── static/
+│   ├── css/
+│   │   └── style.css       # 样式文件
+│   └── js/
+│       └── app.js          # JavaScript逻辑
+├── requirements.txt        # Python依赖
+└── README.md              # 项目说明
 ```
 
-### 核心组件
+## 安装和配置
 
-#### 1. 网络管理器 (NetworkManager)
-- 统一的网络连接管理
-- 支持TCP/UDP/WebSocket等协议
-- 连接池和负载均衡
-- 自动重连和故障恢复
+### 1. 环境要求
+- Python 3.8+
+- 现代浏览器 (Chrome, Firefox, Safari, Edge)
+- Windows/macOS/Linux
 
-#### 2. 协议处理器 (ProtocolHandler)
-- 消息序列化和反序列化
-- 协议版本协商
-- 消息路由和分发
-- 错误处理和恢复
+### 2. 安装依赖
 
-#### 3. 安全管理器 (SecurityManager)
-- 端到端加密
-- 身份认证和授权
-- 密钥管理和交换
-- 会话安全
-
-#### 4. 屏幕捕获器 (ScreenCapture)
-- 多种捕获方法（PIL、OpenCV、MSS）
-- 实时屏幕流
-- 图像压缩和优化
-- 多显示器支持
-
-#### 5. 输入控制器 (InputController)
-- 鼠标和键盘事件处理
-- 跨平台输入模拟
-- 事件队列和批处理
-- 安全限制
-
-## 🔧 高级功能
-
-### 1. 自定义协议
-```python
-from core.protocol import ProtocolHandler, MessageType
-
-class CustomProtocol(ProtocolHandler):
-    def handle_custom_message(self, message):
-        # 自定义消息处理逻辑
-        pass
+```bash
+cd rdptool
+pip install -r requirements.txt
 ```
 
-### 2. 插件系统
-```python
-from core.network import NetworkManager
+### 3. 启动服务端
 
-class CustomPlugin:
-    def on_connection_established(self, connection):
-        # 连接建立时的处理
-        pass
-    
-    def on_data_received(self, data):
-        # 数据接收时的处理
-        pass
+```bash
+cd server
+python main.py
 ```
 
-### 3. 性能监控
-```python
-from utils.performance import PerformanceMonitor
+服务端将在 `http://localhost:8000` 启动
 
-monitor = PerformanceMonitor()
-monitor.start_monitoring()
+### 4. 启动客户端
 
-# 获取性能指标
-metrics = monitor.get_current_metrics()
-print(f"CPU使用率: {metrics.cpu_percent}%")
-print(f"内存使用率: {metrics.memory_percent}%")
+#### 被控端 (需要被远程控制的设备)
+```bash
+cd client
+python controlled_client.py
 ```
 
-## 🛡️ 安全考虑
+#### 控制端 (用于控制其他设备)
+```bash
+cd client
+python controller_client.py
+```
 
-### 1. 网络安全
-- 所有通信默认加密
-- 支持TLS/SSL证书验证
-- 防止中间人攻击
-- 网络流量混淆
+#### Web控制端
+打开浏览器访问: `http://localhost:8000`
 
-### 2. 访问控制
-- 基于IP的访问限制
-- 用户认证和授权
-- 会话超时管理
-- 操作审计日志
+## 使用说明
 
-### 3. 数据保护
-- 敏感数据加密存储
-- 内存数据清理
-- 安全的密钥管理
-- 数据完整性校验
+### 基本流程
 
-## 📊 性能优化
+1. **启动服务端**: 运行 `server/main.py`
+2. **启动被控端**: 在需要被控制的设备上运行 `controlled_client.py`
+3. **启动控制端**: 在控制设备上运行 `controller_client.py` 或打开Web界面
+4. **建立连接**: 在控制端选择目标设备并发送控制请求
+5. **开始控制**: 被控端接受请求后即可开始远程控制
 
-### 1. 网络优化
-- 数据压缩算法
-- 连接复用
-- 带宽自适应
-- 缓存机制
+### Web界面使用
 
-### 2. 图像优化
-- 动态质量调整
-- 增量更新
-- 区域压缩
-- 格式选择
+1. **连接服务器**:
+   - 输入服务器地址 (默认: localhost:8000)
+   - 设置设备名称
+   - 点击"连接"按钮
 
-### 3. 系统优化
-- 多线程处理
-- 异步I/O
-- 内存池管理
-- CPU亲和性
+2. **选择设备**:
+   - 在设备列表中选择要控制的设备
+   - 输入控制密码 (如果需要)
+   - 发送控制请求
 
-## 🐛 故障排除
+3. **远程控制**:
+   - 等待被控端接受请求
+   - 使用鼠标和键盘控制远程设备
+   - 使用快捷键面板发送特殊按键
+
+### Python客户端使用
+
+#### 被控端设置
+- 启动后会显示设备信息和连接状态
+- 可以设置控制密码
+- 接收到控制请求时会弹出确认对话框
+
+#### 控制端设置
+- 连接服务器后会显示可用设备列表
+- 双击设备名称发送控制请求
+- 控制时可以使用所有鼠标和键盘功能
+
+## 配置选项
+
+### 服务端配置
+- 端口: 默认8000，可在 `main.py` 中修改
+- CORS: 支持跨域访问
+- WebSocket: 自动处理连接管理
+
+### 客户端配置
+- 服务器地址: 可在客户端界面中设置
+- 屏幕质量: 可调整压缩质量和分辨率
+- 更新频率: 可设置屏幕刷新率
+
+## 安全说明
+
+- 所有通信基于WebSocket协议
+- 支持密码保护的控制请求
+- 被控端需要手动确认控制请求
+- 可随时断开控制连接
+- 建议在可信网络环境中使用
+
+## 故障排除
 
 ### 常见问题
 
 1. **连接失败**
-   - 检查防火墙设置
-   - 验证端口是否开放
-   - 确认网络连通性
+   - 检查服务端是否正常运行
+   - 确认网络连接和防火墙设置
+   - 验证服务器地址和端口
 
-2. **性能问题**
-   - 调整图像质量设置
+2. **控制延迟**
+   - 降低屏幕分辨率
+   - 调整压缩质量
    - 检查网络带宽
-   - 优化压缩参数
 
-3. **认证失败**
-   - 验证用户名密码
-   - 检查证书配置
-   - 确认权限设置
+3. **权限问题**
+   - 确保客户端有屏幕捕获权限
+   - 检查输入设备访问权限
+   - 以管理员权限运行 (如需要)
 
-### 调试模式
-```bash
-# 启用详细日志
-python main.py server --log-level DEBUG
+### 日志调试
+- 服务端日志会显示连接和消息信息
+- 客户端控制台会输出详细的调试信息
+- Web浏览器开发者工具可查看前端日志
 
-# 查看网络状态
-python -c "from network.network_monitor import NetworkMonitor; m=NetworkMonitor(); print(m.get_network_info())"
-```
+## 开发说明
 
-## 🤝 贡献指南
+### 架构设计
+- **服务端**: FastAPI + WebSocket处理客户端通信
+- **客户端**: tkinter GUI + WebSocket客户端
+- **Web端**: HTML5 + Bootstrap + WebSocket API
 
-1. Fork 项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
+### 扩展开发
+- 可添加文件传输功能
+- 支持音频传输
+- 实现录屏功能
+- 添加聊天功能
+- 支持多显示器
 
-## 📄 许可证
+### 贡献指南
+1. Fork项目仓库
+2. 创建功能分支
+3. 提交代码更改
+4. 发起Pull Request
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+## 许可证
 
-## 🙏 致谢
+本项目采用MIT许可证，详见LICENSE文件。
 
-- 参考了 [pproxy](https://github.com/qwj/python-proxy) 的设计理念
-- 感谢所有开源项目的贡献者
-- 特别感谢测试和反馈的用户
+## 致谢
 
-## 📚 文档
+- 参考了 [billd-desk](https://github.com/galaxy-s10/billd-desk) 项目的设计思路
+- 借鉴了向日葵、ToDesk等商业远程桌面工具的用户体验
+- 使用了多个优秀的开源库和框架
 
-- [用户手册](docs/USER_MANUAL.md)
-- [开发指南](docs/DEVELOPMENT.md)
-- [API文档](docs/API.md)
-- [部署指南](docs/DEPLOYMENT.md)
-- [云服务器部署](docs/CLOUD_DEPLOYMENT.md)
-- [Docker部署指南](docs/DOCKER_DEPLOYMENT.md)
+## 联系方式
 
-## 📞 联系方式
-
-- 项目主页: [GitHub Repository]
-- 问题报告: [GitHub Issues]
-- 文档: [Wiki Pages]
+如有问题或建议，请通过以下方式联系:
+- 提交Issue
+- 发起Discussion
+- 邮件联系
 
 ---
 
-**注意**: 本工具仅供学习和合法用途使用，请遵守当地法律法规。
+**注意**: 本工具仅供学习和合法用途使用，请遵守相关法律法规。
