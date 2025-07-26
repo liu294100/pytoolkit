@@ -1,0 +1,28 @@
+# Dict Learner Dependencies
+# 单词学习软件依赖包
+
+# GUI Framework
+tkinter-tooltip>=2.2.0
+Pillow>=10.0.0
+
+# Audio and TTS
+pygame>=2.5.0
+pyttsx3>=2.90
+gtts>=2.3.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# JSON and Configuration
+jsonschema>=4.17.0
+
+# Typing Extensions
+typing-extensions>=4.5.0
+
+# Development Tools (optional)
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+flake8>=6.0.0

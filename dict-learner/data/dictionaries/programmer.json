@@ -1,0 +1,894 @@
+{
+  "id": "programmer",
+  "name": "程序员英语词汇",
+  "description": "程序员必备英语词汇，包含编程、软件开发、计算机科学等领域的专业术语",
+  "version": "1.0.0",
+  "language": "en-zh",
+  "total_words": 80,
+  "chapters": 8,
+  "words_per_chapter": 10,
+  "difficulty": "professional",
+  "tags": ["programming", "software", "computer", "technology"],
+  "words": [
+    {
+      "word": "algorithm",
+      "phonetic": "/ˈælɡərɪðəm/",
+      "translation": "n. 算法",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "This sorting algorithm is very efficient.",
+        "We need to optimize the algorithm."
+      ]
+    },
+    {
+      "word": "array",
+      "phonetic": "/əˈreɪ/",
+      "translation": "n. 数组",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "Store the data in an array.",
+        "The array index starts from zero."
+      ]
+    },
+    {
+      "word": "boolean",
+      "phonetic": "/ˈbuːliən/",
+      "translation": "n. 布尔值 adj. 布尔的",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "The function returns a boolean value.",
+        "Use boolean logic for this condition."
+      ]
+    },
+    {
+      "word": "buffer",
+      "phonetic": "/ˈbʌfər/",
+      "translation": "n. 缓冲区 v. 缓冲",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "The data is stored in a buffer.",
+        "Buffer overflow can cause security issues."
+      ]
+    },
+    {
+      "word": "cache",
+      "phonetic": "/kæʃ/",
+      "translation": "n. 缓存 v. 缓存",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "Clear the browser cache.",
+        "The system caches frequently used data."
+      ]
+    },
+    {
+      "word": "callback",
+      "phonetic": "/ˈkɔːlbæk/",
+      "translation": "n. 回调函数",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "Pass a callback function as parameter.",
+        "The callback is executed after completion."
+      ]
+    },
+    {
+      "word": "compile",
+      "phonetic": "/kəmˈpaɪl/",
+      "translation": "v. 编译",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "Compile the source code.",
+        "The program failed to compile."
+      ]
+    },
+    {
+      "word": "debug",
+      "phonetic": "/diːˈbʌɡ/",
+      "translation": "v. 调试，除错",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "Debug the application to find errors.",
+        "Use debugging tools to trace the issue."
+      ]
+    },
+    {
+      "word": "deploy",
+      "phonetic": "/dɪˈplɔɪ/",
+      "translation": "v. 部署，发布",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "Deploy the application to production.",
+        "The deployment process is automated."
+      ]
+    },
+    {
+      "word": "exception",
+      "phonetic": "/ɪkˈsepʃən/",
+      "translation": "n. 异常，例外",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "Handle the exception properly.",
+        "An exception was thrown during execution."
+      ]
+    },
+    {
+      "word": "framework",
+      "phonetic": "/ˈfreɪmwɜːrk/",
+      "translation": "n. 框架",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "Use a web development framework.",
+        "The framework provides useful libraries."
+      ]
+    },
+    {
+      "word": "function",
+      "phonetic": "/ˈfʌŋkʃən/",
+      "translation": "n. 函数，功能",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "Define a new function.",
+        "This function calculates the sum."
+      ]
+    },
+    {
+      "word": "garbage",
+      "phonetic": "/ˈɡɑːrbɪdʒ/",
+      "translation": "n. 垃圾（垃圾回收）",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "Garbage collection frees memory.",
+        "The garbage collector runs automatically."
+      ]
+    },
+    {
+      "word": "hash",
+      "phonetic": "/hæʃ/",
+      "translation": "n. 哈希，散列 v. 哈希化",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "Use a hash table for fast lookup.",
+        "Hash the password for security."
+      ]
+    },
+    {
+      "word": "inheritance",
+      "phonetic": "/ɪnˈherɪtəns/",
+      "translation": "n. 继承",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "Use inheritance to extend the class.",
+        "Multiple inheritance can be complex."
+      ]
+    },
+    {
+      "word": "instance",
+      "phonetic": "/ˈɪnstəns/",
+      "translation": "n. 实例",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "Create an instance of the class.",
+        "Each instance has its own properties."
+      ]
+    },
+    {
+      "word": "interface",
+      "phonetic": "/ˈɪntərfeɪs/",
+      "translation": "n. 接口，界面",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "Design a user-friendly interface.",
+        "Implement the interface methods."
+      ]
+    },
+    {
+      "word": "iterate",
+      "phonetic": "/ˈɪtəreɪt/",
+      "translation": "v. 迭代，重复",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "Iterate through the array elements.",
+        "The loop iterates until completion."
+      ]
+    },
+    {
+      "word": "library",
+      "phonetic": "/ˈlaɪbreri/",
+      "translation": "n. 库，程序库",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "Import the required library.",
+        "This library provides useful functions."
+      ]
+    },
+    {
+      "word": "method",
+      "phonetic": "/ˈmeθəd/",
+      "translation": "n. 方法",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "Call the method with parameters.",
+        "Override the parent method."
+      ]
+    },
+    {
+      "word": "module",
+      "phonetic": "/ˈmɑːdʒuːl/",
+      "translation": "n. 模块",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "Import the math module.",
+        "Each module has specific functionality."
+      ]
+    },
+    {
+      "word": "namespace",
+      "phonetic": "/ˈneɪmspeɪs/",
+      "translation": "n. 命名空间",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "Avoid namespace conflicts.",
+        "Use namespace to organize code."
+      ]
+    },
+    {
+      "word": "object",
+      "phonetic": "/ˈɑːbdʒekt/",
+      "translation": "n. 对象",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "Create a new object.",
+        "The object contains data and methods."
+      ]
+    },
+    {
+      "word": "parameter",
+      "phonetic": "/pəˈræmɪtər/",
+      "translation": "n. 参数",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "Pass parameters to the function.",
+        "The method accepts multiple parameters."
+      ]
+    },
+    {
+      "word": "pointer",
+      "phonetic": "/ˈpɔɪntər/",
+      "translation": "n. 指针",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "The pointer references memory address.",
+        "Null pointer can cause crashes."
+      ]
+    },
+    {
+      "word": "polymorphism",
+      "phonetic": "/ˌpɑːliˈmɔːrfɪzəm/",
+      "translation": "n. 多态性",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "Polymorphism enables flexible code.",
+        "Use polymorphism for different implementations."
+      ]
+    },
+    {
+      "word": "protocol",
+      "phonetic": "/ˈproʊtəkɔːl/",
+      "translation": "n. 协议",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "HTTP is a web protocol.",
+        "Follow the communication protocol."
+      ]
+    },
+    {
+      "word": "query",
+      "phonetic": "/ˈkwɪri/",
+      "translation": "n. 查询 v. 查询",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "Execute a database query.",
+        "The query returns multiple results."
+      ]
+    },
+    {
+      "word": "recursion",
+      "phonetic": "/rɪˈkɜːrʒən/",
+      "translation": "n. 递归",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "Use recursion to solve the problem.",
+        "Recursion can lead to stack overflow."
+      ]
+    },
+    {
+      "word": "refactor",
+      "phonetic": "/riːˈfæktər/",
+      "translation": "v. 重构",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "Refactor the code for better readability.",
+        "Refactoring improves code quality."
+      ]
+    },
+    {
+      "word": "repository",
+      "phonetic": "/rɪˈpɑːzətɔːri/",
+      "translation": "n. 仓库，存储库",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "Clone the Git repository.",
+        "The repository contains source code."
+      ]
+    },
+    {
+      "word": "runtime",
+      "phonetic": "/ˈrʌntaɪm/",
+      "translation": "n. 运行时",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Runtime error occurred during execution.",
+        "The runtime environment is configured."
+      ]
+    },
+    {
+      "word": "schema",
+      "phonetic": "/ˈskiːmə/",
+      "translation": "n. 模式，架构",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Define the database schema.",
+        "The XML schema validates structure."
+      ]
+    },
+    {
+      "word": "scope",
+      "phonetic": "/skoʊp/",
+      "translation": "n. 作用域，范围",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Variable scope determines accessibility.",
+        "Global scope can cause conflicts."
+      ]
+    },
+    {
+      "word": "serialize",
+      "phonetic": "/ˈsɪriəlaɪz/",
+      "translation": "v. 序列化",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Serialize the object to JSON.",
+        "Serialization converts data to bytes."
+      ]
+    },
+    {
+      "word": "socket",
+      "phonetic": "/ˈsɑːkɪt/",
+      "translation": "n. 套接字",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Create a network socket.",
+        "The socket handles communication."
+      ]
+    },
+    {
+      "word": "stack",
+      "phonetic": "/stæk/",
+      "translation": "n. 栈，堆栈",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "Push data onto the stack.",
+        "Stack overflow causes program crash."
+      ]
+    },
+    {
+      "word": "syntax",
+      "phonetic": "/ˈsɪntæks/",
+      "translation": "n. 语法",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "Check the syntax for errors.",
+        "Each language has different syntax."
+      ]
+    },
+    {
+      "word": "thread",
+      "phonetic": "/θred/",
+      "translation": "n. 线程",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Create a new thread for processing.",
+        "Multiple threads run concurrently."
+      ]
+    },
+    {
+      "word": "token",
+      "phonetic": "/ˈtoʊkən/",
+      "translation": "n. 令牌，标记",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Use authentication token for access.",
+        "Parse the input into tokens."
+      ]
+    },
+    {
+      "word": "variable",
+      "phonetic": "/ˈveriəbəl/",
+      "translation": "n. 变量",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "Declare a variable to store data.",
+        "The variable value can change."
+      ]
+    },
+    {
+      "word": "version",
+      "phonetic": "/ˈvɜːrʒən/",
+      "translation": "n. 版本",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "Update to the latest version.",
+        "Version control tracks changes."
+      ]
+    },
+    {
+      "word": "virtual",
+      "phonetic": "/ˈvɜːrtʃuəl/",
+      "translation": "adj. 虚拟的",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Use virtual memory for efficiency.",
+        "Virtual functions enable polymorphism."
+      ]
+    },
+    {
+      "word": "webhook",
+      "phonetic": "/ˈwebhʊk/",
+      "translation": "n. 网络钩子",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Set up a webhook for notifications.",
+        "The webhook triggers on events."
+      ]
+    },
+    {
+      "word": "workflow",
+      "phonetic": "/ˈwɜːrkfloʊ/",
+      "translation": "n. 工作流程",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Automate the development workflow.",
+        "The workflow includes testing steps."
+      ]
+    },
+    {
+      "word": "wrapper",
+      "phonetic": "/ˈræpər/",
+      "translation": "n. 包装器",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Create a wrapper for the API.",
+        "The wrapper simplifies complex operations."
+      ]
+    },
+    {
+      "word": "binary",
+      "phonetic": "/ˈbaɪneri/",
+      "translation": "adj. 二进制的 n. 二进制",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Convert to binary format.",
+        "Binary search is efficient."
+      ]
+    },
+    {
+      "word": "database",
+      "phonetic": "/ˈdeɪtəbeɪs/",
+      "translation": "n. 数据库",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "Store data in the database.",
+        "Database optimization improves performance."
+      ]
+    },
+    {
+      "word": "encryption",
+      "phonetic": "/ɪnˈkrɪpʃən/",
+      "translation": "n. 加密",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Use encryption for data security.",
+        "Strong encryption protects information."
+      ]
+    },
+    {
+      "word": "firewall",
+      "phonetic": "/ˈfaɪərwɔːl/",
+      "translation": "n. 防火墙",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Configure the firewall rules.",
+        "Firewall blocks unauthorized access."
+      ]
+    },
+    {
+      "word": "backend",
+      "phonetic": "/ˈbækend/",
+      "translation": "n. 后端",
+      "chapter": 6,
+      "frequency": "high",
+      "examples": [
+        "Develop the backend API.",
+        "Backend handles data processing."
+      ]
+    },
+    {
+      "word": "frontend",
+      "phonetic": "/ˈfrʌntend/",
+      "translation": "n. 前端",
+      "chapter": 6,
+      "frequency": "high",
+      "examples": [
+        "Design the frontend interface.",
+        "Frontend interacts with users."
+      ]
+    },
+    {
+      "word": "middleware",
+      "phonetic": "/ˈmɪdəlwer/",
+      "translation": "n. 中间件",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Add authentication middleware.",
+        "Middleware processes requests."
+      ]
+    },
+    {
+      "word": "microservice",
+      "phonetic": "/ˈmaɪkroʊsɜːrvɪs/",
+      "translation": "n. 微服务",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Build microservice architecture.",
+        "Each microservice has specific function."
+      ]
+    },
+    {
+      "word": "container",
+      "phonetic": "/kənˈteɪnər/",
+      "translation": "n. 容器",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Deploy application in containers.",
+        "Docker creates lightweight containers."
+      ]
+    },
+    {
+      "word": "orchestration",
+      "phonetic": "/ˌɔːrkɪˈstreɪʃən/",
+      "translation": "n. 编排，协调",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Container orchestration manages deployment.",
+        "Kubernetes provides orchestration."
+      ]
+    },
+    {
+      "word": "scalability",
+      "phonetic": "/ˌskeɪləˈbɪləti/",
+      "translation": "n. 可扩展性",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Design for scalability.",
+        "Cloud services offer scalability."
+      ]
+    },
+    {
+      "word": "redundancy",
+      "phonetic": "/rɪˈdʌndənsi/",
+      "translation": "n. 冗余",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Add redundancy for reliability.",
+        "Data redundancy prevents loss."
+      ]
+    },
+    {
+      "word": "latency",
+      "phonetic": "/ˈleɪtənsi/",
+      "translation": "n. 延迟",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Reduce network latency.",
+        "Low latency improves performance."
+      ]
+    },
+    {
+      "word": "throughput",
+      "phonetic": "/ˈθruːpʊt/",
+      "translation": "n. 吞吐量",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Increase system throughput.",
+        "Measure throughput in requests per second."
+      ]
+    },
+    {
+      "word": "benchmark",
+      "phonetic": "/ˈbentʃmɑːrk/",
+      "translation": "n. 基准测试 v. 基准测试",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Run benchmark tests.",
+        "Benchmark against industry standards."
+      ]
+    },
+    {
+      "word": "profiling",
+      "phonetic": "/ˈproʊfaɪlɪŋ/",
+      "translation": "n. 性能分析",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Use profiling to find bottlenecks.",
+        "Memory profiling shows usage patterns."
+      ]
+    },
+    {
+      "word": "optimization",
+      "phonetic": "/ˌɑːptɪməˈzeɪʃən/",
+      "translation": "n. 优化",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Code optimization improves speed.",
+        "Database optimization reduces query time."
+      ]
+    },
+    {
+      "word": "bottleneck",
+      "phonetic": "/ˈbɑːtəlnek/",
+      "translation": "n. 瓶颈",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Identify performance bottlenecks.",
+        "The database is a bottleneck."
+      ]
+    },
+    {
+      "word": "concurrency",
+      "phonetic": "/kənˈkɜːrənsi/",
+      "translation": "n. 并发性",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Handle concurrency issues.",
+        "Concurrency improves performance."
+      ]
+    },
+    {
+      "word": "synchronization",
+      "phonetic": "/ˌsɪŋkrənaɪˈzeɪʃən/",
+      "translation": "n. 同步",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Thread synchronization prevents conflicts.",
+        "Data synchronization ensures consistency."
+      ]
+    },
+    {
+      "word": "asynchronous",
+      "phonetic": "/eɪˈsɪŋkrənəs/",
+      "translation": "adj. 异步的",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Use asynchronous programming.",
+        "Asynchronous calls don't block."
+      ]
+    },
+    {
+      "word": "deadlock",
+      "phonetic": "/ˈdedlɑːk/",
+      "translation": "n. 死锁",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Avoid deadlock situations.",
+        "Deadlock occurs when threads wait."
+      ]
+    },
+    {
+      "word": "mutex",
+      "phonetic": "/ˈmjuːteks/",
+      "translation": "n. 互斥锁",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Use mutex for thread safety.",
+        "Mutex prevents race conditions."
+      ]
+    },
+    {
+      "word": "semaphore",
+      "phonetic": "/ˈseməfɔːr/",
+      "translation": "n. 信号量",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "Semaphore controls resource access.",
+        "Binary semaphore acts like mutex."
+      ]
+    },
+    {
+      "word": "architecture",
+      "phonetic": "/ˈɑːrkɪtektʃər/",
+      "translation": "n. 架构",
+      "chapter": 8,
+      "frequency": "high",
+      "examples": [
+        "Design system architecture.",
+        "Microservice architecture is popular."
+      ]
+    },
+    {
+      "word": "infrastructure",
+      "phonetic": "/ˈɪnfrəstrʌktʃər/",
+      "translation": "n. 基础设施",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Cloud infrastructure is scalable.",
+        "IT infrastructure supports business."
+      ]
+    },
+    {
+      "word": "deployment",
+      "phonetic": "/dɪˈplɔɪmənt/",
+      "translation": "n. 部署",
+      "chapter": 8,
+      "frequency": "high",
+      "examples": [
+        "Automate deployment process.",
+        "Blue-green deployment reduces downtime."
+      ]
+    },
+    {
+      "word": "monitoring",
+      "phonetic": "/ˈmɑːnɪtərɪŋ/",
+      "translation": "n. 监控",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Set up system monitoring.",
+        "Monitoring alerts on issues."
+      ]
+    },
+    {
+      "word": "logging",
+      "phonetic": "/ˈlɔːɡɪŋ/",
+      "translation": "n. 日志记录",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Implement proper logging.",
+        "Logging helps debug issues."
+      ]
+    },
+    {
+      "word": "metrics",
+      "phonetic": "/ˈmetrɪks/",
+      "translation": "n. 指标",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Collect performance metrics.",
+        "Metrics show system health."
+      ]
+    },
+    {
+      "word": "analytics",
+      "phonetic": "/ˌænəˈlɪtɪks/",
+      "translation": "n. 分析",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Use analytics for insights.",
+        "Web analytics track user behavior."
+      ]
+    },
+    {
+      "word": "dashboard",
+      "phonetic": "/ˈdæʃbɔːrd/",
+      "translation": "n. 仪表板",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Create monitoring dashboard.",
+        "Dashboard shows key metrics."
+      ]
+    },
+    {
+      "word": "automation",
+      "phonetic": "/ˌɔːtəˈmeɪʃən/",
+      "translation": "n. 自动化",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Implement test automation.",
+        "Automation reduces manual work."
+      ]
+    },
+    {
+      "word": "integration",
+      "phonetic": "/ˌɪntɪˈɡreɪʃən/",
+      "translation": "n. 集成",
+      "chapter": 8,
+      "frequency": "high",
+      "examples": [
+        "Continuous integration improves quality.",
+        "API integration connects systems."
+      ]
+    }
+  ]
+}

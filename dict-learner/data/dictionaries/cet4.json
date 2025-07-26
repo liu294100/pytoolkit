@@ -1,0 +1,1114 @@
+{
+  "id": "cet4",
+  "name": "CET-4 大学英语四级词汇",
+  "description": "大学英语四级考试核心词汇，包含约4500个常用单词",
+  "version": "1.0.0",
+  "language": "en-zh",
+  "total_words": 100,
+  "chapters": 10,
+  "words_per_chapter": 10,
+  "difficulty": "intermediate",
+  "tags": ["exam", "cet4", "university", "english"],
+  "words": [
+    {
+      "word": "abandon",
+      "phonetic": "/əˈbændən/",
+      "translation": "v. 放弃，抛弃",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "He abandoned his car in the snow.",
+        "Don't abandon hope."
+      ]
+    },
+    {
+      "word": "ability",
+      "phonetic": "/əˈbɪləti/",
+      "translation": "n. 能力，才能",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "She has the ability to learn quickly.",
+        "His ability in math is outstanding."
+      ]
+    },
+    {
+      "word": "abroad",
+      "phonetic": "/əˈbrɔːd/",
+      "translation": "adv. 在国外，到国外",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "He went abroad to study.",
+        "Many students dream of studying abroad."
+      ]
+    },
+    {
+      "word": "absence",
+      "phonetic": "/ˈæbsəns/",
+      "translation": "n. 缺席，不在",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "His absence was noticed by everyone.",
+        "In the absence of evidence, we cannot proceed."
+      ]
+    },
+    {
+      "word": "absolute",
+      "phonetic": "/ˈæbsəluːt/",
+      "translation": "adj. 绝对的，完全的",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "I have absolute confidence in you.",
+        "The silence was absolute."
+      ]
+    },
+    {
+      "word": "absorb",
+      "phonetic": "/əbˈzɔːrb/",
+      "translation": "v. 吸收，吸引",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "Plants absorb water through their roots.",
+        "She was absorbed in her book."
+      ]
+    },
+    {
+      "word": "abstract",
+      "phonetic": "/ˈæbstrækt/",
+      "translation": "adj. 抽象的 n. 摘要",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "Love is an abstract concept.",
+        "Please write an abstract of your paper."
+      ]
+    },
+    {
+      "word": "academic",
+      "phonetic": "/ˌækəˈdemɪk/",
+      "translation": "adj. 学术的，学院的",
+      "chapter": 1,
+      "frequency": "high",
+      "examples": [
+        "He has strong academic performance.",
+        "This is purely academic discussion."
+      ]
+    },
+    {
+      "word": "accelerate",
+      "phonetic": "/əkˈseləreɪt/",
+      "translation": "v. 加速，促进",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "The car began to accelerate.",
+        "We need to accelerate the process."
+      ]
+    },
+    {
+      "word": "accent",
+      "phonetic": "/ˈæksent/",
+      "translation": "n. 口音，重音",
+      "chapter": 1,
+      "frequency": "medium",
+      "examples": [
+        "She speaks with a British accent.",
+        "Put the accent on the first syllable."
+      ]
+    },
+    {
+      "word": "accept",
+      "phonetic": "/əkˈsept/",
+      "translation": "v. 接受，承认",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "I accept your apology.",
+        "Please accept this gift."
+      ]
+    },
+    {
+      "word": "access",
+      "phonetic": "/ˈækses/",
+      "translation": "n. 通道，入口 v. 访问",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "Students have access to the library.",
+        "You can access the file online."
+      ]
+    },
+    {
+      "word": "accident",
+      "phonetic": "/ˈæksɪdənt/",
+      "translation": "n. 事故，意外",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "There was a car accident yesterday.",
+        "I met him by accident."
+      ]
+    },
+    {
+      "word": "accompany",
+      "phonetic": "/əˈkʌmpəni/",
+      "translation": "v. 陪伴，伴随",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "I'll accompany you to the station.",
+        "The disease is accompanied by fever."
+      ]
+    },
+    {
+      "word": "accomplish",
+      "phonetic": "/əˈkʌmplɪʃ/",
+      "translation": "v. 完成，实现",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "We accomplished our mission.",
+        "She accomplished a lot in her career."
+      ]
+    },
+    {
+      "word": "accord",
+      "phonetic": "/əˈkɔːrd/",
+      "translation": "n. 协议，一致 v. 给予",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "The two sides reached an accord.",
+        "His actions accord with his words."
+      ]
+    },
+    {
+      "word": "account",
+      "phonetic": "/əˈkaʊnt/",
+      "translation": "n. 账户，叙述 v. 解释",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "I opened a bank account.",
+        "Can you account for your absence?"
+      ]
+    },
+    {
+      "word": "accurate",
+      "phonetic": "/ˈækjərət/",
+      "translation": "adj. 准确的，精确的",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "The report is accurate.",
+        "We need accurate measurements."
+      ]
+    },
+    {
+      "word": "accuse",
+      "phonetic": "/əˈkjuːz/",
+      "translation": "v. 指控，控告",
+      "chapter": 2,
+      "frequency": "medium",
+      "examples": [
+        "He was accused of theft.",
+        "Don't accuse me without evidence."
+      ]
+    },
+    {
+      "word": "achieve",
+      "phonetic": "/əˈtʃiːv/",
+      "translation": "v. 实现，达到",
+      "chapter": 2,
+      "frequency": "high",
+      "examples": [
+        "She achieved her goal.",
+        "Hard work helps achieve success."
+      ]
+    },
+    {
+      "word": "acquire",
+      "phonetic": "/əˈkwaɪər/",
+      "translation": "v. 获得，取得",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "He acquired new skills.",
+        "The company acquired a competitor."
+      ]
+    },
+    {
+      "word": "action",
+      "phonetic": "/ˈækʃən/",
+      "translation": "n. 行动，动作",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "We need to take action now.",
+        "His actions speak louder than words."
+      ]
+    },
+    {
+      "word": "active",
+      "phonetic": "/ˈæktɪv/",
+      "translation": "adj. 积极的，活跃的",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "She is very active in sports.",
+        "We need active participation."
+      ]
+    },
+    {
+      "word": "activity",
+      "phonetic": "/ækˈtɪvəti/",
+      "translation": "n. 活动，行为",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "What's your favorite activity?",
+        "There's a lot of activity in the market."
+      ]
+    },
+    {
+      "word": "actual",
+      "phonetic": "/ˈæktʃuəl/",
+      "translation": "adj. 实际的，真实的",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "What's the actual cost?",
+        "The actual situation is different."
+      ]
+    },
+    {
+      "word": "adapt",
+      "phonetic": "/əˈdæpt/",
+      "translation": "v. 适应，改编",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "Animals adapt to their environment.",
+        "The novel was adapted for TV."
+      ]
+    },
+    {
+      "word": "addition",
+      "phonetic": "/əˈdɪʃən/",
+      "translation": "n. 加法，增加",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "In addition to English, she speaks French.",
+        "The addition of new members is welcome."
+      ]
+    },
+    {
+      "word": "address",
+      "phonetic": "/əˈdres/",
+      "translation": "n. 地址 v. 演讲，处理",
+      "chapter": 3,
+      "frequency": "high",
+      "examples": [
+        "What's your home address?",
+        "The president will address the nation."
+      ]
+    },
+    {
+      "word": "adequate",
+      "phonetic": "/ˈædɪkwət/",
+      "translation": "adj. 足够的，适当的",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "We have adequate supplies.",
+        "His performance was adequate."
+      ]
+    },
+    {
+      "word": "adjust",
+      "phonetic": "/əˈdʒʌst/",
+      "translation": "v. 调整，适应",
+      "chapter": 3,
+      "frequency": "medium",
+      "examples": [
+        "Please adjust the volume.",
+        "It takes time to adjust to a new job."
+      ]
+    },
+    {
+      "word": "administration",
+      "phonetic": "/ədˌmɪnɪˈstreɪʃən/",
+      "translation": "n. 管理，行政",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "The school administration made new rules.",
+        "He works in administration."
+      ]
+    },
+    {
+      "word": "admit",
+      "phonetic": "/ədˈmɪt/",
+      "translation": "v. 承认，允许进入",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "I admit I was wrong.",
+        "Only members are admitted."
+      ]
+    },
+    {
+      "word": "adopt",
+      "phonetic": "/əˈdɑːpt/",
+      "translation": "v. 采用，收养",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "They decided to adopt a child.",
+        "The company adopted new policies."
+      ]
+    },
+    {
+      "word": "adult",
+      "phonetic": "/əˈdʌlt/",
+      "translation": "n. 成年人 adj. 成年的",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "This movie is for adults only.",
+        "Adult education is important."
+      ]
+    },
+    {
+      "word": "advance",
+      "phonetic": "/ədˈvæns/",
+      "translation": "v. 前进，提前 n. 进步",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "Technology continues to advance.",
+        "We made great advances in medicine."
+      ]
+    },
+    {
+      "word": "advantage",
+      "phonetic": "/ədˈvæntɪdʒ/",
+      "translation": "n. 优势，好处",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "What's the advantage of this method?",
+        "She has an advantage in experience."
+      ]
+    },
+    {
+      "word": "adventure",
+      "phonetic": "/ədˈventʃər/",
+      "translation": "n. 冒险，奇遇",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "Life is an adventure.",
+        "They went on an adventure trip."
+      ]
+    },
+    {
+      "word": "advertise",
+      "phonetic": "/ˈædvərtaɪz/",
+      "translation": "v. 做广告，宣传",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "They advertise on TV.",
+        "The job was advertised online."
+      ]
+    },
+    {
+      "word": "advice",
+      "phonetic": "/ədˈvaɪs/",
+      "translation": "n. 建议，忠告",
+      "chapter": 4,
+      "frequency": "high",
+      "examples": [
+        "Can you give me some advice?",
+        "His advice was very helpful."
+      ]
+    },
+    {
+      "word": "affair",
+      "phonetic": "/əˈfer/",
+      "translation": "n. 事务，事件",
+      "chapter": 4,
+      "frequency": "medium",
+      "examples": [
+        "This is a private affair.",
+        "Foreign affairs are complex."
+      ]
+    },
+    {
+      "word": "affect",
+      "phonetic": "/əˈfekt/",
+      "translation": "v. 影响，感动",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "The weather affects my mood.",
+        "The news deeply affected him."
+      ]
+    },
+    {
+      "word": "afford",
+      "phonetic": "/əˈfɔːrd/",
+      "translation": "v. 负担得起，提供",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "I can't afford a new car.",
+        "We can't afford to wait."
+      ]
+    },
+    {
+      "word": "afraid",
+      "phonetic": "/əˈfreɪd/",
+      "translation": "adj. 害怕的，担心的",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "Don't be afraid of making mistakes.",
+        "I'm afraid I can't help you."
+      ]
+    },
+    {
+      "word": "agency",
+      "phonetic": "/ˈeɪdʒənsi/",
+      "translation": "n. 代理处，机构",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "He works for a travel agency.",
+        "The news agency reported the story."
+      ]
+    },
+    {
+      "word": "agent",
+      "phonetic": "/ˈeɪdʒənt/",
+      "translation": "n. 代理人，特工",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "She's a real estate agent.",
+        "The secret agent completed his mission."
+      ]
+    },
+    {
+      "word": "aggressive",
+      "phonetic": "/əˈɡresɪv/",
+      "translation": "adj. 侵略的，积极的",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "He has an aggressive personality.",
+        "We need aggressive marketing."
+      ]
+    },
+    {
+      "word": "agriculture",
+      "phonetic": "/ˈæɡrɪkʌltʃər/",
+      "translation": "n. 农业，农学",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "Agriculture is important for the economy.",
+        "He studied agriculture in college."
+      ]
+    },
+    {
+      "word": "ahead",
+      "phonetic": "/əˈhed/",
+      "translation": "adv. 在前面，提前",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "Look ahead, not behind.",
+        "Plan ahead for the future."
+      ]
+    },
+    {
+      "word": "aid",
+      "phonetic": "/eɪd/",
+      "translation": "n. 帮助，援助 v. 帮助",
+      "chapter": 5,
+      "frequency": "medium",
+      "examples": [
+        "They provided aid to the victims.",
+        "This tool will aid your work."
+      ]
+    },
+    {
+      "word": "aim",
+      "phonetic": "/eɪm/",
+      "translation": "v. 瞄准，目标 n. 目的",
+      "chapter": 5,
+      "frequency": "high",
+      "examples": [
+        "Aim carefully before shooting.",
+        "What's your aim in life?"
+      ]
+    },
+    {
+      "word": "aircraft",
+      "phonetic": "/ˈerkræft/",
+      "translation": "n. 飞机，航空器",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "The aircraft landed safely.",
+        "Military aircraft flew overhead."
+      ]
+    },
+    {
+      "word": "airline",
+      "phonetic": "/ˈerlaɪn/",
+      "translation": "n. 航空公司",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Which airline are you flying with?",
+        "The airline offers good service."
+      ]
+    },
+    {
+      "word": "airport",
+      "phonetic": "/ˈerpɔːrt/",
+      "translation": "n. 机场",
+      "chapter": 6,
+      "frequency": "high",
+      "examples": [
+        "I'll pick you up at the airport.",
+        "The airport is very busy today."
+      ]
+    },
+    {
+      "word": "alarm",
+      "phonetic": "/əˈlɑːrm/",
+      "translation": "n. 警报，闹钟 v. 使惊恐",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "The fire alarm went off.",
+        "Don't be alarmed by the noise."
+      ]
+    },
+    {
+      "word": "album",
+      "phonetic": "/ˈælbəm/",
+      "translation": "n. 相册，专辑",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "She showed me her photo album.",
+        "The band released a new album."
+      ]
+    },
+    {
+      "word": "alcohol",
+      "phonetic": "/ˈælkəhɔːl/",
+      "translation": "n. 酒精，酒",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "This drink contains no alcohol.",
+        "Alcohol can be harmful to health."
+      ]
+    },
+    {
+      "word": "alert",
+      "phonetic": "/əˈlɜːrt/",
+      "translation": "adj. 警觉的 n. 警报",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "Stay alert while driving.",
+        "There's a weather alert today."
+      ]
+    },
+    {
+      "word": "alien",
+      "phonetic": "/ˈeɪliən/",
+      "translation": "n. 外国人，外星人 adj. 外国的",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "The movie is about aliens from space.",
+        "These ideas are alien to our culture."
+      ]
+    },
+    {
+      "word": "alike",
+      "phonetic": "/əˈlaɪk/",
+      "translation": "adj. 相似的 adv. 同样地",
+      "chapter": 6,
+      "frequency": "medium",
+      "examples": [
+        "The twins look alike.",
+        "We think alike on this issue."
+      ]
+    },
+    {
+      "word": "alive",
+      "phonetic": "/əˈlaɪv/",
+      "translation": "adj. 活着的，有生气的",
+      "chapter": 6,
+      "frequency": "high",
+      "examples": [
+        "Is he still alive?",
+        "The city comes alive at night."
+      ]
+    },
+    {
+      "word": "alliance",
+      "phonetic": "/əˈlaɪəns/",
+      "translation": "n. 联盟，联合",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "The two countries formed an alliance.",
+        "There's a strategic alliance between the companies."
+      ]
+    },
+    {
+      "word": "allow",
+      "phonetic": "/əˈlaʊ/",
+      "translation": "v. 允许，准许",
+      "chapter": 7,
+      "frequency": "high",
+      "examples": [
+        "Smoking is not allowed here.",
+        "Please allow me to explain."
+      ]
+    },
+    {
+      "word": "almost",
+      "phonetic": "/ˈɔːlmoʊst/",
+      "translation": "adv. 几乎，差不多",
+      "chapter": 7,
+      "frequency": "high",
+      "examples": [
+        "I'm almost finished.",
+        "Almost everyone was there."
+      ]
+    },
+    {
+      "word": "alone",
+      "phonetic": "/əˈloʊn/",
+      "translation": "adj. 单独的 adv. 独自地",
+      "chapter": 7,
+      "frequency": "high",
+      "examples": [
+        "She lives alone.",
+        "Leave me alone, please."
+      ]
+    },
+    {
+      "word": "along",
+      "phonetic": "/əˈlɔːŋ/",
+      "translation": "prep. 沿着 adv. 一起",
+      "chapter": 7,
+      "frequency": "high",
+      "examples": [
+        "Walk along the river.",
+        "Come along with us."
+      ]
+    },
+    {
+      "word": "already",
+      "phonetic": "/ɔːlˈredi/",
+      "translation": "adv. 已经，早已",
+      "chapter": 7,
+      "frequency": "high",
+      "examples": [
+        "I've already finished my homework.",
+        "It's already too late."
+      ]
+    },
+    {
+      "word": "also",
+      "phonetic": "/ˈɔːlsoʊ/",
+      "translation": "adv. 也，同样",
+      "chapter": 7,
+      "frequency": "high",
+      "examples": [
+        "I also like music.",
+        "She's smart and also kind."
+      ]
+    },
+    {
+      "word": "alter",
+      "phonetic": "/ˈɔːltər/",
+      "translation": "v. 改变，修改",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "We need to alter our plans.",
+        "The dress needs to be altered."
+      ]
+    },
+    {
+      "word": "alternative",
+      "phonetic": "/ɔːlˈtɜːrnətɪv/",
+      "translation": "n. 选择，替代 adj. 替代的",
+      "chapter": 7,
+      "frequency": "medium",
+      "examples": [
+        "What's the alternative?",
+        "We need alternative energy sources."
+      ]
+    },
+    {
+      "word": "although",
+      "phonetic": "/ɔːlˈðoʊ/",
+      "translation": "conj. 虽然，尽管",
+      "chapter": 7,
+      "frequency": "high",
+      "examples": [
+        "Although it's raining, we'll go out.",
+        "She's happy although she's tired."
+      ]
+    },
+    {
+      "word": "altogether",
+      "phonetic": "/ˌɔːltəˈɡeðər/",
+      "translation": "adv. 完全地，总共",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "The plan failed altogether.",
+        "How much is it altogether?"
+      ]
+    },
+    {
+      "word": "always",
+      "phonetic": "/ˈɔːlweɪz/",
+      "translation": "adv. 总是，永远",
+      "chapter": 8,
+      "frequency": "high",
+      "examples": [
+        "She always arrives on time.",
+        "I will always remember you."
+      ]
+    },
+    {
+      "word": "amateur",
+      "phonetic": "/ˈæmətər/",
+      "translation": "n. 业余爱好者 adj. 业余的",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "He's an amateur photographer.",
+        "This is amateur work."
+      ]
+    },
+    {
+      "word": "amaze",
+      "phonetic": "/əˈmeɪz/",
+      "translation": "v. 使惊奇，使惊愕",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Your talent amazes me.",
+        "I was amazed by the view."
+      ]
+    },
+    {
+      "word": "ambition",
+      "phonetic": "/æmˈbɪʃən/",
+      "translation": "n. 雄心，野心",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "She has great ambition.",
+        "His ambition is to become a doctor."
+      ]
+    },
+    {
+      "word": "ambulance",
+      "phonetic": "/ˈæmbjələns/",
+      "translation": "n. 救护车",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "Call an ambulance immediately.",
+        "The ambulance arrived quickly."
+      ]
+    },
+    {
+      "word": "among",
+      "phonetic": "/əˈmʌŋ/",
+      "translation": "prep. 在...之中",
+      "chapter": 8,
+      "frequency": "high",
+      "examples": [
+        "She's popular among students.",
+        "Choose among these options."
+      ]
+    },
+    {
+      "word": "amount",
+      "phonetic": "/əˈmaʊnt/",
+      "translation": "n. 数量，总额 v. 总计",
+      "chapter": 8,
+      "frequency": "high",
+      "examples": [
+        "What's the total amount?",
+        "This amounts to a lot of money."
+      ]
+    },
+    {
+      "word": "ample",
+      "phonetic": "/ˈæmpəl/",
+      "translation": "adj. 充足的，宽敞的",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "We have ample time.",
+        "The room has ample space."
+      ]
+    },
+    {
+      "word": "amuse",
+      "phonetic": "/əˈmjuːz/",
+      "translation": "v. 娱乐，逗乐",
+      "chapter": 8,
+      "frequency": "medium",
+      "examples": [
+        "The joke amused everyone.",
+        "Children are easily amused."
+      ]
+    },
+    {
+      "word": "analyze",
+      "phonetic": "/ˈænəlaɪz/",
+      "translation": "v. 分析，解析",
+      "chapter": 9,
+      "frequency": "high",
+      "examples": [
+        "Let's analyze the problem.",
+        "Scientists analyze the data."
+      ]
+    },
+    {
+      "word": "ancient",
+      "phonetic": "/ˈeɪnʃənt/",
+      "translation": "adj. 古代的，古老的",
+      "chapter": 9,
+      "frequency": "medium",
+      "examples": [
+        "This is an ancient building.",
+        "Ancient history is fascinating."
+      ]
+    },
+    {
+      "word": "anger",
+      "phonetic": "/ˈæŋɡər/",
+      "translation": "n. 愤怒 v. 使愤怒",
+      "chapter": 9,
+      "frequency": "medium",
+      "examples": [
+        "He couldn't control his anger.",
+        "The decision angered many people."
+      ]
+    },
+    {
+      "word": "angle",
+      "phonetic": "/ˈæŋɡəl/",
+      "translation": "n. 角度，角",
+      "chapter": 9,
+      "frequency": "medium",
+      "examples": [
+        "Look at it from a different angle.",
+        "The angle is 90 degrees."
+      ]
+    },
+    {
+      "word": "angry",
+      "phonetic": "/ˈæŋɡri/",
+      "translation": "adj. 愤怒的，生气的",
+      "chapter": 9,
+      "frequency": "high",
+      "examples": [
+        "Why are you angry with me?",
+        "She looked angry."
+      ]
+    },
+    {
+      "word": "animal",
+      "phonetic": "/ˈænɪməl/",
+      "translation": "n. 动物",
+      "chapter": 9,
+      "frequency": "high",
+      "examples": [
+        "Dogs are loyal animals.",
+        "The zoo has many animals."
+      ]
+    },
+    {
+      "word": "anniversary",
+      "phonetic": "/ˌænɪˈvɜːrsəri/",
+      "translation": "n. 周年纪念日",
+      "chapter": 9,
+      "frequency": "medium",
+      "examples": [
+        "Today is our wedding anniversary.",
+        "The company celebrates its anniversary."
+      ]
+    },
+    {
+      "word": "announce",
+      "phonetic": "/əˈnaʊns/",
+      "translation": "v. 宣布，通告",
+      "chapter": 9,
+      "frequency": "medium",
+      "examples": [
+        "They announced the winner.",
+        "The president will announce new policies."
+      ]
+    },
+    {
+      "word": "annoy",
+      "phonetic": "/əˈnɔɪ/",
+      "translation": "v. 烦恼，打扰",
+      "chapter": 9,
+      "frequency": "medium",
+      "examples": [
+        "The noise annoys me.",
+        "Don't annoy your sister."
+      ]
+    },
+    {
+      "word": "annual",
+      "phonetic": "/ˈænjuəl/",
+      "translation": "adj. 每年的，年度的",
+      "chapter": 9,
+      "frequency": "medium",
+      "examples": [
+        "We have an annual meeting.",
+        "What's your annual income?"
+      ]
+    },
+    {
+      "word": "another",
+      "phonetic": "/əˈnʌðər/",
+      "translation": "adj. 另一个的 pron. 另一个",
+      "chapter": 10,
+      "frequency": "high",
+      "examples": [
+        "Can I have another cup of coffee?",
+        "One problem after another."
+      ]
+    },
+    {
+      "word": "answer",
+      "phonetic": "/ˈænsər/",
+      "translation": "n. 答案，回答 v. 回答",
+      "chapter": 10,
+      "frequency": "high",
+      "examples": [
+        "What's the answer to this question?",
+        "Please answer the phone."
+      ]
+    },
+    {
+      "word": "anticipate",
+      "phonetic": "/ænˈtɪsəpeɪt/",
+      "translation": "v. 预期，期望",
+      "chapter": 10,
+      "frequency": "medium",
+      "examples": [
+        "I anticipate problems.",
+        "We anticipate your arrival."
+      ]
+    },
+    {
+      "word": "anxiety",
+      "phonetic": "/æŋˈzaɪəti/",
+      "translation": "n. 焦虑，担心",
+      "chapter": 10,
+      "frequency": "medium",
+      "examples": [
+        "She suffers from anxiety.",
+        "The test caused anxiety."
+      ]
+    },
+    {
+      "word": "anxious",
+      "phonetic": "/ˈæŋkʃəs/",
+      "translation": "adj. 焦虑的，渴望的",
+      "chapter": 10,
+      "frequency": "medium",
+      "examples": [
+        "I'm anxious about the exam.",
+        "She's anxious to meet you."
+      ]
+    },
+    {
+      "word": "anyway",
+      "phonetic": "/ˈeniweɪ/",
+      "translation": "adv. 无论如何，不管怎样",
+      "chapter": 10,
+      "frequency": "high",
+      "examples": [
+        "I don't like it, but I'll do it anyway.",
+        "Anyway, let's move on."
+      ]
+    },
+    {
+      "word": "anywhere",
+      "phonetic": "/ˈeniwer/",
+      "translation": "adv. 任何地方",
+      "chapter": 10,
+      "frequency": "high",
+      "examples": [
+        "You can sit anywhere you like.",
+        "I can't find it anywhere."
+      ]
+    },
+    {
+      "word": "apart",
+      "phonetic": "/əˈpɑːrt/",
+      "translation": "adv. 分开地，除了",
+      "chapter": 10,
+      "frequency": "medium",
+      "examples": [
+        "They live apart now.",
+        "Apart from English, what languages do you speak?"
+      ]
+    },
+    {
+      "word": "apartment",
+      "phonetic": "/əˈpɑːrtmənt/",
+      "translation": "n. 公寓，房间",
+      "chapter": 10,
+      "frequency": "high",
+      "examples": [
+        "I live in a small apartment.",
+        "The apartment has two bedrooms."
+      ]
+    },
+    {
+      "word": "apologize",
+      "phonetic": "/əˈpɑːlədʒaɪz/",
+      "translation": "v. 道歉，谢罪",
+      "chapter": 10,
+      "frequency": "medium",
+      "examples": [
+        "I apologize for being late.",
+        "He apologized to his friend."
+      ]
+    }
+  ]
+}
