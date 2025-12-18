@@ -1,0 +1,113 @@
+//@version=5
+strategy("Gemini V7.1 [Active Flow] - Bollinger Reversion", overlay=true, initial_capital=1000, default_qty_type=strategy.cash, currency=currency.USD, commission_value=0.1, commission_type=strategy.commission.percent, process_orders_on_close=true)
+
+// ==========================================
+// 1. 自动参数适配 (针对 V7.1 高频版优化)
+// ==========================================
+isSOL  = (syminfo.root == "SOL" or syminfo.root == "SOLUSDT")
+isDOGE = (syminfo.root == "DOGE" or syminfo.root == "DOGEUSDT")
+isXAU  = (syminfo.root == "GOLD" or syminfo.root == "XAUUSD" or syminfo.root == "GC1!")
+isETH  = (syminfo.root == "ETH" or syminfo.root == "ETHUSDT")
+
+// --- V7.1 宽松版参数 ---
+// RSI: 不再追求极致的 20/80，放宽到 30-40 就可以进
+rsiLongLimit = isETH ? 35 : (isXAU ? 40 : 30)
+rsiShortLimit = isETH ? 65 : (isXAU ? 60 : 70)
+
+// 布林带参数
+bbLength = 20
+bbMult = 2.0
+
+// 止损/止盈 (高频模式下，止盈稍微放短一点，落袋为安)
+slMult = isDOGE ? 3.0 : (isSOL ? 2.5 : 2.0)
+tpMult = isDOGE ? 4.5 : (isSOL ? 4.0 : 3.0)
+
+// 风险控制
+riskPerTrade = input.float(2.5, "单笔风险 %") / 100
+startYear = input.int(2023, "回测开始年份")
+inDateRange = time >= timestamp(syminfo.timezone, startYear, 1, 1, 0, 0)
+
+// ==========================================
+// 2. 指标计算
+// ==========================================
+// 布林带
+[bbMiddle, bbUpper, bbLower] = ta.bb(close, bbLength, bbMult)
+// RSI
+rsi = ta.rsi(close, 7)
+// ATR
+atr = ta.atr(14)
+
+// 绘图
+plot(bbUpper, "BB Upper", color=color.blue)
+plot(bbLower, "BB Lower", color=color.blue)
+plot(bbMiddle, "BB Mid", color=color.gray)
+
+// ==========================================
+// 3. V7.1 核心逻辑 (布林带逆势 + 顺大势微调)
+// ==========================================
+
+// 进场条件：
+// 1. 价格突破布林带轨 (超买超卖的物理信号)
+// 2. RSI 配合 (情绪信号)
+// 3. K线收盘确认 (防止接飞刀)
+
+// --- 做多 ---
+// 收盘价跌破布林下轨 AND RSI低 AND 收阳线
+longTrigger = (close < bbLower) and (rsi < rsiLongLimit) and (close > open)
+
+// --- 做空 ---
+// 收盘价突破布林上轨 AND RSI高 AND 收阴线
+shortTrigger = (close > bbUpper) and (rsi > rsiShortLimit) and (close < open)
+
+// ==========================================
+// 4. 交易执行 & 保本逻辑
+// ==========================================
+// 记录开仓信息
+var float entryAtr = na
+var float entryPrice = na
+var bool isBreakeven = false
+
+if inDateRange
+    // 计算仓位
+    safeAtr = atr == 0 ? close * 0.01 : atr
+    slDist = safeAtr * slMult
+    riskAmount = strategy.equity * riskPerTrade
+    qtySize = (slDist > 0) ? (riskAmount / slDist) : 0
+
+    // 开仓
+    if strategy.position_size == 0
+        if longTrigger
+            strategy.entry("Long", strategy.long, qty=qtySize)
+            entryAtr := safeAtr
+            entryPrice := close
+            isBreakeven := false
+            strategy.exit("Exit Long", "Long", stop=close - slDist, limit=close + (slDist * tpMult))
+
+        if shortTrigger
+            strategy.entry("Short", strategy.short, qty=qtySize)
+            entryAtr := safeAtr
+            entryPrice := close
+            isBreakeven := false
+            strategy.exit("Exit Short", "Short", stop=close + slDist, limit=close - (slDist * tpMult))
+
+    // 持仓管理 (V7.1 快速保本)
+    // 高频策略更需要快速保本，防止利润回撤
+    if strategy.position_size != 0
+        float currentEntry = strategy.opentrades.entry_price(strategy.opentrades - 1)
+        
+        // 浮盈达到 1.2倍 ATR 就保本 (比 V7.0 的 1.5倍更灵敏)
+        if not isBreakeven
+            if strategy.position_size > 0 // 多单
+                if high > (currentEntry + entryAtr * 1.2)
+                    strategy.exit("Exit Long", "Long", stop=currentEntry, limit=currentEntry + (entryAtr * tpMult), comment="快保本")
+                    isBreakeven := true
+            else // 空单
+                if low < (currentEntry - entryAtr * 1.2)
+                    strategy.exit("Exit Short", "Short", stop=currentEntry, limit=currentEntry - (entryAtr * tpMult), comment="快保本")
+                    isBreakeven := true
+
+// ==========================================
+// 5. 信号标记
+// ==========================================
+plotshape(longTrigger, style=shape.labelup, location=location.belowbar, color=color.green, text="做多", size=size.tiny)
+plotshape(shortTrigger, style=shape.labeldown, location=location.abovebar, color=color.red, text="做空", size=size.tiny)
