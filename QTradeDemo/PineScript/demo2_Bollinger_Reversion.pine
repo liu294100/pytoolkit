@@ -1,0 +1,134 @@
+//@version=5
+strategy("Gemini V10.0 [Titan] Final", overlay=true, initial_capital=1000, default_qty_type=strategy.cash, currency=currency.USD, commission_value=0.06, commission_type=strategy.commission.percent, process_orders_on_close=true)
+
+// ==========================================
+// 1. 泰坦参数自动适配 (Auto-Tuning)
+// ==========================================
+// 识别品种
+isSOL  = (syminfo.root == "SOL" or syminfo.root == "SOLUSDT")
+isXAU  = (syminfo.root == "GOLD" or syminfo.root == "XAUUSD" or syminfo.root == "GC1!")
+
+// --- 参数映射 (与 Python 版完全一致) ---
+// EMA 周期
+emaLen = 144 
+
+// RSI 阈值 (顺势回调)
+// 黄金和SOL都统一用 30/70，这是经典的机构参数
+rsiLongLimit = 30
+rsiShortLimit = 70
+
+// 止损/止盈 ATR 倍数
+// 黄金波动小，给 2.0/3.0
+// SOL 波动大，给 2.5/4.0
+slMult = isXAU ? 2.0 : 2.5
+tpMult = isXAU ? 3.0 : 4.0
+
+// 风险控制
+riskPerTrade = input.float(3.0, "单笔风险 %") / 100
+startYear = input.int(2023, "回测开始年份")
+inDateRange = time >= timestamp(syminfo.timezone, startYear, 1, 1, 0, 0)
+
+// ==========================================
+// 2. 指标计算
+// ==========================================
+emaTrend = ta.ema(close, emaLen)
+rsi = ta.rsi(close, 14)
+atr = ta.atr(14)
+
+// 绘图：144 EMA 生命线
+plot(emaTrend, "144 EMA", color=color.white, linewidth=2)
+
+// ==========================================
+// 3. V10.0 核心逻辑 (趋势 + 回调 + 确认)
+// ==========================================
+
+// A. 趋势判断
+bullTrend = close > emaTrend
+bearTrend = close < emaTrend
+
+// B. 情绪到位 (RSI)
+oversold = rsi < rsiLongLimit
+overbought = rsi > rsiShortLimit
+
+// C. K线确认 (关键！必须收盘反转)
+// 做多：一定要收阳线 (Close > Open)
+confirmBuy = close > open
+// 做空：一定要收阴线 (Close < Open)
+confirmSell = close < open
+
+// --- 综合信号 ---
+longTrigger = bullTrend and oversold and confirmBuy and inDateRange
+shortTrigger = bearTrend and overbought and confirmSell and inDateRange
+
+// ==========================================
+// 4. 交易执行 & 动态保本
+// ==========================================
+// 变量记录
+var float entryPrice = na
+var float slPrice = na
+var float tpPrice = na
+var bool isBreakeven = false
+
+// --- 开仓 ---
+if strategy.position_size == 0
+    if longTrigger
+        // 计算仓位
+        safeAtr = atr == 0 ? close*0.01 : atr
+        slDist = safeAtr * slMult
+        qtySize = (strategy.equity * riskPerTrade) / slDist
+        
+        strategy.entry("Long", strategy.long, qty=qtySize)
+        
+        // 记录初始止盈止损
+        entryPrice := close
+        slPrice := close - slDist
+        tpPrice := close + (slDist * tpMult)
+        isBreakeven := false
+        
+        // 设置硬止损止盈
+        strategy.exit("Exit Long", "Long", stop=slPrice, limit=tpPrice)
+
+    if shortTrigger
+        safeAtr = atr == 0 ? close*0.01 : atr
+        slDist = safeAtr * slMult
+        qtySize = (strategy.equity * riskPerTrade) / slDist
+        
+        strategy.entry("Short", strategy.short, qty=qtySize)
+        
+        entryPrice := close
+        slPrice := close + slDist
+        tpPrice := close - (slDist * tpMult)
+        isBreakeven := false
+        
+        strategy.exit("Exit Short", "Short", stop=slPrice, limit=tpPrice)
+
+// --- 持仓管理 (动态保本) ---
+if strategy.position_size != 0
+    // 计算当前止损距离 (用于衡量风险)
+    float riskDist = math.abs(entryPrice - slPrice)
+    
+    // 多单逻辑
+    if strategy.position_size > 0
+        // 如果浮盈超过 1.5倍 风险距离，且还没保本
+        if high > (entryPrice + riskDist * 1.5) and not isBreakeven
+            // 修改止损到开仓价
+            strategy.exit("Exit Long", "Long", stop=entryPrice, limit=tpPrice, comment="保本")
+            isBreakeven := true
+            
+    // 空单逻辑
+    if strategy.position_size < 0
+        if low < (entryPrice - riskDist * 1.5) and not isBreakeven
+            strategy.exit("Exit Short", "Short", stop=entryPrice, limit=tpPrice, comment="保本")
+            isBreakeven := true
+
+// ==========================================
+// 5. 视觉辅助
+// ==========================================
+// 信号标记
+plotshape(longTrigger, style=shape.labelup, location=location.belowbar, color=color.green, text="V10多", size=size.tiny, textcolor=color.white)
+plotshape(shortTrigger, style=shape.labeldown, location=location.abovebar, color=color.red, text="V10空", size=size.tiny, textcolor=color.white)
+
+// 绘制止损止盈线 (仅持仓时显示)
+plot(strategy.position_size != 0 ? slPrice : na, "SL", color=color.red, style=plot.style_linebr)
+plot(strategy.position_size != 0 ? tpPrice : na, "TP", color=color.green, style=plot.style_linebr)
+plot(strategy.position_size != 0 ? entryPrice : na, "Entry", color=color.gray, style=plot.style_linebr)
