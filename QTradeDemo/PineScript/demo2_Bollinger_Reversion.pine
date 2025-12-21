@@ -13,8 +13,8 @@ isXAU  = (syminfo.root == "GOLD" or syminfo.root == "XAUUSD" or syminfo.root == 
 emaLen = 144 
 
 // RSI 阈值 (顺势回调)
-// 黄金和SOL都统一用 30/70，这是经典的机构参数
-rsiLongLimit = 30
+// 黄金和SOL都统一用 40/70，这是经典的机构参数
+rsiLongLimit = 40
 rsiShortLimit = 70
 
 // 止损/止盈 ATR 倍数
