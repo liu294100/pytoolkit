@@ -37,7 +37,7 @@ class WatermarkApp:
         # Variables
         self.input_path = tk.StringVar()
         self.output_path = tk.StringVar()
-        self.watermark_text = tk.StringVar(value="仅供长虹天汇城开发票使用")
+        self.watermark_text = tk.StringVar(value="仅供XXXX使用")
         self.font_size = tk.IntVar(value=50) # Increased default size
         self.opacity = tk.IntVar(value=150)  # Increased default opacity
         self.angle = tk.IntVar(value=30)
