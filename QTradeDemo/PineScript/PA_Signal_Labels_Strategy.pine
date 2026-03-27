@@ -1,0 +1,856 @@
+// This Pine Script™ source code is subject to the terms of the Mozilla Public License 2.0
+// © PA Signal Labels Strategy - 基于 PA Signal Labels v9.0 快速入门文档实现
+// 包含: 6种信号类型 + 6维趋势评分 + TWM十大形态 + Trap陷阱检测
+
+//@version=5
+indicator("PA Signal Labels Strategy v9.0", overlay=true, max_labels_count=500, max_bars_back=300)
+
+// ============================================================
+// 一、参数设置
+// ============================================================
+
+// --- 信号控制 ---
+grpSignal = "📊 信号控制"
+i_boNeedFT      = input.bool(true,   "BO需FT确认才显示",       group=grpSignal)
+i_mergeConsec   = input.bool(true,   "合并连续同类信号",       group=grpSignal)
+i_minPriority   = input.int(1,       "信号最低优先级",         minval=1, maxval=5, group=grpSignal, tooltip="1=全部, 2=CX及以上, 3=OB及以上, 5=仅BigBO")
+i_bigBOMode     = input.int(1,       "显示大突破模式",         minval=0, maxval=2, group=grpSignal, tooltip="0=关闭, 1=振幅倍数, 2=Z-Score")
+i_bigBOMult     = input.float(2.0,   "大突破振幅倍数",         minval=1.2, step=0.1, group=grpSignal)
+i_bigBOZScore   = input.float(2.5,   "大突破Z-Score阈值",      minval=1.5, step=0.1, group=grpSignal)
+
+// --- 趋势系统 ---
+grpTrend = "📈 趋势系统"
+i_trendMode     = input.int(1,       "趋势评分模式",           minval=0, maxval=1, group=grpTrend, tooltip="0=传统EMA, 1=六维综合评分")
+i_bullThresh    = input.int(30,      "多头阈值",               minval=10, maxval=60, group=grpTrend)
+i_bearThresh    = input.int(-30,     "空头阈值",               minval=-60, maxval=-10, group=grpTrend)
+i_emaFast       = input.int(20,      "EMA快线周期",            minval=5, maxval=50, group=grpTrend)
+i_emaSlow       = input.int(50,      "EMA慢线周期",            minval=20, maxval=200, group=grpTrend)
+i_swingLen      = input.int(5,       "Swing结构回看",          minval=3, maxval=20, group=grpTrend)
+i_pressureLen   = input.int(10,      "买卖压力回看",           minval=5, maxval=30, group=grpTrend)
+
+// --- 形态识别 ---
+grpPattern = "🔷 形态识别"
+i_enablePattern = input.bool(true,   "启用形态识别",           group=grpPattern)
+i_patternCool   = input.int(5,       "形态冷却间隔",           minval=2, maxval=15, group=grpPattern)
+i_patternThresh = input.int(60,      "标签显示阈值",           minval=30, maxval=90, group=grpPattern)
+i_enableP1      = input.bool(true,   "P1 单边反转首回调",      group=grpPattern)
+i_enableP2      = input.bool(true,   "P2 大突破后首回调",      group=grpPattern)
+i_enableP3      = input.bool(true,   "P3 动能强势交易",        group=grpPattern)
+i_enableP4      = input.bool(true,   "P4 反转与跟进回调",      group=grpPattern)
+i_enableP5      = input.bool(true,   "P5 BSB大K-小K-大K",      group=grpPattern)
+i_enableP6      = input.bool(true,   "P6 高潮后第二段",        group=grpPattern)
+i_enableP7      = input.bool(true,   "P7 弱势反转逆势",        group=grpPattern)
+i_enableP8      = input.bool(true,   "P8 内包K线反向",         group=grpPattern)
+i_enableP9      = input.bool(true,   "P9 外包K线失效",         group=grpPattern)
+i_enableP10     = input.bool(true,   "P10 好运逆势",           group=grpPattern)
+
+// --- Trap 陷阱检测 ---
+grpTrap = "🚨 Trap 陷阱检测"
+i_enableTrap    = input.bool(true,   "启用Trap检测",           group=grpTrap)
+i_trapConsec    = input.int(2,       "连续同向信号数",         minval=2, maxval=5, group=grpTrap)
+i_trapHTF       = input.bool(true,   "要求HTF趋势确认",       group=grpTrap)
+i_trapVolume    = input.bool(true,   "要求放量确认",           group=grpTrap)
+i_trapVolMult   = input.float(1.5,   "放量倍数",               minval=1.0, step=0.1, group=grpTrap)
+
+// --- HTF 大周期 ---
+grpHTF = "🕐 大周期趋势"
+i_htfTF         = input.timeframe("60", "大周期时间框架",      group=grpHTF)
+i_htfMAType     = input.string("EMA","大周期均线类型",         options=["EMA","SMA"], group=grpHTF)
+i_htfFast       = input.int(20,      "大周期快线",             minval=5, maxval=50, group=grpHTF)
+i_htfSlow       = input.int(50,      "大周期慢线",             minval=20, maxval=200, group=grpHTF)
+
+// --- 显示控制 ---
+grpDisplay = "🎨 显示控制"
+i_compactLabel  = input.bool(true,   "精简标签模式",           group=grpDisplay)
+i_showEMA       = input.bool(true,   "显示EMA趋势线",         group=grpDisplay)
+i_showClimax    = input.bool(true,   "显示高潮图标",           group=grpDisplay)
+i_dimNoSignal   = input.bool(true,   "无信号K线半透明",        group=grpDisplay)
+i_showTRBg      = input.bool(true,   "显示震荡区间背景",       group=grpDisplay)
+i_showPatLabel  = input.bool(true,   "显示形态标签",           group=grpDisplay)
+i_showTrapLabel = input.bool(true,   "显示Trap标签",           group=grpDisplay)
+i_compactPat    = input.bool(true,   "精简形态标签",           group=grpDisplay)
+
+// --- 形态评分权重 ---
+grpWeight = "⚖️ 形态评分权重"
+i_wPattern      = input.float(0.25,  "形态匹配权重",           minval=0, maxval=1, step=0.05, group=grpWeight)
+i_wTrend        = input.float(0.20,  "趋势背景权重",           minval=0, maxval=1, step=0.05, group=grpWeight)
+i_wSignalBar    = input.float(0.25,  "信号棒质量权重",         minval=0, maxval=1, step=0.05, group=grpWeight)
+i_wMarket       = input.float(0.15,  "市场阶段权重",           minval=0, maxval=1, step=0.05, group=grpWeight)
+i_wHTF          = input.float(0.15,  "HTF对齐权重",            minval=0, maxval=1, step=0.05, group=grpWeight)
+
+
+// ============================================================
+// 二、基础计算
+// ============================================================
+
+// --- EMA ---
+emaFast = ta.ema(close, i_emaFast)
+emaSlow = ta.ema(close, i_emaSlow)
+
+// --- ATR ---
+atrLen  = 14
+atrVal  = ta.atr(atrLen)
+
+// --- K线基础属性 ---
+bodySize    = math.abs(close - open)
+rangeSize   = high - low
+upperWick   = high - math.max(close, open)
+lowerWick   = math.min(close, open) - low
+isBullBar   = close > open
+isBearBar   = close < open
+isDoji      = bodySize <= rangeSize * 0.1
+
+// --- 成交量均值 ---
+volMA       = ta.sma(volume, 20)
+isHighVol   = volume >= volMA * i_trapVolMult
+
+// --- Z-Score (用于BigBO判断) ---
+rangeMean   = ta.sma(rangeSize, 20)
+rangeStd    = ta.stdev(rangeSize, 20)
+rangeZScore = rangeStd > 0 ? (rangeSize - rangeMean) / rangeStd : 0.0
+
+// ============================================================
+// 三、Swing 结构检测 (HH/HL/LH/LL)
+// ============================================================
+
+// Swing High / Swing Low 检测
+swingHigh   = ta.pivothigh(high, i_swingLen, i_swingLen)
+swingLow    = ta.pivotlow(low, i_swingLen, i_swingLen)
+
+// 记录最近的 Swing 高低点
+var float lastSwingH  = na
+var float prevSwingH  = na
+var float lastSwingL  = na
+var float prevSwingL  = na
+var int   barsSinceSwing = 0
+
+barsSinceSwing := barsSinceSwing + 1
+
+if not na(swingHigh)
+    prevSwingH := lastSwingH
+    lastSwingH := swingHigh
+    barsSinceSwing := 0
+
+if not na(swingLow)
+    prevSwingL := lastSwingL
+    lastSwingL := swingLow
+    barsSinceSwing := 0
+
+// Swing 结构判断
+isHH = not na(lastSwingH) and not na(prevSwingH) and lastSwingH > prevSwingH
+isHL = not na(lastSwingL) and not na(prevSwingL) and lastSwingL > prevSwingL
+isLH = not na(lastSwingH) and not na(prevSwingH) and lastSwingH < prevSwingH
+isLL = not na(lastSwingL) and not na(prevSwingL) and lastSwingL < prevSwingL
+
+// ============================================================
+// 四、六维趋势评分系统
+// ============================================================
+
+// --- 维度1: Swing 结构 (±40) ---
+swingScore = 0.0
+swingScore := isHH and isHL ? 40.0 : isHH or isHL ? 25.0 : isLH and isLL ? -40.0 : isLH or isLL ? -25.0 : 0.0
+
+// --- 维度2: EMA 位置 (±30) ---
+emaScore = 0.0
+emaDiff  = emaFast - emaSlow
+emaSlope = emaFast - emaFast[3]
+aboveEMA = close > emaFast and close > emaSlow
+belowEMA = close < emaFast and close < emaSlow
+
+emaScore := aboveEMA ? 15.0 : belowEMA ? -15.0 : 0.0
+emaScore := emaScore + (emaDiff > 0 ? math.min(emaDiff / atrVal * 10, 10.0) : math.max(emaDiff / atrVal * 10, -10.0))
+emaScore := emaScore + (emaSlope > 0 ? math.min(emaSlope / atrVal * 5, 5.0) : math.max(emaSlope / atrVal * 5, -5.0))
+emaScore := math.max(-30.0, math.min(30.0, emaScore))
+
+// --- 维度3: 买卖压力 (±30) ---
+bullCount = 0.0
+bearCount = 0.0
+for i = 0 to i_pressureLen - 1
+    if close[i] > open[i]
+        bullCount := bullCount + 1
+    else if close[i] < open[i]
+        bearCount := bearCount + 1
+
+pressureRatio = (bullCount - bearCount) / i_pressureLen
+pressureScore = pressureRatio * 30.0
+pressureScore := math.max(-30.0, math.min(30.0, pressureScore))
+
+// --- 维度4: 微通道 (±15) ---
+microUp   = close > close[1] and close[1] > close[2] and close[2] > close[3]
+microDown = close < close[1] and close[1] < close[2] and close[2] < close[3]
+microScore = microUp ? 15.0 : microDown ? -15.0 : 0.0
+
+// --- 维度5: 缺口 (±10) ---
+gapUp   = low > high[1]
+gapDown = high < low[1]
+var float gapScore = 0.0
+if gapUp
+    gapScore := 10.0
+else if gapDown
+    gapScore := -10.0
+else
+    gapScore := gapScore * 0.8  // 缺口影响逐渐衰减
+
+gapScore := math.max(-10.0, math.min(10.0, gapScore))
+
+// --- 维度6: 竭尽衰减 (后面高潮检测后应用) ---
+var int   climaxCount    = 0
+var float exhaustDecay   = 1.0
+
+// --- 综合趋势评分 ---
+rawTrendScore = swingScore + emaScore + pressureScore + microScore + gapScore
+trendScore    = i_trendMode == 1 ? rawTrendScore * exhaustDecay : (aboveEMA ? 50.0 : belowEMA ? -50.0 : 0.0)
+trendScore    := math.max(-100.0, math.min(100.0, trendScore))
+
+// 趋势方向和强度
+trendDir      = trendScore >= i_bullThresh ? 1 : trendScore <= i_bearThresh ? -1 : 0
+trendStrength = math.abs(trendScore) >= 70 ? 3 : math.abs(trendScore) >= 50 ? 2 : math.abs(trendScore) >= 30 ? 1 : 0
+
+// 震荡区间判断
+isTR = trendDir == 0
+
+
+// ============================================================
+// 五、信号检测引擎
+// ============================================================
+
+// --- 突破判断 ---
+breakHigh = high > high[1] and close > high[1]
+breakLow  = low < low[1] and close < low[1]
+
+// --- 外包线 (OB): 同时突破前K线高低 ---
+isOB_Bull = high > high[1] and low < low[1] and isBullBar
+isOB_Bear = high > high[1] and low < low[1] and isBearBar
+isOB_Doji = high > high[1] and low < low[1] and isDoji
+
+// --- 高潮 (CX): 单边极端突破，大实体+小影线 ---
+isCX_Bull = breakHigh and not breakLow and bodySize > rangeSize * 0.6 and upperWick < bodySize * 0.3 and rangeSize > atrVal * 0.8
+isCX_Bear = breakLow and not breakHigh and bodySize > rangeSize * 0.6 and lowerWick < bodySize * 0.3 and rangeSize > atrVal * 0.8
+
+// --- 大突破 (BigBO) ---
+isBigBO_Amp    = rangeSize > atrVal * i_bigBOMult
+isBigBO_ZScore = rangeZScore > i_bigBOZScore
+isBigBO = i_bigBOMode == 1 ? isBigBO_Amp : i_bigBOMode == 2 ? isBigBO_ZScore : false
+isBigBO_Bull = isBigBO and isBullBar and breakHigh
+isBigBO_Bear = isBigBO and isBearBar and breakLow
+
+// --- 普通突破 (BO) ---
+isBO_Bull = breakHigh and not breakLow and isBullBar and not isCX_Bull and not isBigBO_Bull and not isOB_Bull
+isBO_Bear = breakLow and not breakHigh and isBearBar and not isCX_Bear and not isBigBO_Bear and not isOB_Bear
+
+// --- 信号编码 (优先级覆盖: BigBO > OB > CX > BO) ---
+signalCode = 0
+if isOB_Doji
+    signalCode := 4
+if isBO_Bull
+    signalCode := 1
+if isBO_Bear
+    signalCode := -1
+if isCX_Bull
+    signalCode := 2
+if isCX_Bear
+    signalCode := -2
+if isOB_Bull
+    signalCode := 3
+if isOB_Bear
+    signalCode := -3
+if isBigBO_Bull
+    signalCode := 5
+if isBigBO_Bear
+    signalCode := -5
+
+// --- 跟随确认 (FT) ---
+var int prevSignalCode = 0
+var int prevSignalBar  = 0
+isFT = false
+ftDir = 0
+
+if signalCode == 0 and prevSignalCode != 0 and prevSignalCode != 4
+    // 当前无信号，检查是否跟随前一信号方向
+    if prevSignalCode > 0 and isBullBar and close > close[1] and (bar_index - prevSignalBar) <= 3
+        isFT := true
+        ftDir := 1
+    if prevSignalCode < 0 and isBearBar and close < close[1] and (bar_index - prevSignalBar) <= 3
+        isFT := true
+        ftDir := -1
+
+// 更新前一信号记录
+if signalCode != 0
+    prevSignalCode := signalCode
+    prevSignalBar  := bar_index
+
+// --- BO需FT确认逻辑 ---
+var int pendingBO = 0
+var int pendingBOBar = 0
+
+// 如果开启BO需FT确认
+if i_boNeedFT
+    if (signalCode == 1 or signalCode == -1)
+        pendingBO    := signalCode
+        pendingBOBar := bar_index
+        signalCode   := 0  // 暂不显示
+    if isFT and pendingBO != 0 and (bar_index - pendingBOBar) <= 3
+        if (pendingBO > 0 and ftDir > 0) or (pendingBO < 0 and ftDir < 0)
+            signalCode := pendingBO  // 恢复BO信号
+            pendingBO  := 0
+
+// --- 合并连续同类信号 ---
+var int lastShownSignal = 0
+var int lastShownBar    = 0
+
+if i_mergeConsec and signalCode != 0
+    if signalCode == lastShownSignal and (bar_index - lastShownBar) <= 3
+        signalCode := 0  // 合并掉
+
+if signalCode != 0
+    lastShownSignal := signalCode
+    lastShownBar    := bar_index
+
+// --- 最低优先级过滤 ---
+signalPriority = math.abs(signalCode)
+if signalPriority > 0 and signalPriority < i_minPriority
+    signalCode := 0
+
+// --- FT 标记 ---
+hasFT = isFT and signalCode == 0  // 独立FT标记（非BO确认用途）
+
+// ============================================================
+// 六、高潮阶段检测
+// ============================================================
+
+var int climaxPhase = 0
+isCX = signalCode == 2 or signalCode == -2 or signalCode == 5 or signalCode == -5
+
+if isCX
+    climaxCount := climaxCount + 1
+    if climaxCount == 1
+        climaxPhase := 1   // BO! 突破型
+    else if climaxCount == 2
+        climaxPhase := 2   // CL! 竭尽型
+    else
+        climaxPhase := 3   // EXH! 枯竭
+    exhaustDecay := math.max(0.5, 1.0 - climaxCount * 0.15)
+else if math.abs(signalCode) >= 1 and ((signalCode > 0 and trendDir < 0) or (signalCode < 0 and trendDir > 0))
+    // 反向信号重置高潮计数
+    climaxCount  := 0
+    climaxPhase  := 0
+    exhaustDecay := 1.0
+
+
+// ============================================================
+// 七、HTF 大周期趋势
+// ============================================================
+
+htfMA(src, len, maType) =>
+    maType == "EMA" ? ta.ema(src, len) : ta.sma(src, len)
+
+htfFastMA = request.security(syminfo.tickerid, i_htfTF, htfMA(close, i_htfFast, i_htfMAType))
+htfSlowMA = request.security(syminfo.tickerid, i_htfTF, htfMA(close, i_htfSlow, i_htfMAType))
+htfTrend  = htfFastMA > htfSlowMA ? 1 : htfFastMA < htfSlowMA ? -1 : 0
+
+// ============================================================
+// 八、信号质量评分
+// ============================================================
+
+// 信号质量 = 综合多个因素
+signalQuality = 0.0
+if signalCode != 0
+    // 基础分: 信号类型
+    baseQ = signalPriority == 5 ? 30.0 : signalPriority == 3 ? 25.0 : signalPriority == 2 ? 20.0 : 15.0
+    // 趋势对齐加分
+    trendAlignQ = (signalCode > 0 and trendDir > 0) or (signalCode < 0 and trendDir < 0) ? 25.0 : 0.0
+    // HTF对齐加分
+    htfAlignQ = (signalCode > 0 and htfTrend > 0) or (signalCode < 0 and htfTrend < 0) ? 15.0 : 0.0
+    // K线质量: 实体占比
+    barQualQ = bodySize / math.max(rangeSize, 0.0001) * 15.0
+    // 成交量加分
+    volQ = isHighVol ? 15.0 : volume > volMA ? 8.0 : 0.0
+    signalQuality := math.min(100.0, baseQ + trendAlignQ + htfAlignQ + barQualQ + volQ)
+
+// 星级
+starRating = signalQuality >= 80 ? 3 : signalQuality >= 60 ? 2 : signalQuality >= 40 ? 1 : 0
+
+// ============================================================
+// 九、TWM 十大形态识别
+// ============================================================
+
+var int lastPatternBar = 0
+patternCoolOK = (bar_index - lastPatternBar) >= i_patternCool
+
+// 辅助变量
+bigBody     = bodySize > atrVal * 1.2
+smallBody   = bodySize < atrVal * 0.4
+prevBigBody = math.abs(close[1] - open[1]) > atrVal[1] * 1.2
+prevSmallBody = math.abs(close[1] - open[1]) < atrVal[1] * 0.4
+
+// 内包线
+isInsideBar = high < high[1] and low > low[1]
+
+// --- 形态检测 ---
+patternID    = 0
+patternDir   = 0
+patternScore = 0.0
+patternName  = ""
+
+if i_enablePattern and patternCoolOK
+
+    // P1: 单边反转首回调 — 趋势刚翻转，第一次回调后恢复
+    if i_enableP1
+        // 多头: 之前空头趋势，近期出现反转信号，当前回调后恢复上涨
+        p1Bull = trendDir >= 0 and trendScore[5] <= i_bearThresh and signalCode > 0 and close > emaFast
+        p1Bear = trendDir <= 0 and trendScore[5] >= i_bullThresh and signalCode < 0 and close < emaFast
+        if p1Bull
+            patternID := 1
+            patternDir := 1
+            patternName := "P1反转首回调"
+        if p1Bear
+            patternID := 1
+            patternDir := -1
+            patternName := "P1反转首回调"
+
+    // P2: 大突破后首回调 — BigBO后跟随确认→回调→恢复
+    if i_enableP2 and patternID == 0
+        hadBigBO_Bull = false
+        hadBigBO_Bear = false
+        for i = 1 to 10
+            if high[i] - low[i] > atrVal[i] * i_bigBOMult and close[i] > open[i]
+                hadBigBO_Bull := true
+            if high[i] - low[i] > atrVal[i] * i_bigBOMult and close[i] < open[i]
+                hadBigBO_Bear := true
+        p2Bull = hadBigBO_Bull and signalCode > 0 and close > emaFast and trendDir > 0
+        p2Bear = hadBigBO_Bear and signalCode < 0 and close < emaFast and trendDir < 0
+        if p2Bull
+            patternID := 2
+            patternDir := 1
+            patternName := "P2突破首回调"
+        if p2Bear
+            patternID := 2
+            patternDir := -1
+            patternName := "P2突破首回调"
+
+    // P3: 动能强势交易 — BigBO + 大实体 + 顺趋势 = 即时入场
+    if i_enableP3 and patternID == 0
+        p3Bull = isBigBO_Bull and bigBody and trendDir > 0
+        p3Bear = isBigBO_Bear and bigBody and trendDir < 0
+        // 竭尽过滤: 如果已经处于竭尽阶段，不触发P3
+        if p3Bull and climaxPhase < 3
+            patternID := 3
+            patternDir := 1
+            patternName := "P3动能强势"
+        if p3Bear and climaxPhase < 3
+            patternID := 3
+            patternDir := -1
+            patternName := "P3动能强势"
+
+    // P4: 反转与跟进回调 — CX信号触发反转→FT确认
+    if i_enableP4 and patternID == 0
+        hadCX_Bull = false
+        hadCX_Bear = false
+        for i = 1 to 5
+            sc = 0
+            if high[i] > high[i+1] and not (low[i] < low[i+1]) and math.abs(close[i]-open[i]) > (high[i]-low[i]) * 0.6
+                sc := 2
+            if low[i] < low[i+1] and not (high[i] > high[i+1]) and math.abs(close[i]-open[i]) > (high[i]-low[i]) * 0.6
+                sc := -2
+            if sc == 2
+                hadCX_Bull := true
+            if sc == -2
+                hadCX_Bear := true
+        p4Bull = hadCX_Bull and isFT and ftDir == 1
+        p4Bear = hadCX_Bear and isFT and ftDir == -1
+        if p4Bull
+            patternID := 4
+            patternDir := 1
+            patternName := "P4反转跟进"
+        if p4Bear
+            patternID := 4
+            patternDir := -1
+            patternName := "P4反转跟进"
+
+    // P5: BSB 大K-小K-大K — 三根K线模式：大-小-大，方向一致
+    if i_enableP5 and patternID == 0
+        bar2Big  = math.abs(close[2] - open[2]) > atrVal[2] * 1.0
+        bar1Sm   = math.abs(close[1] - open[1]) < atrVal[1] * 0.5
+        bar0Big  = bodySize > atrVal * 1.0
+        sameDir  = (close[2] > open[2] and isBullBar) or (close[2] < open[2] and isBearBar)
+        if bar2Big and bar1Sm and bar0Big and sameDir
+            patternID := 5
+            patternDir := isBullBar ? 1 : -1
+            patternName := "P5 BSB"
+
+    // P6: 高潮后第二段 — 早期高潮→回调→趋势恢复
+    if i_enableP6 and patternID == 0
+        if climaxPhase == 1 and signalCode != 0
+            if signalCode > 0 and trendDir > 0
+                patternID := 6
+                patternDir := 1
+                patternName := "P6高潮二段"
+            if signalCode < 0 and trendDir < 0
+                patternID := 6
+                patternDir := -1
+                patternName := "P6高潮二段"
+
+    // P7: 弱势反转逆势 — 强趋势中出现弱势K线→顺趋势恢复
+    if i_enableP7 and patternID == 0
+        if trendStrength >= 2 and smallBody and not isDoji
+            if trendDir > 0 and isBearBar and signalCode >= 1
+                patternID := 7
+                patternDir := 1
+                patternName := "P7弱势逆势"
+            if trendDir < 0 and isBullBar and signalCode <= -1
+                patternID := 7
+                patternDir := -1
+                patternName := "P7弱势逆势"
+
+    // P8: 内包K线反向 — 趋势中内包线→反向突破
+    if i_enableP8 and patternID == 0
+        if isInsideBar[1] and signalCode != 0
+            if signalCode > 0 and trendDir > 0
+                patternID := 8
+                patternDir := 1
+                patternName := "P8内包反向"
+            if signalCode < 0 and trendDir < 0
+                patternID := 8
+                patternDir := -1
+                patternName := "P8内包反向"
+
+    // P9: 外包K线失效 — 外包线反向突破失效→顺趋势交易
+    if i_enableP9 and patternID == 0
+        wasOB_Bull = high[1] > high[2] and low[1] < low[2] and close[1] > open[1]
+        wasOB_Bear = high[1] > high[2] and low[1] < low[2] and close[1] < open[1]
+        if wasOB_Bull and isBearBar and close < low[1] and trendDir < 0
+            patternID := 9
+            patternDir := -1
+            patternName := "P9外包失效"
+        if wasOB_Bear and isBullBar and close > high[1] and trendDir > 0
+            patternID := 9
+            patternDir := 1
+            patternName := "P9外包失效"
+
+    // P10: 好运逆势 — 趋势末期大幅冲刺→暂停信号
+    if i_enableP10 and patternID == 0
+        if climaxPhase >= 2 and signalCode != 0
+            if signalCode > 0 and trendDir < 0
+                patternID := 10
+                patternDir := 1
+                patternName := "P10好运逆势"
+            if signalCode < 0 and trendDir > 0
+                patternID := 10
+                patternDir := -1
+                patternName := "P10好运逆势"
+
+// 形态评分
+if patternID > 0
+    // 形态匹配分
+    pmScore = patternID <= 6 ? 85.0 : 70.0  // 顺势形态基础分更高
+    // 趋势背景分
+    ptScore = trendStrength >= 2 ? 90.0 : trendStrength >= 1 ? 70.0 : 50.0
+    // 信号棒质量分
+    psScore = signalQuality
+    // 市场阶段分
+    mkScore = isTR ? 40.0 : 80.0
+    // HTF对齐分
+    hfScore = (patternDir > 0 and htfTrend > 0) or (patternDir < 0 and htfTrend < 0) ? 90.0 : 50.0
+
+    patternScore := pmScore * i_wPattern + ptScore * i_wTrend + psScore * i_wSignalBar + mkScore * i_wMarket + hfScore * i_wHTF
+    lastPatternBar := bar_index
+
+
+// ============================================================
+// 十、Trap 陷阱检测
+// ============================================================
+
+var int   consecBull   = 0
+var int   consecBear   = 0
+trapSignal   = 0
+trapStrength = 0
+trapVolRatio = 0.0
+
+if signalCode > 0
+    consecBull := consecBull + 1
+    consecBear := 0
+else if signalCode < 0
+    consecBear := consecBear + 1
+    consecBull := 0
+
+if i_enableTrap
+    // 诱多检测: 连续多头信号后出现空头信号
+    if signalCode < 0 and consecBull >= i_trapConsec
+        trapSignal := 1  // 诱多
+        trapStrength := 1
+        if i_trapHTF and htfTrend > 0
+            trapStrength := trapStrength + 1
+        if i_trapVolume and isHighVol
+            trapStrength := trapStrength + 1
+            trapVolRatio := volume / volMA
+        if math.abs(signalCode) >= 2 or consecBull >= 4
+            trapStrength := math.min(3, trapStrength + 1)
+
+    // 诱空检测: 连续空头信号后出现多头信号
+    if signalCode > 0 and consecBear >= i_trapConsec
+        trapSignal := -1  // 诱空
+        trapStrength := 1
+        if i_trapHTF and htfTrend < 0
+            trapStrength := trapStrength + 1
+        if i_trapVolume and isHighVol
+            trapStrength := trapStrength + 1
+            trapVolRatio := volume / volMA
+        if math.abs(signalCode) >= 2 or consecBear >= 4
+            trapStrength := math.min(3, trapStrength + 1)
+
+// ============================================================
+// 十一、视觉渲染
+// ============================================================
+
+// --- 信号颜色定义 ---
+colorBO_Bull    = color.new(color.blue, 0)
+colorBO_Bear    = color.new(color.red, 0)
+colorCX_Bull    = color.new(color.teal, 0)
+colorCX_Bear    = color.new(color.fuchsia, 0)
+colorOB_Bull    = color.new(color.green, 0)
+colorOB_Bear    = color.new(color.orange, 0)
+colorDoji       = color.new(color.purple, 0)
+colorBigBO_Bull = color.new(color.aqua, 0)
+colorBigBO_Bear = color.new(color.purple, 0)
+colorFT_Bull    = color.new(color.blue, 50)
+colorFT_Bear    = color.new(color.red, 50)
+
+// 获取信号颜色
+getSignalColor(code) =>
+    code == 5  ? colorBigBO_Bull :
+     code == -5 ? colorBigBO_Bear :
+     code == 3  ? colorOB_Bull :
+     code == -3 ? colorOB_Bear :
+     code == 2  ? colorCX_Bull :
+     code == -2 ? colorCX_Bear :
+     code == 1  ? colorBO_Bull :
+     code == -1 ? colorBO_Bear :
+     code == 4  ? colorDoji :
+     color.gray
+
+// 获取信号名称
+getSignalName(code) =>
+    code == 5  ? "多BigBO" :
+     code == -5 ? "空BigBO" :
+     code == 3  ? "多OB" :
+     code == -3 ? "空OB" :
+     code == 2  ? "多CX" :
+     code == -2 ? "空CX" :
+     code == 1  ? "多BO" :
+     code == -1 ? "空BO" :
+     code == 4  ? "Doji" :
+     ""
+
+// 星级文本
+getStarText(rating) =>
+    rating == 3 ? "★★★" : rating == 2 ? "★★" : rating == 1 ? "★" : "☆"
+
+// 趋势文本
+getTrendText(dir, strength) =>
+    dir == 0 ? "TR" :
+     strength == 3 ? (dir > 0 ? "↑↑极强" : "↓↓极强") :
+     strength == 2 ? (dir > 0 ? "↑强" : "↓强") :
+     strength == 1 ? (dir > 0 ? "↑弱" : "↓弱") :
+     "→"
+
+// --- EMA 绘制 ---
+plot(i_showEMA ? emaFast : na, "EMA快线", color=color.new(color.yellow, 20), linewidth=1)
+plot(i_showEMA ? emaSlow : na, "EMA慢线", color=color.new(color.orange, 20), linewidth=1)
+
+// --- 震荡区间背景 ---
+bgcolor(i_showTRBg and isTR ? color.new(#B0C4DE, 90) : na, title="震荡区间背景")
+
+// --- 趋势渐变背景 ---
+trendBgColor = trendDir > 0 ? color.new(color.green, 95 - trendStrength * 5) : trendDir < 0 ? color.new(color.red, 95 - trendStrength * 5) : na
+bgcolor(not isTR ? trendBgColor : na, title="趋势渐变")
+
+// --- K线着色 ---
+barColor = signalCode != 0 ? getSignalColor(signalCode) : hasFT and ftDir > 0 ? colorFT_Bull : hasFT and ftDir < 0 ? colorFT_Bear : i_dimNoSignal ? color.new(color.gray, 70) : na
+barcolor(barColor, title="K线着色")
+
+// --- 第1层: 信号标签 ---
+if signalCode != 0
+    sigName   = getSignalName(signalCode)
+    sigColor  = getSignalColor(signalCode)
+    starTxt   = getStarText(starRating)
+    trendTxt  = getTrendText(trendDir, trendStrength)
+
+    // 逆势/衰减警告
+    isCounter = (signalCode > 0 and trendDir < 0) or (signalCode < 0 and trendDir > 0)
+    counterTxt = isCounter and trendStrength >= 2 ? " ⚠强逆" : isCounter ? " ⚠逆" : ""
+    decayTxt   = climaxPhase >= 2 ? " ⚠衰" : ""
+    microConflict = (signalCode > 0 and microDown) or (signalCode < 0 and microUp)
+    mcTxt      = microConflict ? " ⛔MC" : ""
+    patMark    = patternID > 0 and patternScore >= i_patternThresh ? " 🔶" : ""
+
+    // 策略建议
+    advice = isCounter ? "逆势谨慎" : trendStrength >= 2 ? "顺势做多" : "观望"
+    if signalCode < 0 and not isCounter and trendStrength >= 2
+        advice := "顺势做空"
+
+    // 标签文本
+    labelText = ""
+    if i_compactLabel
+        labelText := sigName + " " + starTxt + " " + trendTxt + counterTxt + decayTxt + mcTxt + "\n" + advice + patMark
+    else
+        labelText := (signalCode > 0 ? "📈" : signalCode < 0 ? "📉" : "⚖️") + sigName + " " + starTxt + "\n" + trendTxt + " | " + advice + patMark + counterTxt + decayTxt + mcTxt
+
+    // Tooltip 详情
+    tooltipText = "── PA v9 详情 ──\n" +
+     "趋势评分: " + str.tostring(math.round(trendScore)) + "\n" +
+     "  Swing:" + str.tostring(math.round(swingScore)) +
+     " EMA:" + str.tostring(math.round(emaScore)) +
+     " 压力:" + str.tostring(math.round(pressureScore)) + "\n" +
+     "  微通道:" + str.tostring(math.round(microScore)) +
+     " 缺口:" + str.tostring(math.round(gapScore)) + "\n" +
+     "信号质量: " + str.tostring(math.round(signalQuality, 1)) + "%\n" +
+     "Swing后: " + str.tostring(barsSinceSwing) + "K"
+
+    isBull = signalCode > 0 or signalCode == 4
+    label.new(
+     bar_index, isBull ? low - atrVal * 0.3 : high + atrVal * 0.3,
+     labelText,
+     style    = isBull ? label.style_label_up : label.style_label_down,
+     color    = sigColor,
+     textcolor= color.white,
+     size     = size.small,
+     tooltip  = tooltipText)
+
+// --- FT 标记 ---
+if hasFT
+    ftColor = ftDir > 0 ? colorFT_Bull : colorFT_Bear
+    ftText  = ftDir > 0 ? "FT↑" : "FT↓"
+    label.new(
+     bar_index, ftDir > 0 ? low - atrVal * 0.2 : high + atrVal * 0.2,
+     ftText,
+     style    = ftDir > 0 ? label.style_label_up : label.style_label_down,
+     color    = ftColor,
+     textcolor= color.white,
+     size     = size.tiny)
+
+
+// --- 第2层: 形态标签 ---
+if i_showPatLabel and patternID > 0 and patternScore >= i_patternThresh
+    patStarRating = patternScore >= 80 ? 3 : patternScore >= 60 ? 2 : 1
+    patStarTxt    = getStarText(patStarRating)
+    htfTxt        = htfTrend > 0 ? "HTF↑" : htfTrend < 0 ? "HTF↓" : "HTF→"
+    dirTxt        = patternDir > 0 ? "▲多" : "▼空"
+
+    patLabelText = ""
+    if i_compactPat
+        patLabelText := "🔵" + patternName + " " + patStarTxt + "\n" + dirTxt + " " + str.tostring(math.round(patternScore)) + " " + htfTxt
+    else
+        patLabelText := "🔵" + patternName + " " + patStarTxt + "\n" + dirTxt + " " + str.tostring(math.round(patternScore)) + "\n" + htfTxt
+
+    patColor = patternDir > 0 ? color.new(color.teal, 10) : color.new(color.maroon, 10)
+    label.new(
+     bar_index, patternDir > 0 ? low - atrVal * 1.3 : high + atrVal * 1.3,
+     patLabelText,
+     style    = patternDir > 0 ? label.style_label_up : label.style_label_down,
+     color    = patColor,
+     textcolor= color.white,
+     size     = size.small,
+     tooltip  = "形态: " + patternName + "\n评分: " + str.tostring(math.round(patternScore, 1)) + "\n方向: " + (patternDir > 0 ? "多头" : "空头"))
+
+// --- 第3层: Trap 标签 ---
+if i_showTrapLabel and trapSignal != 0
+    trapStarTxt = trapStrength >= 3 ? "★★★" : trapStrength >= 2 ? "★★" : "★"
+    trapType    = trapSignal > 0 ? "诱多" : "诱空"
+    trapHTFTxt  = htfTrend > 0 ? "HTF↑" : htfTrend < 0 ? "HTF↓" : "HTF→"
+    trapVolTxt  = trapVolRatio > 0 ? " V" + str.tostring(math.round(trapVolRatio, 1)) + "x" : ""
+    trapAdvice  = trapSignal > 0 ? "⚡反手空" : "⚡反手多"
+
+    trapText = "🚨" + trapType + "TRAP " + trapStarTxt + "\n" + trapHTFTxt + trapVolTxt + "\n" + trapAdvice
+
+    trapColor = trapSignal > 0 ? color.new(color.red, 0) : color.new(color.green, 0)
+    trapIsBull = trapSignal < 0  // 诱空 = 实际看多
+    label.new(
+     bar_index, trapIsBull ? low - atrVal * 2.8 : high + atrVal * 2.8,
+     trapText,
+     style    = trapIsBull ? label.style_label_up : label.style_label_down,
+     color    = trapColor,
+     textcolor= color.white,
+     size     = size.normal,
+     tooltip  = "Trap类型: " + trapType + "\n强度: " + trapStarTxt + "\n建议: " + trapAdvice)
+
+// --- 高潮图标 ---
+if i_showClimax and isCX
+    if climaxPhase == 1
+        label.new(bar_index, signalCode > 0 ? high + atrVal * 0.5 : low - atrVal * 0.5,
+         "💎BO!", style=label.style_none, textcolor=color.aqua, size=size.small)
+    else if climaxPhase == 2
+        label.new(bar_index, signalCode > 0 ? high + atrVal * 0.5 : low - atrVal * 0.5,
+         "✖CL!", style=label.style_none, textcolor=color.orange, size=size.small)
+    else if climaxPhase == 3
+        label.new(bar_index, signalCode > 0 ? high + atrVal * 0.5 : low - atrVal * 0.5,
+         "✖EXH!", style=label.style_none, textcolor=color.red, size=size.small)
+
+// P3竭尽过滤标记
+if i_enableP3 and isBigBO and bigBody and climaxPhase >= 3
+    label.new(bar_index, isBullBar ? high + atrVal * 0.8 : low - atrVal * 0.8,
+     "✖⚡P3竭尽", style=label.style_none, textcolor=color.red, size=size.tiny)
+
+// --- 微通道标记 ---
+if microUp and not microUp[1]
+    label.new(bar_index, low - atrVal * 0.1, "▲", style=label.style_none, textcolor=color.new(color.green, 30), size=size.tiny)
+if microDown and not microDown[1]
+    label.new(bar_index, high + atrVal * 0.1, "▼", style=label.style_none, textcolor=color.new(color.red, 30), size=size.tiny)
+
+// ============================================================
+// 十二、形态汇总表 (右上角)
+// ============================================================
+
+var table summaryTable = table.new(position.top_right, 4, 6, bgcolor=color.new(color.black, 80), border_width=1)
+
+if barstate.islast
+    table.cell(summaryTable, 0, 0, "形态", text_color=color.white, text_size=size.small)
+    table.cell(summaryTable, 1, 0, "方向", text_color=color.white, text_size=size.small)
+    table.cell(summaryTable, 2, 0, "评分", text_color=color.white, text_size=size.small)
+    table.cell(summaryTable, 3, 0, "趋势", text_color=color.white, text_size=size.small)
+
+    // 当前状态行
+    table.cell(summaryTable, 0, 1, patternID > 0 ? patternName : "—", text_color=color.yellow, text_size=size.small)
+    table.cell(summaryTable, 1, 1, patternDir > 0 ? "▲多" : patternDir < 0 ? "▼空" : "—", text_color=patternDir > 0 ? color.green : patternDir < 0 ? color.red : color.gray, text_size=size.small)
+    table.cell(summaryTable, 2, 1, patternScore > 0 ? str.tostring(math.round(patternScore)) : "—", text_color=color.white, text_size=size.small)
+    table.cell(summaryTable, 3, 1, getTrendText(trendDir, trendStrength), text_color=trendDir > 0 ? color.green : trendDir < 0 ? color.red : color.gray, text_size=size.small)
+
+    // 趋势评分详情
+    table.cell(summaryTable, 0, 2, "趋势分", text_color=color.gray, text_size=size.tiny)
+    table.cell(summaryTable, 1, 2, str.tostring(math.round(trendScore)), text_color=trendScore > 0 ? color.green : trendScore < 0 ? color.red : color.gray, text_size=size.small)
+    table.cell(summaryTable, 2, 2, "HTF", text_color=color.gray, text_size=size.tiny)
+    table.cell(summaryTable, 3, 2, htfTrend > 0 ? "↑" : htfTrend < 0 ? "↓" : "→", text_color=htfTrend > 0 ? color.green : htfTrend < 0 ? color.red : color.gray, text_size=size.small)
+
+    // 高潮状态
+    table.cell(summaryTable, 0, 3, "高潮", text_color=color.gray, text_size=size.tiny)
+    table.cell(summaryTable, 1, 3, climaxPhase == 0 ? "—" : climaxPhase == 1 ? "BO!" : climaxPhase == 2 ? "CL!" : "EXH!", text_color=climaxPhase >= 2 ? color.orange : color.white, text_size=size.small)
+    table.cell(summaryTable, 2, 3, "衰减", text_color=color.gray, text_size=size.tiny)
+    table.cell(summaryTable, 3, 3, str.tostring(math.round(exhaustDecay * 100)) + "%", text_color=exhaustDecay < 0.8 ? color.orange : color.white, text_size=size.small)
+
+    // 信号统计
+    table.cell(summaryTable, 0, 4, "信号", text_color=color.gray, text_size=size.tiny)
+    table.cell(summaryTable, 1, 4, signalCode != 0 ? getSignalName(signalCode) : "—", text_color=signalCode > 0 ? color.green : signalCode < 0 ? color.red : color.gray, text_size=size.small)
+    table.cell(summaryTable, 2, 4, "质量", text_color=color.gray, text_size=size.tiny)
+    table.cell(summaryTable, 3, 4, signalQuality > 0 ? str.tostring(math.round(signalQuality)) + "%" : "—", text_color=color.white, text_size=size.small)
+
+    // Trap 状态
+    table.cell(summaryTable, 0, 5, "Trap", text_color=color.gray, text_size=size.tiny)
+    trapStatusTxt = trapSignal > 0 ? "诱多" : trapSignal < 0 ? "诱空" : "—"
+    table.cell(summaryTable, 1, 5, trapStatusTxt, text_color=trapSignal != 0 ? color.orange : color.gray, text_size=size.small)
+    table.cell(summaryTable, 2, 5, "连续", text_color=color.gray, text_size=size.tiny)
+    table.cell(summaryTable, 3, 5, str.tostring(math.max(consecBull, consecBear)), text_color=color.white, text_size=size.small)
+
+// ============================================================
+// 十三、Alert 条件
+// ============================================================
+
+alertcondition(signalCode == 5,  "多头大突破 BigBO",  "PA Signal: 多头大突破 BigBO ★★★")
+alertcondition(signalCode == -5, "空头大突破 BigBO",  "PA Signal: 空头大突破 BigBO ★★★")
+alertcondition(signalCode == 3,  "多头外包线 OB",     "PA Signal: 多头外包线 OB ★★")
+alertcondition(signalCode == -3, "空头外包线 OB",     "PA Signal: 空头外包线 OB ★★")
+alertcondition(signalCode == 2,  "多头高潮 CX",       "PA Signal: 多头高潮 CX")
+alertcondition(signalCode == -2, "空头高潮 CX",       "PA Signal: 空头高潮 CX")
+alertcondition(signalCode == 1,  "多头突破 BO",       "PA Signal: 多头突破 BO")
+alertcondition(signalCode == -1, "空头突破 BO",       "PA Signal: 空头突破 BO")
+alertcondition(trapSignal != 0,  "Trap 陷阱警告",     "PA Signal: 检测到Trap陷阱!")
+alertcondition(patternID > 0 and patternScore >= 60, "TWM形态触发", "PA Signal: TWM形态触发!")
+alertcondition(climaxPhase == 3, "竭尽警告 EXH",      "PA Signal: 力量枯竭 EXH!")
