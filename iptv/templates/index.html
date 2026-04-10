@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Pro 控制台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-top">
+            <div>
+                <h1>IPTV Pro 控制台</h1>
+                <p>Flask 后端代理跨域，前端支持开源播放器、M3U 模拟 APTV、EPG 节目表。</p>
+            </div>
+            <div class="header-actions">
+                <span class="header-badge" id="proxyIndicator">代理未启用</span>
+                <button id="proxySettingsBtn" type="button" class="secondary">代理设置</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+        <aside class="card side">
+            <h2 class="section-title">直播源</h2>
+            <div class="field">
+                <label>预设源</label>
+                <select id="sourceSelect"></select>
+            </div>
+            <div class="row-2">
+                <button id="loadSourceBtn">加载选中源</button>
+                <button id="openSourceBtn" class="secondary">打开源站</button>
+            </div>
+            <div class="field">
+                <label>手动输入 M3U 链接</label>
+                <input id="customUrlInput" placeholder="https://example.com/list.m3u">
+            </div>
+            <div class="row-2">
+                <button id="loadCustomBtn" class="secondary">加载手动链接</button>
+                <button id="loadTextBtn" class="warning">导入文本</button>
+            </div>
+            <div class="field">
+                <label>M3U 文本（模拟 APTV）</label>
+                <textarea id="m3uText" placeholder="#EXTM3U"></textarea>
+            </div>
+            <h2 class="section-title">频道筛选</h2>
+            <div class="field">
+                <label>关键词筛选</label>
+                <input id="keywordInput" placeholder="输入频道关键字">
+            </div>
+            <div class="field">
+                <label>分组筛选</label>
+                <select id="groupFilter"></select>
+            </div>
+            <div class="small count-row">频道数量 <span class="tag" id="channelCount">0</span></div>
+            <div class="channel-list" id="channelList"></div>
+            <div class="status" id="sourceStatus"></div>
+        </aside>
+
+        <main class="card player-area">
+            <div class="video-wrap">
+                <video id="player" controls playsinline></video>
+            </div>
+            <div class="toolbar row-5">
+                <button id="playPauseBtn">播放/暂停</button>
+                <button id="retryBtn">重连</button>
+                <button id="muteBtn">静音</button>
+                <button id="fullBtn">全屏</button>
+                <button id="copyBtn">复制流地址</button>
+            </div>
+            <div class="field source-switch">
+                <label>当前信号源</label>
+                <select id="channelSourceSelect"></select>
+            </div>
+            <div class="now-box" id="nowPlaying">未选择频道</div>
+            <div class="small mono" id="streamUrl"></div>
+            <div class="status" id="playerStatus"></div>
+        </main>
+
+        <aside class="card side">
+            <h2 class="section-title">EPG 节目表</h2>
+            <div class="field">
+                <label>EPG 预设</label>
+                <select id="epgPreset"></select>
+            </div>
+            <div class="field">
+                <label>EPG 链接</label>
+                <input id="epgUrlInput" placeholder="https://example.com/epg.xml.gz">
+            </div>
+            <div class="row-2">
+                <button id="loadEpgBtn">加载当前频道节目</button>
+                <button id="clearEpgBtn" class="warning">清空节目表</button>
+            </div>
+            <div class="small">当前频道：<span id="epgChannel">-</span></div>
+            <div class="small">正在播出：<span id="epgNow">-</span></div>
+            <div class="small">下个节目：<span id="epgNext">-</span></div>
+            <div class="epg-list" id="epgList"></div>
+            <div class="status" id="epgStatus"></div>
+        </aside>
+    </div>
+</div>
+
+<div class="modal-mask" id="proxyModal">
+    <div class="modal-card">
+        <div class="modal-title">代理模式</div>
+        <div class="field inline-check">
+            <label class="check-row">
+                <input id="proxyEnabled" type="checkbox">
+                <span>启用代理模式</span>
+            </label>
+        </div>
+        <div class="field">
+            <label>代理主机</label>
+            <input id="proxyHost" value="127.0.0.1" placeholder="127.0.0.1">
+        </div>
+        <div class="field">
+            <label>代理端口</label>
+            <input id="proxyPort" type="number" value="7890" placeholder="7890">
+        </div>
+        <div class="row-2 modal-actions">
+            <button id="proxySaveBtn" type="button">保存</button>
+            <button id="proxyCancelBtn" type="button" class="warning">取消</button>
+        </div>
+        <div class="status" id="proxyStatus"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

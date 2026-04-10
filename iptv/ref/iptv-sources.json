@@ -1,0 +1,52 @@
+{
+  "version": 2,
+  "assistant": "https://copilot.aptv.app/chat",
+  "sources": [
+    {
+      "name": "APTV 测试直播源",
+      "type": "m3u",
+      "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
+      "group": "APTV 测试",
+      "epg": "https://epg.aptv.app/xml",
+      "note": "公开测试源，仅用于播放器功能测试。"
+    },
+    {
+      "name": "YanG Gather",
+      "type": "m3u",
+      "url": "https://tv.iill.top/m3u/Gather",
+      "group": "APTV 测试"
+    },
+    {
+      "name": "裤佬",
+      "type": "m3u",
+      "url": "https://raw.githubusercontent.com/Jsnzkpg/Jsnzkpg/Jsnzkpg/Jsnzkpg1.m3u",
+      "group": "APTV 测试"
+    },
+    {
+      "name": "itvlist",
+      "type": "m3u",
+      "url": "https://raw.githubusercontent.com/mzky/checklist/refs/heads/master/itvlist.m3u",
+      "group": "APTV 测试",
+      "note": "建议开启自动刷新配置。"
+    },
+    {
+      "name": "suxuang",
+      "type": "m3u",
+      "url": "https://raw.githubusercontent.com/suxuang/myIPTV/main/ipv4.m3u",
+      "group": "APTV 测试"
+    },
+    { "name": "虎牙直播", "type": "m3u", "url": "https://cdn.jsdelivr.net/gh/Kimentanm/aptv@master/m3u/ya.m3u", "group": "其他直播源" },
+    { "name": "虎牙一起看", "type": "m3u", "url": "https://cdn.jsdelivr.net/gh/Kimentanm/aptv@refs/heads/master/m3u/yqk.m3u", "group": "其他直播源" },
+    { "name": "斗鱼一起看", "type": "m3u", "url": "https://live.freetv.top/douyuyqk.m3u", "group": "其他直播源" },
+    { "name": "YY轮播", "type": "m3u", "url": "https://www.goodiptv.club/yylunbo.m3u?url=https://lunbo.freetv.top", "group": "其他直播源" },
+    { "name": "BiliBili 直播", "type": "m3u", "url": "https://www.goodiptv.club/bililive.m3u", "group": "其他直播源" },
+    { "name": "APTV 广播源", "type": "m3u", "url": "https://cdn.jsdelivr.net/gh/Kimentanm/aptv@master/m3u/radio.m3u", "group": "其他直播源" }
+  ],
+  "epgSources": [
+    { "name": "51zmt e.xml.gz", "url": "http://epg.51zmt.top:8000/e.xml.gz" },
+    { "name": "APTV EPG 首页", "url": "https://epg.aptv.app/" },
+    { "name": "APTV pp.xml.gz", "url": "https://epg.aptv.app/pp.xml.gz" },
+    { "name": "APTV xml", "url": "https://epg.aptv.app/xml" }
+  ],
+  "notice": "公开源仅用于播放器稳定性与功能测试。部分内网源对运营商、地区、IPv6、组播环境有要求。"
+}
