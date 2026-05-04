@@ -10,7 +10,6 @@ from datetime import datetime
 
 import requests
 from PyQt5.QtCore import (
-    QEvent,
     QObject,
     QPoint,
     QRect,
@@ -43,7 +42,6 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSpinBox,
-    QSplitter,
     QStyle,
     QTableWidget,
     QTableWidgetItem,
@@ -58,6 +56,9 @@ try:
 except ImportError:
     MUSICDL_AVAILABLE = False
     print("警告：musicdl 库未安装，请运行 pip install musicdl")
+
+
+SEARCH_CACHE_TTL_SECONDS = 600
 
 
 class ProxyEnv:
@@ -147,6 +148,12 @@ class SearchWorker(QThread):
         try:
             with open(cache_file, "r", encoding="utf-8") as f:
                 payload = json.load(f)
+            ts = payload.get("ts")
+            if ts:
+                cache_age = time.time() - datetime.fromisoformat(ts).timestamp()
+                if cache_age > SEARCH_CACHE_TTL_SECONDS:
+                    self.log.emit(f"{source} 缓存已过期，重新在线搜索")
+                    return None
             songs = payload.get("songs", [])
             if isinstance(songs, list):
                 self.log.emit(f"{source} 命中缓存，直接返回 {len(songs)} 首")
@@ -334,8 +341,8 @@ class DownloadWorker(QThread):
 
 
 class ImageSignals(QObject):
-    finished = pyqtSignal(int, QPixmap)
-    error = pyqtSignal(int)
+    finished = pyqtSignal(int, str, QPixmap)
+    error = pyqtSignal(int, str)
 
 
 class ImageTask(QRunnable):
@@ -348,18 +355,18 @@ class ImageTask(QRunnable):
     def run(self):
         try:
             if not self.image_url:
-                self.signals.error.emit(self.row)
+                self.signals.error.emit(self.row, self.image_url)
                 return
             response = requests.get(self.image_url, timeout=8)
             if response.status_code != 200:
-                self.signals.error.emit(self.row)
+                self.signals.error.emit(self.row, self.image_url)
                 return
             pixmap = QPixmap()
             pixmap.loadFromData(response.content)
             scaled = pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self.signals.finished.emit(self.row, scaled)
+            self.signals.finished.emit(self.row, self.image_url, scaled)
         except Exception:
-            self.signals.error.emit(self.row)
+            self.signals.error.emit(self.row, self.image_url)
 
 
 class FlowLayout(QLayout):
@@ -499,6 +506,7 @@ class MusicDownloader(QMainWindow):
         self.image_signals.finished.connect(self.on_image_downloaded)
         self.image_signals.error.connect(self.on_image_error)
         self.image_cache = {}
+        self.seen_song_keys = set()
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -859,6 +867,7 @@ class MusicDownloader(QMainWindow):
         self.results_table.setRowCount(0)
         self.search_results = {}
         self.music_records = {}
+        self.seen_song_keys = set()
         self.btn_search.setEnabled(False)
         self.btn_cancel_search.setEnabled(True)
         self.search_progress.setValue(0)
@@ -924,15 +933,31 @@ class MusicDownloader(QMainWindow):
         self.results_table.setRowCount(0)
         self.music_records = {}
         self.image_cache = {}
+        self.seen_song_keys = set()
         self.append_song_rows(all_songs)
+
+    def make_song_key(self, song):
+        song_name = str(song.get("song_name", "")).strip().lower()
+        singers = song.get("singers", "")
+        if isinstance(singers, list):
+            singer_text = "|".join(sorted(str(x).strip().lower() for x in singers if str(x).strip()))
+        else:
+            singer_text = str(singers).strip().lower()
+        album = str(song.get("album", "")).strip().lower()
+        duration = str(song.get("duration", "")).strip().lower()
+        return f"{song_name}::{singer_text}::{album}::{duration}"
 
     def append_song_rows(self, songs):
         if not songs:
             return
-        start_row = self.results_table.rowCount()
-        self.results_table.setRowCount(start_row + len(songs))
-        for idx, song in enumerate(songs):
-            row = start_row + idx
+        added_count = 0
+        for song in songs:
+            song_key = self.make_song_key(song)
+            if song_key in self.seen_song_keys:
+                continue
+            self.seen_song_keys.add(song_key)
+            row = self.results_table.rowCount()
+            self.results_table.setRowCount(row + 1)
             check_holder = QWidget()
             check_layout = QHBoxLayout(check_holder)
             check_layout.setContentsMargins(0, 0, 0, 0)
@@ -959,11 +984,14 @@ class MusicDownloader(QMainWindow):
 
             cover_url = self.get_album_image_url(song)
             if cover_url in self.image_cache:
-                self.on_image_downloaded(row, self.image_cache[cover_url])
+                self.on_image_downloaded(row, cover_url, self.image_cache[cover_url])
             else:
                 self.results_table.setCellWidget(row, 1, self.build_cover_placeholder())
                 task = ImageTask(row=row, image_url=cover_url, signals=self.image_signals)
                 self.image_pool.start(task)
+            added_count += 1
+        if added_count:
+            self.append_log(f"本批新增 {added_count} 首，当前列表共 {self.results_table.rowCount()} 首。")
         self.btn_download.setEnabled(self.results_table.rowCount() > 0)
 
     def build_cover_placeholder(self):
@@ -972,15 +1000,17 @@ class MusicDownloader(QMainWindow):
         label.setStyleSheet("font-size: 24px; color: #8b949e;")
         return label
 
-    def on_image_downloaded(self, row, pixmap):
+    def on_image_downloaded(self, row, image_url, pixmap):
         if row >= self.results_table.rowCount():
             return
+        if image_url:
+            self.image_cache[image_url] = pixmap
         label = QLabel()
         label.setAlignment(Qt.AlignCenter)
         label.setPixmap(pixmap)
         self.results_table.setCellWidget(row, 1, label)
 
-    def on_image_error(self, row):
+    def on_image_error(self, row, image_url):
         if row < self.results_table.rowCount():
             self.results_table.setCellWidget(row, 1, self.build_cover_placeholder())
 
