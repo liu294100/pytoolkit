@@ -565,39 +565,43 @@ class UWPManagerGUI:
         list_frame = tk.Frame(main, bg=self.COLORS['bg_primary'])
         list_frame.pack(fill='both', expand=True, pady=(0, 15))
         
-        # 列标题
+        # 列标题（使用 grid 布局对齐）
         header_frame = tk.Frame(list_frame, bg=self.COLORS['bg_card'])
         header_frame.pack(fill='x')
+        header_frame.grid_columnconfigure(1, weight=1)
+        header_frame.grid_columnconfigure(2, weight=1)
+        header_frame.grid_columnconfigure(3, weight=2)
+        header_frame.grid_columnconfigure(4, weight=0)
         
-        tk.Label(header_frame, text="  启用",
+        tk.Label(header_frame, text="启用",
                 bg=self.COLORS['bg_card'],
                 fg=self.COLORS['text_primary'],
                 font=('Microsoft YaHei UI', 11, 'bold'),
-                width=6).pack(side='left')
+                width=6).grid(row=0, column=0, padx=10, pady=10, sticky='w')
         
         tk.Label(header_frame, text="应用名称",
                 bg=self.COLORS['bg_card'],
                 fg=self.COLORS['text_primary'],
                 font=('Microsoft YaHei UI', 11, 'bold'),
-                width=25).pack(side='left', padx=(5, 0))
+                anchor='w').grid(row=0, column=1, padx=5, pady=10, sticky='ew')
         
         tk.Label(header_frame, text="友好名称",
                 bg=self.COLORS['bg_card'],
                 fg=self.COLORS['text_primary'],
                 font=('Microsoft YaHei UI', 11, 'bold'),
-                width=20).pack(side='left', padx=(5, 0))
+                anchor='w').grid(row=0, column=2, padx=5, pady=10, sticky='ew')
         
         tk.Label(header_frame, text="包名称",
                 bg=self.COLORS['bg_card'],
                 fg=self.COLORS['text_primary'],
                 font=('Microsoft YaHei UI', 11, 'bold'),
-                width=40).pack(side='left', padx=(5, 0))
+                anchor='w').grid(row=0, column=3, padx=5, pady=10, sticky='ew')
         
         tk.Label(header_frame, text="状态",
                 bg=self.COLORS['bg_card'],
                 fg=self.COLORS['text_primary'],
                 font=('Microsoft YaHei UI', 11, 'bold'),
-                width=10).pack(side='right', padx=(0, 10))
+                width=10).grid(row=0, column=4, padx=10, pady=10)
         
         # 可滚动列表
         list_container = tk.Frame(list_frame, bg=self.COLORS['bg_secondary'])
@@ -693,7 +697,7 @@ class UWPManagerGUI:
         self._update_stats()
     
     def _render_apps(self, apps=None):
-        """渲染应用列表"""
+        """渲染应用列表（使用 grid 布局对齐）"""
         if apps is None:
             apps = self.filtered_apps
         
@@ -701,23 +705,27 @@ class UWPManagerGUI:
             widget.destroy()
         self.checkboxes.clear()
         
+        # 配置列权重（与表头一致）
+        self.scrollable_frame.grid_columnconfigure(1, weight=1)
+        self.scrollable_frame.grid_columnconfigure(2, weight=1)
+        self.scrollable_frame.grid_columnconfigure(3, weight=2)
+        self.scrollable_frame.grid_columnconfigure(4, weight=0)
+        
         for i, app in enumerate(apps):
             app.temp_enabled = app.loopback_enabled
             
             row_bg = self.COLORS['bg_secondary'] if i % 2 == 0 else self.COLORS['bg_card']
-            row = tk.Frame(self.scrollable_frame, bg=row_bg)
-            row.pack(fill='x', pady=0)
             
-            # 复选框
+            # 复选框（列0）
             var = tk.IntVar(value=1 if app.loopback_enabled else 0)
             self.checkboxes[app.sid] = var
             
-            cb = tk.Checkbutton(row, variable=var,
+            cb = tk.Checkbutton(self.scrollable_frame, variable=var,
                                bg=row_bg,
                                activebackground=row_bg,
                                selectcolor=self.COLORS['bg_card'],
                                cursor='hand2')
-            cb.pack(side='left', padx=(10, 5), pady=10)
+            cb.grid(row=i, column=0, padx=10, pady=8, sticky='w')
             
             def on_change(sid=app.sid, v=var):
                 for a in apps:
@@ -727,48 +735,38 @@ class UWPManagerGUI:
             
             var.trace('w', lambda *args, sid=app.sid, v=var: on_change(sid, v))
             
-            # 应用名称（原始名称）
+            # 应用名称（列1）
             display_name = app.display_name if app.display_name and not app.display_name.startswith('@') else app.name
-            if len(display_name) > 30:
-                display_name = display_name[:27] + '...'
             
-            tk.Label(row, text=display_name,
+            tk.Label(self.scrollable_frame, text=display_name,
                     bg=row_bg,
                     fg=self.COLORS['text_primary'],
                     font=('Microsoft YaHei UI', 10),
-                    width=25,
-                    anchor='w').pack(side='left', padx=(5, 0))
+                    anchor='w').grid(row=i, column=1, padx=5, pady=8, sticky='ew')
             
-            # 友好名称（中文）
-            friendly_name = app.friendly_name
-            if len(friendly_name) > 20:
-                friendly_name = friendly_name[:17] + '...'
-            
-            tk.Label(row, text=friendly_name,
+            # 友好名称（列2）
+            tk.Label(self.scrollable_frame, text=app.friendly_name,
                     bg=row_bg,
-                    fg='#5dade2',  # 蓝色高亮
+                    fg='#5dade2',
                     font=('Microsoft YaHei UI', 10, 'bold'),
-                    width=20,
-                    anchor='w').pack(side='left', padx=(5, 0))
+                    anchor='w').grid(row=i, column=2, padx=5, pady=8, sticky='ew')
             
-            # 包名称
-            package_short = app.package_name[:45] + '...' if len(app.package_name) > 45 else app.package_name
-            tk.Label(row, text=package_short,
+            # 包名称（列3）
+            tk.Label(self.scrollable_frame, text=app.package_name,
                     bg=row_bg,
                     fg=self.COLORS['text_secondary'],
                     font=('Microsoft YaHei UI', 9),
-                    width=40,
-                    anchor='w').pack(side='left', padx=(5, 0))
+                    anchor='w').grid(row=i, column=3, padx=5, pady=8, sticky='ew')
             
-            # 当前状态
+            # 当前状态（列4）
             status_text = "✅ 已启用" if app.loopback_enabled else "⚪ 未启用"
             status_color = self.COLORS['success'] if app.loopback_enabled else self.COLORS['text_secondary']
             
-            tk.Label(row, text=status_text,
+            tk.Label(self.scrollable_frame, text=status_text,
                     bg=row_bg,
                     fg=status_color,
                     font=('Microsoft YaHei UI', 10),
-                    width=10).pack(side='right', padx=(0, 10))
+                    width=10).grid(row=i, column=4, padx=10, pady=8)
         
         self._update_stats()
     
