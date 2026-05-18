@@ -9,16 +9,18 @@ from tkinter import ttk, messagebox
 import subprocess
 import json
 import os
-from typing import List, Dict
+import re
+from typing import List, Dict, Set
 import ctypes
 import locale
 
 
 class UWPApp:
     """UWP 应用信息"""
-    def __init__(self, name: str, package_id: str, loopback_enabled: bool = False):
-        self.name = name
-        self.package_id = package_id
+    def __init__(self, name: str, package_id: str, display_name: str = "", loopback_enabled: bool = False):
+        self.name = name  # 内部名称（小写）
+        self.package_id = package_id  # PackageFamilyName
+        self.display_name = display_name or name  # 显示名称
         self.loopback_enabled = loopback_enabled
 
 
@@ -29,7 +31,6 @@ class LoopbackManager:
     
     def __init__(self):
         self.apps: List[UWPApp] = []
-        # Windows 默认编码（GBK/CP936）
         self.system_encoding = locale.getpreferredencoding(False) or 'gbk'
         self._load_config()
     
@@ -45,43 +46,69 @@ class LoopbackManager:
     def _save_config(self):
         """保存配置"""
         with open(self.CONFIG_FILE, 'w', encoding='utf-8') as f:
-            json.dump([{'name': a.name, 'package_id': a.package_id, 
-                       'loopback_enabled': a.loopback_enabled} for a in self.apps], 
-                     f, indent=2, ensure_ascii=False)
+            json.dump([{
+                'name': a.name, 
+                'package_id': a.package_id,
+                'display_name': a.display_name,
+                'loopback_enabled': a.loopback_enabled
+            } for a in self.apps], f, indent=2, ensure_ascii=False)
     
     def _run_powershell(self, cmd: str) -> str:
-        """执行 PowerShell 命令，处理编码问题"""
+        """执行 PowerShell 命令"""
         try:
             result = subprocess.run(
                 ['powershell', '-Command', cmd],
                 capture_output=True,
-                # 关键：使用系统默认编码
-                encoding=self.system_encoding,
-                errors='ignore'  # 忽略无法解码的字符
+                encoding='utf-8',
+                errors='ignore'
             )
             return result.stdout
         except Exception as e:
             print(f"PowerShell 执行失败: {e}")
             return ""
     
-    def _run_checknetisolation(self, args: list) -> tuple:
-        """执行 CheckNetIsolation 命令"""
+    def _run_cmd(self, cmd: list) -> tuple:
+        """执行命令行程序"""
         try:
             result = subprocess.run(
-                ['CheckNetIsolation'] + args,
+                cmd,
                 capture_output=True,
                 encoding=self.system_encoding,
                 errors='ignore'
             )
-            return result.returncode == 0, result.stderr
+            return result.returncode == 0, result.stdout, result.stderr
         except Exception as e:
-            return False, str(e)
+            return False, "", str(e)
+    
+    def _get_enabled_packages(self) -> Set[str]:
+        """获取已启用回环的应用列表（返回小写包名集合）"""
+        success, output, _ = self._run_cmd(['CheckNetIsolation', 'LoopbackExempt', '-s'])
+        
+        enabled = set()
+        if not success:
+            return enabled
+        
+        # 解析输出：名称: microsoft.xxx_xxx 格式
+        for line in output.split('\n'):
+            if '名称:' in line or 'Name:' in line:
+                # 提取名称部分
+                parts = re.split(r'[名称:|Name:]', line)
+                if len(parts) > 1:
+                    pkg = parts[1].strip().lower()
+                    if pkg and pkg != 'appcontainer not found':
+                        enabled.add(pkg)
+        
+        return enabled
     
     def get_uwp_apps(self) -> List[UWPApp]:
         """获取系统已安装的 UWP 应用列表"""
+        # 获取已启用列表（小写）
+        enabled_packages = self._get_enabled_packages()
+        
+        # PowerShell 获取应用列表
         cmd = '''
-        Get-AppxPackage | Where-Object {$_.SignatureKind -eq 'Store'} | 
-        Select-Object Name, PackageFamilyName | ConvertTo-Json -Compress
+        Get-AppxPackage | Where-Object {$_.SignatureKind -eq 'Store' -or $_.IsFramework -eq $false} | 
+        Select-Object Name, PackageFamilyName, DisplayName | ConvertTo-Json -Compress
         '''
         output = self._run_powershell(cmd)
         
@@ -94,16 +121,24 @@ class LoopbackManager:
             if isinstance(data, dict):
                 data = [data]
             
-            # 获取当前已启用列表
-            enabled_packages = self._get_enabled_packages()
-            
+            seen = set()
             for item in data:
-                name = item.get('Name', 'Unknown')
+                name = item.get('Name', '').lower()
                 package_id = item.get('PackageFamilyName', '')
+                display_name = item.get('DisplayName', '') or name
                 
-                if package_id:
-                    enabled = package_id in enabled_packages
-                    apps.append(UWPApp(name, package_id, enabled))
+                if not name or not package_id:
+                    continue
+                
+                # 去重
+                if package_id.lower() in seen:
+                    continue
+                seen.add(package_id.lower())
+                
+                # 检查是否已启用（小写匹配）
+                enabled = package_id.lower() in enabled_packages or name in enabled_packages
+                
+                apps.append(UWPApp(name, package_id, display_name, enabled))
         except json.JSONDecodeError as e:
             print(f"JSON 解析失败: {e}")
         
@@ -111,39 +146,17 @@ class LoopbackManager:
         apps.sort(key=lambda x: x.name.lower())
         return apps
     
-    def _get_enabled_packages(self) -> set:
-        """获取已启用回环的应用列表"""
-        try:
-            result = subprocess.run(
-                ['CheckNetIsolation', 'LoopbackExempt', '-s'],
-                capture_output=True,
-                encoding=self.system_encoding,
-                errors='ignore'
-            )
-            
-            enabled = set()
-            # 解析输出，提取包名
-            for line in result.stdout.split('\n'):
-                if 'Name:' in line:
-                    parts = line.split('Name:')
-                    if len(parts) > 1:
-                        pkg = parts[1].strip()
-                        enabled.add(pkg)
-            return enabled
-        except:
-            return set()
-    
     def enable_loopback(self, package_id: str) -> tuple:
         """启用应用的回环访问"""
-        success, error = self._run_checknetisolation(
-            ['LoopbackExempt', '-a', f'-n={package_id}']
+        success, _, error = self._run_cmd(
+            ['CheckNetIsolation', 'LoopbackExempt', '-a', f'-n={package_id}']
         )
         return success, error
     
     def disable_loopback(self, package_id: str) -> tuple:
         """禁用应用的回环访问"""
-        success, error = self._run_checknetisolation(
-            ['LoopbackExempt', '-d', f'-n={package_id}']
+        success, _, error = self._run_cmd(
+            ['CheckNetIsolation', 'LoopbackExempt', '-d', f'-n={package_id}']
         )
         return success, error
     
@@ -172,15 +185,15 @@ class LoopbackManager:
     def add_custom(self, name: str, package_id: str) -> bool:
         """添加自定义应用"""
         for app in self.apps:
-            if app.package_id == package_id:
+            if app.package_id.lower() == package_id.lower():
                 return False
-        self.apps.append(UWPApp(name, package_id, False))
+        self.apps.append(UWPApp(name.lower(), package_id, name, False))
         self._save_config()
         return True
     
     def remove(self, package_id: str) -> bool:
         """移除应用"""
-        self.apps = [a for a in self.apps if a.package_id != package_id]
+        self.apps = [a for a in self.apps if a.package_id.lower() != package_id.lower()]
         self._save_config()
         return True
     
@@ -191,7 +204,9 @@ class LoopbackManager:
         
         keyword = keyword.lower()
         return [app for app in self.apps 
-                if keyword in app.name.lower() or keyword in app.package_id.lower()]
+                if keyword in app.name.lower() 
+                or keyword in app.package_id.lower()
+                or keyword in app.display_name.lower()]
 
 
 # ========== GUI ==========
@@ -258,7 +273,7 @@ class UWPManagerGUI:
     def _build_ui(self):
         """构建界面"""
         self.root.configure(bg=self.COLORS['bg_primary'])
-        self.root.geometry('1100x750')
+        self.root.geometry('1150x750')
         self.root.minsize(900, 600)
         
         # 主容器
@@ -332,7 +347,6 @@ class UWPManagerGUI:
                 font=('Microsoft YaHei UI', 10))
         search_entry.pack(padx=10, pady=8, side='left')
         
-        # 清空搜索按钮
         tk.Button(search_frame, text="✕",
                  bg=self.COLORS['bg_secondary'],
                  fg=self.COLORS['text_secondary'],
@@ -348,12 +362,12 @@ class UWPManagerGUI:
                                 show='headings', style='Custom.Treeview')
         
         self.tree.heading('name', text='应用名称')
-        self.tree.heading('package_id', text='包标识')
+        self.tree.heading('package_id', text='包标识 (PackageFamilyName)')
         self.tree.heading('status', text='代理状态')
         self.tree.heading('action', text='操作')
         
         self.tree.column('name', width=200, anchor='w')
-        self.tree.column('package_id', width=400, anchor='w')
+        self.tree.column('package_id', width=420, anchor='w')
         self.tree.column('status', width=120, anchor='center')
         self.tree.column('action', width=150, anchor='center')
         
@@ -367,7 +381,7 @@ class UWPManagerGUI:
         footer.pack(fill='x', pady=(15, 0))
         
         tk.Label(footer, 
-                text="💡 提示：启用后 UWP 应用可以访问本地代理（如 Clash、Fiddler、Charles 等）| 双击操作列切换状态",
+                text="💡 提示：启用后 UWP 应用可以访问本地代理（如 Clash、Fiddler、Charles 等）| 点击操作列切换状态",
                 bg=self.COLORS['bg_primary'],
                 fg=self.COLORS['text_secondary'],
                 font=('Microsoft YaHei UI', 9)).pack(side='left')
@@ -405,8 +419,11 @@ class UWPManagerGUI:
             status = "✅ 已启用" if app.loopback_enabled else "⚪ 未启用"
             action_btn = "禁用" if app.loopback_enabled else "启用"
             
+            # 显示名称优先，fallback 到 name
+            display = app.display_name if app.display_name and app.display_name != app.name else app.name
+            
             item_id = self.tree.insert('', 'end', values=(
-                app.name,
+                display,
                 app.package_id,
                 status,
                 f"[{action_btn}]"
@@ -536,7 +553,6 @@ class UWPManagerGUI:
         dialog.transient(self.root)
         dialog.grab_set()
         
-        # 居中显示
         dialog.geometry("+%d+%d" % (
             self.root.winfo_rootx() + 200,
             self.root.winfo_rooty() + 150
@@ -574,7 +590,7 @@ class UWPManagerGUI:
                 return
             
             if self.manager.add_custom(name, pkg):
-                self.all_apps.append(UWPApp(name, pkg, False))
+                self.all_apps = self.manager.apps
                 self._refresh_list()
                 dialog.destroy()
                 messagebox.showinfo("成功", f"已添加: {name}")
@@ -601,7 +617,6 @@ def main():
     root = tk.Tk()
     root.title("UWP 回环代理管理器")
     
-    # 设置 DPI 感知
     try:
         from ctypes import windll
         windll.shcore.SetProcessDpiAwareness(1)
