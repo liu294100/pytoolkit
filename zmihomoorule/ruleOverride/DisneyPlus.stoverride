@@ -1,0 +1,22 @@
+name: DisneyPlus Override
+desc: DisneyPlus
+rule-providers:
+  DisneyPlus:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/liu294100/web-subscription-yaml/refs/heads/main/doc/rule/Disneyplus.yaml
+    interval: 86400
+
+proxy-groups:
+- name: 🎬 DisneyPlusRule
+  type: select
+  proxies:
+  - "🔰 手动选择"
+  - "🎯 Direct"
+  - "\U0001F30D 主流媒体"
+  include-all-proxies: true
+  # 匹配所有节点，确保像参考配置那样包含各国节点
+  filter: .*
+
+rules:
+- RULE-SET,DisneyPlus,🎬 DisneyPlusRule

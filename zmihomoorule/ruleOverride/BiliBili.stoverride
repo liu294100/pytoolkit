@@ -1,0 +1,22 @@
+name: BiliBili Override
+desc: 独立的 BiliBili 分流规则，包含专用的策略组
+rule-providers:
+  BiliBili:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/BiliBili/BiliBili.yaml
+    interval: 86400
+
+proxy-groups:
+- name: 🎬 BiliBiliRule
+  type: select
+  proxies:
+  - "🔰 手动选择"
+  - "🎯 Direct"
+  - "\U0001F30D 主流媒体"
+  include-all-proxies: true
+  # 匹配所有节点，确保像参考配置那样包含各国节点
+  filter: .*
+
+rules:
+- RULE-SET,BiliBili,🎬 BiliBiliRule
