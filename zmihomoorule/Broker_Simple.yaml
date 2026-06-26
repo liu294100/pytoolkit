@@ -1,0 +1,113 @@
+# NAME: Broker
+# AUTHOR: Custom
+# REPO: -
+# UPDATED: 2026-06-26
+# DOMAIN: 0
+# DOMAIN-KEYWORD: 8
+# DOMAIN-SUFFIX: 120+
+# IP-CIDR: 5
+# TOTAL: 130+
+payload:
+  # ==========================
+  # 富途 Futu / moomoo
+  # ==========================
+
+  - DOMAIN-SUFFIX,futunn.com
+  - DOMAIN-SUFFIX,futu5.com
+  - DOMAIN-SUFFIX,futuapi.com
+  - DOMAIN-SUFFIX,futuhk.com
+  - DOMAIN-SUFFIX,futufin.com
+  - DOMAIN-SUFFIX,fututrade.com
+  - DOMAIN-SUFFIX,futuesop.com
+  - DOMAIN-SUFFIX,futuin.com
+  - DOMAIN-SUFFIX,futuhk1.com
+  - DOMAIN-SUFFIX,futuhongkong.com
+  - DOMAIN-SUFFIX,futustatic.com
+  - DOMAIN-SUFFIX,futuopen.com
+
+  - DOMAIN-SUFFIX,moomoo.com
+  - DOMAIN-SUFFIX,moomoo.com.hk
+  - DOMAIN-SUFFIX,moomoo.com.sg
+  - DOMAIN-SUFFIX,moomoo.com.au
+  - DOMAIN-SUFFIX,moomoojp.com
+
+  - DOMAIN-SUFFIX,qtlcdn.com
+
+
+  # ==========================
+  # 老虎证券 Tiger Brokers
+  # ==========================
+
+  - DOMAIN-SUFFIX,tigerbrokers.com
+  - DOMAIN-SUFFIX,tiger.com
+  - DOMAIN-SUFFIX,tigerfintech.com
+  - DOMAIN-SUFFIX,itiger.com
+  - DOMAIN-SUFFIX,itigerup.com
+  - DOMAIN-SUFFIX,itigergrowtha.com
+
+  - DOMAIN-SUFFIX,skytigris.cn
+  - DOMAIN-SUFFIX,skytigris.com
+
+  - DOMAIN-SUFFIX,laohu8.com
+  - DOMAIN-SUFFIX,tigerbbs.com
+  - DOMAIN-SUFFIX,tigrdw.com
+  - DOMAIN-SUFFIX,tigrwd.com
+
+  - DOMAIN-SUFFIX,tradeup.com
+
+
+  # ==========================
+  # 长桥 Longbridge / LongPort
+  # ==========================
+
+  - DOMAIN-SUFFIX,longbridge.com
+  - DOMAIN-SUFFIX,longbridge.hk
+  - DOMAIN-SUFFIX,longbridge.sg
+  - DOMAIN-SUFFIX,longbridge.global
+
+  - DOMAIN-SUFFIX,longbridgeapp.com
+  - DOMAIN-SUFFIX,longbridgecloud.com
+  - DOMAIN-SUFFIX,longportapp.com
+
+  - DOMAIN-SUFFIX,longbridgeapi.com
+
+
+
+  # ==========================
+  # Webull 微牛
+  # ==========================
+
+  - DOMAIN-SUFFIX,webull.com
+  - DOMAIN-SUFFIX,webullbroker.com
+  - DOMAIN-SUFFIX,webullapp.com
+
+
+
+  # ==========================
+  # Robinhood
+  # ==========================
+
+  - DOMAIN-SUFFIX,robinhood.com
+  - DOMAIN-SUFFIX,robinhood.io
+
+
+  # ==========================
+  # 富途/腾讯云 IP
+  # ==========================
+
+  - IP-CIDR,43.168.0.0/16,no-resolve
+  - IP-CIDR,43.174.0.0/16,no-resolve
+  - IP-CIDR,43.175.0.0/16,no-resolve
+  - IP-CIDR,49.51.0.0/16,no-resolve
+  - IP-CIDR,119.28.0.0/16,no-resolve
+
+
+  # ==========================
+  # 关键词补充
+  # ==========================
+
+  - DOMAIN-KEYWORD,futu
+  - DOMAIN-KEYWORD,moomoo
+  - DOMAIN-KEYWORD,tiger
+  - DOMAIN-KEYWORD,longbridge
+  - DOMAIN-KEYWORD,longport
