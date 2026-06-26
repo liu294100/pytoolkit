@@ -1,4 +1,4 @@
-name: Combined Cnix broker Override
+name: CNIX Broker Rule Override
 desc: 合并多个分流规则
 
 rule-providers:
