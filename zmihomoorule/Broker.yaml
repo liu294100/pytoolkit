@@ -1,0 +1,219 @@
+# NAME: Broker
+# AUTHOR: Custom
+# REPO: -
+# UPDATED: 2026-06-26
+# DOMAIN: 0
+# DOMAIN-KEYWORD: 8
+# DOMAIN-SUFFIX: 120+
+# IP-CIDR: 5
+# TOTAL: 130+
+payload:
+  # ==========================
+  # 富途 Futu / moomoo
+  # ==========================
+
+  - DOMAIN-SUFFIX,futunn.com
+  - DOMAIN-SUFFIX,futu5.com
+  - DOMAIN-SUFFIX,futuapi.com
+  - DOMAIN-SUFFIX,futuhk.com
+  - DOMAIN-SUFFIX,futufin.com
+  - DOMAIN-SUFFIX,fututrade.com
+  - DOMAIN-SUFFIX,futuesop.com
+  - DOMAIN-SUFFIX,futuin.com
+  - DOMAIN-SUFFIX,futuhk1.com
+  - DOMAIN-SUFFIX,futuhongkong.com
+  - DOMAIN-SUFFIX,futustatic.com
+  - DOMAIN-SUFFIX,futuopen.com
+
+  - DOMAIN-SUFFIX,moomoo.com
+  - DOMAIN-SUFFIX,moomoo.com.hk
+  - DOMAIN-SUFFIX,moomoo.com.sg
+  - DOMAIN-SUFFIX,moomoo.com.au
+  - DOMAIN-SUFFIX,moomoojp.com
+
+  - DOMAIN-SUFFIX,qtlcdn.com
+
+
+  # ==========================
+  # 老虎证券 Tiger Brokers
+  # ==========================
+
+  - DOMAIN-SUFFIX,tigerbrokers.com
+  - DOMAIN-SUFFIX,tiger.com
+  - DOMAIN-SUFFIX,tigerfintech.com
+  - DOMAIN-SUFFIX,itiger.com
+  - DOMAIN-SUFFIX,itigerup.com
+  - DOMAIN-SUFFIX,itigergrowtha.com
+
+  - DOMAIN-SUFFIX,skytigris.cn
+  - DOMAIN-SUFFIX,skytigris.com
+
+  - DOMAIN-SUFFIX,laohu8.com
+  - DOMAIN-SUFFIX,tigerbbs.com
+  - DOMAIN-SUFFIX,tigrdw.com
+  - DOMAIN-SUFFIX,tigrwd.com
+
+  - DOMAIN-SUFFIX,tradeup.com
+
+
+  # ==========================
+  # 长桥 Longbridge / LongPort
+  # ==========================
+
+  - DOMAIN-SUFFIX,longbridge.com
+  - DOMAIN-SUFFIX,longbridge.hk
+  - DOMAIN-SUFFIX,longbridge.sg
+  - DOMAIN-SUFFIX,longbridge.global
+
+  - DOMAIN-SUFFIX,longbridgeapp.com
+  - DOMAIN-SUFFIX,longbridgecloud.com
+  - DOMAIN-SUFFIX,longportapp.com
+
+  - DOMAIN-SUFFIX,longbridgeapi.com
+
+
+  # ==========================
+  # 盈透 Interactive Brokers IBKR
+  # ==========================
+
+  - DOMAIN-SUFFIX,interactivebrokers.com
+  - DOMAIN-SUFFIX,interactivebrokers.com.hk
+  - DOMAIN-SUFFIX,interactivebrokers.com.sg
+
+  - DOMAIN-SUFFIX,ibkr.com
+  - DOMAIN-SUFFIX,ibkr.info
+  - DOMAIN-SUFFIX,ibkrguides.com
+  - DOMAIN-SUFFIX,ibkrcampus.com
+  - DOMAIN-SUFFIX,ibkr.eu
+  - DOMAIN-SUFFIX,ibkr.co.uk
+
+  - DOMAIN-SUFFIX,ibllc.com
+  - DOMAIN-SUFFIX,ibkrtrader.com
+
+
+  # ==========================
+  # 嘉信 Charles Schwab
+  # ==========================
+
+  - DOMAIN-SUFFIX,schwab.com
+  - DOMAIN-SUFFIX,schwabcdn.com
+  - DOMAIN-SUFFIX,tdameritrade.com
+  - DOMAIN-SUFFIX,thinkorswim.com
+
+
+  # ==========================
+  # Webull 微牛
+  # ==========================
+
+  - DOMAIN-SUFFIX,webull.com
+  - DOMAIN-SUFFIX,webullbroker.com
+  - DOMAIN-SUFFIX,webullapp.com
+
+
+  # ==========================
+  # TradeStation
+  # ==========================
+
+  - DOMAIN-SUFFIX,tradestation.com
+  - DOMAIN-SUFFIX,tradestationcrypto.com
+
+
+  # ==========================
+  # E*TRADE
+  # ==========================
+
+  - DOMAIN-SUFFIX,etrade.com
+  - DOMAIN-SUFFIX,etradefinancial.com
+
+
+  # ==========================
+  # Robinhood
+  # ==========================
+
+  - DOMAIN-SUFFIX,robinhood.com
+  - DOMAIN-SUFFIX,robinhood.io
+
+
+  # ==========================
+  # Interactive Brokers 行情/CDN
+  # ==========================
+
+  - DOMAIN-SUFFIX,ibgateway.com
+
+
+  # ==========================
+  # TradingView 行情
+  # ==========================
+
+  - DOMAIN-SUFFIX,tradingview.com
+  - DOMAIN-SUFFIX,tradingview.io
+  - DOMAIN-SUFFIX,tvcdn.net
+
+
+  # ==========================
+  # Yahoo Finance
+  # ==========================
+
+  - DOMAIN-SUFFIX,yahoo.com
+  - DOMAIN-SUFFIX,yimg.com
+  - DOMAIN-SUFFIX,finance.yahoo.com
+
+
+  # ==========================
+  # Investing.com
+  # ==========================
+
+  - DOMAIN-SUFFIX,investing.com
+  - DOMAIN-SUFFIX,investingcdn.com
+
+
+  # ==========================
+  # Seeking Alpha
+  # ==========================
+
+  - DOMAIN-SUFFIX,seekingalpha.com
+
+
+  # ==========================
+  # MarketWatch
+  # ==========================
+
+  - DOMAIN-SUFFIX,marketwatch.com
+
+
+  # ==========================
+  # Bloomberg
+  # ==========================
+
+  - DOMAIN-SUFFIX,bloomberg.com
+
+
+  # ==========================
+  # CNBC
+  # ==========================
+
+  - DOMAIN-SUFFIX,cnbc.com
+
+
+  # ==========================
+  # 富途/腾讯云 IP
+  # ==========================
+
+  - IP-CIDR,43.168.0.0/16,no-resolve
+  - IP-CIDR,43.174.0.0/16,no-resolve
+  - IP-CIDR,43.175.0.0/16,no-resolve
+  - IP-CIDR,49.51.0.0/16,no-resolve
+  - IP-CIDR,119.28.0.0/16,no-resolve
+
+
+  # ==========================
+  # 关键词补充
+  # ==========================
+
+  - DOMAIN-KEYWORD,futu
+  - DOMAIN-KEYWORD,moomoo
+  - DOMAIN-KEYWORD,tiger
+  - DOMAIN-KEYWORD,longbridge
+  - DOMAIN-KEYWORD,longport
+  - DOMAIN-KEYWORD,ibkr
+  - DOMAIN-KEYWORD,interactivebrokers
