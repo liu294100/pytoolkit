@@ -372,8 +372,21 @@ class MainWindow(QMainWindow):
         if not project:
             return
 
-        # Get file content
-        content = self._git_service.get_file_content(project, item.branch, item.file_path_full)
+        # Read file directly from disk (more reliable than git show for shallow clones)
+        local_path = self._git_service.get_local_path(project)
+        file_full = local_path / item.file_path_full
+        
+        content = None
+        if file_full.exists():
+            try:
+                content = file_full.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+        # Fallback to git show
+        if not content:
+            content = self._git_service.get_file_content(project, item.branch, item.file_path_full)
+
         if content:
             self._preview_panel.show_code(
                 content, item.line_number, item.line_content,

@@ -204,8 +204,9 @@ class SearchService:
             except ValueError:
                 continue
 
-            # Make file path relative: strip leading .\ or ./
+            # Make file path relative: strip leading .\ or ./ and normalize to forward slashes
             rel_path = file_path_raw.lstrip(".").lstrip(os.sep).lstrip("/")
+            rel_path = rel_path.replace("\\", "/")
 
             # Skip .git directory files
             if rel_path.startswith(".git"):
