@@ -1,0 +1,417 @@
+做成一个接近 JetBrains「Search Everywhere」+ Sourcegraph 的桌面工具。
+
+技术栈建议：
+
+Python 3.12
+│
+├── GUI
+│      PySide6
+│
+├── GitLab API
+│      python-gitlab
+│
+├── Git 操作
+│      GitPython
+│
+├── 本地搜索
+│      ripgrep(rg)
+│
+├── 代码高亮
+│      QScintilla
+│      或 Pygments
+│
+├── 配置
+│      config.json
+│
+└── SQLite
+       保存历史记录
+最终效果
++--------------------------------------------------------------------------------+
+| GitLab Code Search                                                             |
++--------------------------------------------------------------------------------+
+| GitLab: https://git.xxx.com                                                    |
+| Token: ***************                                                         |
+|                                                                                |
+| Keyword: [ OrderService                     ] [搜索]                           |
+|                                                                                |
+| Group   [全部▼]                                                                |
+| Project [全部▼]                                                                |
+| Branch  [master▼]  (●当前) (○所有分支)                                          |
+|                                                                                |
+| FileType [*.java ▼]                                                            |
+| Regex ☑ Whole Word ☐ IgnoreCase ☑                                              |
++--------------------------------------------------------------------------------+
+
+结果
+
+----------------------------------------------------------------------------------
+Project       Branch      File                     Line
+----------------------------------------------------------------------------------
+trade         master      OrderService.java        123
+trade         dev         OrderService.java        120
+market        release     OrderUtil.java            55
+gateway       master      xxx.py                    30
+
+----------------------------------------------------------------------------------
+
+右侧
+
+118
+
+119
+
+120   public class OrderService {
+
+121       private String name;
+
+122
+
+123 >>> private TradeService service;
+
+124
+
+125
+
+126
+项目结构
+gitlab_search/
+
+│
+├── main.py
+├── ui.py
+├── search.py
+├── gitlab_api.py
+├── git_manager.py
+├── preview.py
+├── config.py
+│
+├── config.json
+│
+├── cache/
+│      trade/
+│      market/
+│      gateway/
+│
+├── database.db
+│
+└── icons/
+左侧功能
+
+搜索框
+
+Keyword
+
+______________________
+
+[Search]
+
+下面
+
+Project
+
+▼ All
+
+Branch
+
+▼ master
+
+Search Mode
+
+● Current Branch
+
+○ All Branches
+
+Regex
+
+☑
+
+Ignore Case
+
+☑
+中间
+
+使用
+
+QTableView
+
+列
+
+Project
+
+Branch
+
+File
+
+Line
+
+Preview
+
+支持
+
+✔ 排序
+
+✔ 双击
+
+✔ Ctrl+C
+
+✔ 导出CSV
+
+右侧
+
+代码预览
+
+QPlainTextEdit
+
+或者
+
+QsciScintilla
+
+自动高亮
+
+private OrderService service;
+
+定位
+
+>>>> 第123行
+
+上下各10行。
+
+底部
+
+状态栏
+
+Searching...
+
+trade...
+
+market...
+
+gateway...
+
+Done
+
+328 Results
+
+2.18 sec
+GitLab API
+
+第一次启动
+
+输入
+
+GitLab URL
+
+Token
+
+点击
+
+Connect
+
+自动获取
+
+Groups
+
+Projects
+
+Branches
+
+缓存
+
+SQLite
+
+以后不用每次请求。
+
+Clone
+
+点击
+
+Sync
+
+后台执行
+
+git clone
+
+或者
+
+git fetch
+
+进度条
+
+███████
+
+45%
+
+trade
+
+搜索流程
+
+点击
+
+Search
+
+后台线程
+
+QThread
+
+↓
+
+ThreadPoolExecutor
+
+↓
+
+每个项目
+
+↓
+
+rg
+
+↓
+
+解析
+
+↓
+
+UI更新
+
+不会卡界面。
+
+搜索结果
+
+点击一行
+
+trade
+
+master
+
+OrderService.java
+
+123
+
+右侧立即显示
+
+118
+
+119
+
+120
+
+121
+
+122
+
+123 >>> private OrderService service;
+
+124
+
+125
+
+126
+双击
+
+可以配置
+
+双击
+
+↓
+
+浏览器打开
+
+https://git.xxx.com/
+
+...
+
+#L123
+
+或者
+
+VSCode
+
+code -g
+
+file.java:123
+设置
+Settings
+
+GitLab URL
+
+Token
+
+Clone Folder
+
+Thread Number
+
+Search Timeout
+
+Theme
+
+Dark
+
+Light
+高级搜索
+
+支持
+
+Order.*
+
+Regex
+
+支持
+
+OrderService AND TradeService
+
+
+支持
+
+OrderService NOT Test
+
+支持
+
+*.java
+
+*.xml
+
+*.sql
+
+*.py
+我建议增加的功能
+
+如果作为团队工具，下面这些功能会非常实用：
+
+功能	作用
+⭐ 收藏搜索	保存常用关键字
+🔍 搜索历史	一键重复查询
+📑 最近打开文件	快速返回查看
+👤 作者过滤	只看某位开发者修改的代码
+📅 最后提交时间	显示命中代码最近更新时间
+📊 项目统计	每个项目命中数量
+📂 文件树	左侧按目录浏览
+🌙 深色主题	更适合长时间使用
+🚀 后台自动同步	定时 git fetch 保持缓存最新
+🔥 全局快捷键	类似 VS Code 的 Ctrl+Shift+P 搜索体验
+推荐架构
+
+我建议采用 MVC 架构，方便后续维护：
+
+gitlab_code_search/
+│
+├── main.py                # 程序入口
+├── gui/
+│   ├── main_window.py     # 主窗口
+│   ├── search_panel.py    # 搜索条件
+│   ├── result_table.py    # 结果表格
+│   ├── preview_panel.py   # 代码预览
+│   └── settings_dialog.py # 设置窗口
+├── service/
+│   ├── gitlab_service.py  # GitLab API
+│   ├── git_service.py     # clone/fetch/branch
+│   ├── search_service.py  # ripgrep 搜索
+│   └── index_service.py   # 索引管理
+├── model/
+│   ├── project.py
+│   ├── result.py
+│   └── config.py
+├── cache/                 # 本地仓库
+├── data/                  # SQLite 配置和历史
+└── resources/             # 图标、UI 资源
+
+这套结构可以支撑几十到几百个 GitLab 项目，后续也能增加代码历史、作者分析、调用关系等高级功能，而不用推倒重来。

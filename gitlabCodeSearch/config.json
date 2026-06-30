@@ -1,0 +1,14 @@
+{
+    "gitlab_url": "https://gitlab.dev.stx365.com",
+    "token": "RTRV8LY_9QNFmUmTdgmD",
+    "proxy": "http://127.0.0.1:7890",
+    "proxy_enabled": false,
+    "clone_folder": "./cache",
+    "thread_count": 8,
+    "search_timeout": 30,
+    "theme": "dark",
+    "max_results_per_project": 500,
+    "context_lines": 10,
+    "auto_sync_interval_minutes": 30,
+    "rg_path": "./rg.exe"
+}
