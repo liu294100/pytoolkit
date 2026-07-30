@@ -3,6 +3,38 @@
   "assistant": "https://copilot.aptv.app/chat",
   "sources": [
     {
+      "name": "四川移动",
+      "type": "m3u",
+      "url": "https://itv.aptv.app/china-iptv/scyd.m3u",
+      "group": "APTV IPTV",
+      "userAgent": "AptvPlayer/1.5.8",
+      "note": "需要 APTV User-Agent 请求头"
+    },
+    {
+      "name": "四川电信",
+      "type": "m3u",
+      "url": "https://itv.aptv.app/china-iptv/scdx.m3u",
+      "group": "APTV IPTV",
+      "userAgent": "AptvPlayer/1.5.8",
+      "note": "需要 APTV User-Agent 请求头"
+    },
+    {
+      "name": "四川联通",
+      "type": "m3u",
+      "url": "https://itv.aptv.app/china-iptv/sclt.m3u",
+      "group": "APTV IPTV",
+      "userAgent": "AptvPlayer/1.5.8",
+      "note": "需要 APTV User-Agent 请求头"
+    },
+    {
+      "name": "重庆移动",
+      "type": "m3u",
+      "url": "https://itv.aptv.app/china-iptv/cqyd.m3u",
+      "group": "APTV IPTV",
+      "userAgent": "AptvPlayer/1.5.8",
+      "note": "需要 APTV User-Agent 请求头"
+    },
+    {
       "name": "APTV 测试直播源",
       "type": "m3u",
       "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
@@ -19,7 +51,7 @@
     {
       "name": "裤佬",
       "type": "m3u",
-      "url": "https://raw.githubusercontent.com/Jsnzkpg/Jsnzkpg/Jsnzkpg/Jsnzkpg1.m3u",
+      "url": "https://live.445569.xyz/live.m3u,
       "group": "APTV 测试"
     },
     {

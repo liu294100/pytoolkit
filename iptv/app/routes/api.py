@@ -64,12 +64,13 @@ def save_proxy_config():
 def get_channels():
     source_url = normalize_input_url(request.args.get("source_url", ""))
     source_name = request.args.get("source_name", "").strip() or "自定义源"
+    user_agent = request.args.get("user_agent", "").strip() or None
 
     if not source_url:
         return jsonify({"error": "缺少 source_url 参数"}), 400
 
     try:
-        m3u_text = fetch_text(source_url, current_app.config["REQUEST_TIMEOUT_SECONDS"])
+        m3u_text = fetch_text(source_url, current_app.config["REQUEST_TIMEOUT_SECONDS"], user_agent=user_agent)
         channels = parse_m3u(m3u_text, source_name)
         _attach_channel_proxy_fields(channels)
         return jsonify({"channels": channels, "total": len(channels)})

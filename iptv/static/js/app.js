@@ -234,6 +234,7 @@ async function loadSources() {
         option.dataset.name = source.name || "未命名源";
         option.dataset.type = source.type || "m3u";
         option.dataset.epg = source.epg || "";
+        option.dataset.userAgent = source.userAgent || "";
         sourceSelect.appendChild(option);
     }
     fillEpgPresets(epgSources);
@@ -443,11 +444,12 @@ function applyCurrentSource(channel, sourceIndex) {
     nowPlaying.textContent = `正在播放：${channel.displayName || channel.name || "未命名频道"} · ${source.name || "默认源"}`;
 }
 
-async function loadChannels(sourceUrl, sourceName) {
+async function loadChannels(sourceUrl, sourceName, userAgent) {
     const encodedUrl = encodeURIComponent(sourceUrl);
     const encodedName = encodeURIComponent(sourceName || "自定义源");
+    const encodedUA = userAgent ? `&user_agent=${encodeURIComponent(userAgent)}` : "";
     setStatus(sourceStatus, "正在拉取频道列表...");
-    const data = await getJson(`/api/channels?source_url=${encodedUrl}&source_name=${encodedName}`);
+    const data = await getJson(`/api/channels?source_url=${encodedUrl}&source_name=${encodedName}${encodedUA}`);
     channels = aggregateChannels((data.channels || []).map(item => ({
         ...item,
         displayName: toDisplayName(item.name || item.title || ""),
@@ -573,7 +575,7 @@ loadSourceBtn.addEventListener("click", async () => {
         if (option.dataset.epg && !epgUrlInput.value.trim()) {
             epgUrlInput.value = option.dataset.epg;
         }
-        await loadChannels(option.value, option.dataset.name || "默认源");
+        await loadChannels(option.value, option.dataset.name || "默认源", option.dataset.userAgent || "");
     } catch (error) {
         setStatus(sourceStatus, error.message || "加载失败", "#fb7185");
     }

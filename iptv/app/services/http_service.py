@@ -224,8 +224,9 @@ def request_url(url: str, timeout: int | tuple[int, int], stream: bool = False, 
     return response
 
 
-def fetch_text(url: str, timeout: int) -> str:
-    response = request_url(url, timeout=(8, timeout))
+def fetch_text(url: str, timeout: int, user_agent: str | None = None) -> str:
+    extra_headers = {"User-Agent": user_agent} if user_agent else None
+    response = request_url(url, timeout=(8, timeout), extra_headers=extra_headers)
     return decode_text_bytes(
         response.content,
         content_type=response.headers.get("Content-Type", ""),
