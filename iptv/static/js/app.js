@@ -2,6 +2,7 @@ const sourceSelect = document.getElementById("sourceSelect");
 const loadSourceBtn = document.getElementById("loadSourceBtn");
 const openSourceBtn = document.getElementById("openSourceBtn");
 const customUrlInput = document.getElementById("customUrlInput");
+const customUserAgent = document.getElementById("customUserAgent");
 const loadCustomBtn = document.getElementById("loadCustomBtn");
 const loadTextBtn = document.getElementById("loadTextBtn");
 const m3uText = document.getElementById("m3uText");
@@ -596,7 +597,8 @@ loadCustomBtn.addEventListener("click", async () => {
         return;
     }
     try {
-        await loadChannels(url, "手动输入");
+        const ua = customUserAgent.value.trim() || "";
+        await loadChannels(url, "手动输入", ua);
     } catch (error) {
         setStatus(sourceStatus, error.message || "加载失败", "#fb7185");
     }
