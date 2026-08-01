@@ -173,5 +173,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-iptvgui/cache/*
+
 /iptvgui/cache
+iptvgui/cache/epg.json
+iptvgui/cache/channels.json
