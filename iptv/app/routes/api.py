@@ -158,7 +158,7 @@ def proxy_stream():
             forward_headers[header] = value
 
     try:
-        upstream = request_url(target_url, timeout=(8, timeout), stream=True, extra_headers=forward_headers)
+        upstream = request_url(target_url, timeout=(8, timeout), stream=True, extra_headers=forward_headers, use_player_ua=True)
     except requests.HTTPError as exc:
         status_code = exc.response.status_code if exc.response is not None else "未知"
         return jsonify({"error": f"上游返回状态码: {status_code}"}), 502

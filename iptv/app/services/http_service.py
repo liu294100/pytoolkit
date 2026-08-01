@@ -4,11 +4,21 @@ from urllib.parse import unquote, urlparse
 import requests
 from requests.adapters import HTTPAdapter
 
-DEFAULT_HEADERS = {
+# 浏览器 UA 用于获取 M3U/EPG 等文本资源
+BROWSER_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
     "Accept": "*/*",
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
 }
+
+# 播放器 UA 用于代理流媒体，避免部分源拦截浏览器 UA
+PLAYER_HEADERS = {
+    "User-Agent": "Lavf/60.16.100",
+    "Accept": "*/*",
+}
+
+# 默认使用浏览器 UA（兼容旧代码）
+DEFAULT_HEADERS = BROWSER_HEADERS
 
 _SESSION = requests.Session()
 _SESSION.mount("http://", HTTPAdapter(pool_connections=32, pool_maxsize=64))
@@ -193,9 +203,24 @@ def decode_text_bytes(
     return repair_text(fallback_text)
 
 
-def request_url(url: str, timeout: int | tuple[int, int], stream: bool = False, extra_headers: dict | None = None) -> requests.Response:
+def _build_referer(url: str) -> str:
+    """根据 URL 生成 Referer 头，用于绕过防盗链检测"""
+    try:
+        parsed = urlparse(url)
+        return f"{parsed.scheme}://{parsed.netloc}/"
+    except Exception:
+        return ""
+
+
+def request_url(url: str, timeout: int | tuple[int, int], stream: bool = False, extra_headers: dict | None = None, use_player_ua: bool = False) -> requests.Response:
     normalized_url = ensure_http_url(url)
-    headers = {**DEFAULT_HEADERS, **(extra_headers or {})}
+    base_headers = PLAYER_HEADERS if use_player_ua else DEFAULT_HEADERS
+    headers = {**base_headers, **(extra_headers or {})}
+    # 添加 Referer 头绕过防盗链
+    if "Referer" not in headers:
+        referer = _build_referer(normalized_url)
+        if referer:
+            headers["Referer"] = referer
     response = _SESSION.get(
         normalized_url,
         timeout=timeout,
