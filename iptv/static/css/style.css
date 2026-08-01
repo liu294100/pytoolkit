@@ -187,10 +187,10 @@ button.warning {
 
 .channel-item {
     display: grid;
-    grid-template-columns: 60px minmax(0, 1fr) auto;
+    grid-template-columns: 44px minmax(0, 1fr);
     gap: 10px;
     align-items: center;
-    padding: 10px 12px;
+    padding: 8px 10px;
     cursor: pointer;
     border-bottom: 1px solid var(--line-soft);
     width: 100%;
@@ -204,34 +204,48 @@ button.warning {
     background: #1d4ed8;
 }
 
-.logo {
-    width: 56px;
-    height: 36px;
-    object-fit: contain;
-    border-radius: 10px;
+.logo-wrap {
+    position: relative;
+    width: 44px;
+    height: 32px;
+    border-radius: 6px;
     border: 1px solid #334155;
     background: #0f172a;
-    padding: 3px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-placeholder {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+}
+
+.logo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    padding: 2px;
+}
+
+.logo.loaded {
+    opacity: 1;
+}
+
+.logo.error {
+    display: none;
 }
 
 .channel-main {
     width: 100%;
     min-width: 0;
-    padding-right: 4px;
-}
-
-.channel-side {
-    max-width: 88px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(37, 99, 235, 0.14);
-    color: #93c5fd;
-    font-size: 11px;
-    line-height: 1.2;
-    justify-self: end;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .title {
@@ -244,7 +258,7 @@ button.warning {
 }
 
 .meta {
-    margin-top: 3px;
+    margin-top: 2px;
     font-size: 11px;
     color: #93c5fd;
     white-space: nowrap;
@@ -254,11 +268,6 @@ button.warning {
 
 .channel-item.active .meta {
     color: #dbeafe;
-}
-
-.channel-item.active .channel-side {
-    background: rgba(255, 255, 255, 0.16);
-    color: #eff6ff;
 }
 
 .video-wrap {
@@ -413,6 +422,190 @@ video {
     font-size: 18px;
     font-weight: 700;
     color: #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+.modal-lg {
+    width: min(680px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.epg-modal-info {
+    display: flex;
+    gap: 20px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    background: rgba(30, 58, 138, 0.18);
+}
+
+.epg-modal-list {
+    flex: 1;
+    min-height: 200px;
+    max-height: 55vh;
+    overflow: auto;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: var(--bg-2);
+}
+
+.epg-modal-btn {
+    margin-top: 10px;
+    width: 100%;
+}
+
+/* EPG 面板遮罩 */
+.epg-panel-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.5);
+    z-index: 99;
+    display: none;
+}
+
+.epg-panel-mask.show {
+    display: block;
+}
+
+/* EPG 可拖动面板 */
+.epg-panel {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px;
+    max-height: 75vh;
+    display: none;
+    flex-direction: column;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.98), rgba(11, 18, 32, 0.99));
+    box-shadow: 0 20px 50px rgba(2, 6, 23, 0.6);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.epg-panel.show {
+    display: flex;
+}
+
+.epg-panel.dragged {
+    transform: none;
+}
+
+.epg-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: rgba(30, 58, 138, 0.25);
+    cursor: move;
+    user-select: none;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+}
+
+/* 隔离 Plyr 样式 */
+.epg-panel input[type="range"] {
+    display: none !important;
+}
+
+.epg-panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #dbeafe;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.epg-panel .epg-modal-info {
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 0;
+}
+
+.epg-panel .epg-modal-list {
+    flex: 1;
+    min-height: 150px;
+    max-height: none;
+    margin: 0 10px 10px;
+    border-radius: 10px;
+}
+
+.epg-panel .status {
+    margin: 0 14px 10px;
+}
+
+/* EPG 日期 Tab */
+.epg-date-tabs {
+    display: none;
+}
+
+.epg-date-tabs.has-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+    background: rgba(15, 23, 42, 0.5);
+    flex-shrink: 0;
+    scrollbar-width: none;
+}
+
+.epg-date-tabs.has-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.epg-date-tab {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--sub);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: auto;
+    min-width: 0;
+}
+
+.epg-date-tab:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--text);
+}
+
+.epg-date-tab.active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
 }
 
 .inline-check {

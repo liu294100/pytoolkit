@@ -42,6 +42,23 @@ const epgNext = document.getElementById("epgNext");
 const epgList = document.getElementById("epgList");
 const epgStatus = document.getElementById("epgStatus");
 
+// EPG 弹框元素
+const showEpgModalBtn = document.getElementById("showEpgModalBtn");
+const epgPanelMask = document.getElementById("epgPanelMask");
+const epgPanel = document.getElementById("epgPanel");
+const epgPanelHeader = document.getElementById("epgPanelHeader");
+const epgModalTitle = document.getElementById("epgModalTitle");
+const epgDateTabs = document.getElementById("epgDateTabs");
+const epgModalNow = document.getElementById("epgModalNow");
+const epgModalNext = document.getElementById("epgModalNext");
+const epgModalList = document.getElementById("epgModalList");
+const epgModalStatus = document.getElementById("epgModalStatus");
+const epgPanelCloseBtn = document.getElementById("epgPanelCloseBtn");
+
+// EPG 弹框当前数据
+let epgModalProgrammes = [];
+let epgModalCurrentDate = "";
+
 let hls = null;
 let playerUi = null;
 let sources = [];
@@ -302,18 +319,75 @@ function renderChannels() {
         if (index === currentIndex) {
             row.classList.add("active");
         }
+        
+        const logoUrl = item.logoUrl || item.logo || "";
+        const sourceCount = item.sourceCount || 1;
+        const sourceText = sourceCount > 1 ? `${sourceCount} 源` : "";
+        
         row.innerHTML = `
-            <img class="logo" src="${item.logoUrl || item.logo || ""}" alt="" onerror="this.style.display='none'">
+            <div class="logo-wrap">
+                ${logoUrl ? `<img class="logo" data-src="${logoUrl}" alt="" loading="lazy">` : ""}
+                <span class="logo-placeholder">${(item.displayName || item.name || "?").charAt(0)}</span>
+            </div>
             <div class="channel-main">
                 <div class="title">${item.displayName || item.name || "未命名频道"}</div>
-                <div class="meta">${item.group || "未分组"}</div>
+                <div class="meta">${item.group || "未分组"}${sourceText ? ` · ${sourceText}` : ""}</div>
             </div>
-            <div class="channel-side">${item.sourceCount || 1} 个源</div>
         `;
         fragment.appendChild(row);
     });
 
     channelList.appendChild(fragment);
+    
+    // 启动懒加载
+    observeChannelLogos();
+}
+
+// 图片懒加载观察器
+let logoObserver = null;
+
+function observeChannelLogos() {
+    // 清理旧的观察器
+    if (logoObserver) {
+        logoObserver.disconnect();
+    }
+    
+    // 不支持 IntersectionObserver 时直接加载
+    if (!window.IntersectionObserver) {
+        channelList.querySelectorAll("img.logo[data-src]").forEach(img => {
+            img.src = img.dataset.src;
+            img.removeAttribute("data-src");
+        });
+        return;
+    }
+    
+    logoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                const src = img.dataset.src;
+                if (src) {
+                    img.src = src;
+                    img.removeAttribute("data-src");
+                    img.onload = () => {
+                        img.classList.add("loaded");
+                    };
+                    img.onerror = () => {
+                        img.classList.add("error");
+                    };
+                }
+                logoObserver.unobserve(img);
+            }
+        });
+    }, {
+        root: channelList,
+        rootMargin: "100px",
+        threshold: 0.01
+    });
+    
+    channelList.querySelectorAll("img.logo[data-src]").forEach(img => {
+        logoObserver.observe(img);
+    });
 }
 
 function clearChannelSourceSelect() {
@@ -353,31 +427,84 @@ function setVideoLoaded() {
     videoWrap.classList.add("has-source");
 }
 
+// 检测 URL 是否可能是 H.265 流（根据文件名特征）
+function isLikelyHevc(url) {
+    const lowerUrl = (url || "").toLowerCase();
+    return lowerUrl.includes("h265") || lowerUrl.includes("hevc") || lowerUrl.includes("4k");
+}
+
 function playByUrl(url, rawUrl = "") {
     destroyPlayer();
     const isM3u8 = isHlsStream(rawUrl) || isHlsStream(url);
+    const likelyHevc = isLikelyHevc(rawUrl) || isLikelyHevc(url);
+    
+    // 如果明显是 H.265，提前提示
+    if (likelyHevc) {
+        setStatus(playerStatus, "检测到可能是 H.265 流，若播放失败请切换 H.264 线路", "#f59e0b");
+    }
+    
     if (isM3u8 && window.Hls && Hls.isSupported()) {
         hls = new Hls({
             enableWorker: true,
-            lowLatencyMode: false,
+            lowLatencyMode: true,
             capLevelToPlayerSize: true,
-            backBufferLength: 18,
-            maxBufferLength: 20,
-            maxMaxBufferLength: 32,
-            liveSyncDurationCount: 3,
-            liveMaxLatencyDurationCount: 8,
-            manifestLoadingTimeOut: 12000,
-            fragLoadingTimeOut: 18000,
-            levelLoadingTimeOut: 12000,
+            // 初始使用最小缓冲，快速启动
+            backBufferLength: 5,
+            maxBufferLength: 5,
+            maxMaxBufferLength: 15,
+            liveSyncDurationCount: 2,
+            liveMaxLatencyDurationCount: 4,
+            // 超时设置
+            manifestLoadingTimeOut: 10000,
+            fragLoadingTimeOut: 15000,
+            levelLoadingTimeOut: 10000,
+            // 快速启动
             startFragPrefetch: true,
+            testBandwidth: false,
+            // 容错
+            stretchShortVideoTrack: true,
+            maxBufferHole: 0.5,
+            maxStarvationDelay: 4,
+            maxLoadingDelay: 4,
+            appendErrorMaxRetry: 3,
+            enableSoftwareAES: true,
+        });
+        
+        // 监测加载性能，自动调整
+        let loadStartTime = Date.now();
+        let hasAdjusted = false;
+        
+        hls.on(Hls.Events.FRAG_LOADING, () => {
+            if (!loadStartTime) loadStartTime = Date.now();
+        });
+        
+        hls.on(Hls.Events.FRAG_LOADED, (_, data) => {
+            if (hasAdjusted) return;
+            const loadTime = Date.now() - loadStartTime;
+            // 如果分片加载超过 2 秒，说明网络较慢或源延迟高，增加缓冲
+            if (loadTime > 2000) {
+                console.log("[HLS] 检测到高延迟，调整缓冲配置");
+                hls.config.maxBufferLength = 30;
+                hls.config.maxMaxBufferLength = 60;
+                hls.config.liveSyncDurationCount = 4;
+                hls.config.liveMaxLatencyDurationCount = 10;
+                hasAdjusted = true;
+            }
+            loadStartTime = Date.now();
         });
         hls.loadSource(url);
         hls.attachMedia(player);
         hls.on(Hls.Events.ERROR, (_, data) => {
+            console.warn("[HLS Error]", data.type, data.details, data);
+            // fragParsingError：H.265 流浏览器不支持
+            if (data.details === "fragParsingError") {
+                setStatus(playerStatus, "流解析失败：H.265/HEVC 格式浏览器不支持，请切换 H.264 线路", "#fb7185");
+                return;
+            }
             if (data?.fatal) {
                 setStatus(playerStatus, `播放失败：${data.type || "未知错误"} / ${data.details || "未知详情"}`, "#fb7185");
                 if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                    hls.startLoad();
+                    setTimeout(() => hls?.startLoad(), 1000);
                     return;
                 }
                 if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
@@ -389,6 +516,9 @@ function playByUrl(url, rawUrl = "") {
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
             setVideoLoaded();
             player.play().catch(() => {});
+            if (!likelyHevc) {
+                setStatus(playerStatus, "播放中", "#22c55e");
+            }
         });
         return;
     }
@@ -412,6 +542,11 @@ function playChannel(index) {
     renderChannelSources(channel);
     applyCurrentSource(channel, currentSourceIndex);
     setStatus(playerStatus, "播放中", "#22c55e");
+    
+    // 如果已预加载 EPG，自动加载当前频道的节目表
+    if (epgPreloaded && epgUrlInput.value.trim()) {
+        loadEpgForCurrentChannel();
+    }
 }
 
 function renderChannelSources(channel) {
@@ -494,10 +629,10 @@ function clearEpgPanel(resetChannel) {
     }
 }
 
-function renderEpgRows(programmes) {
-    epgList.innerHTML = "";
+function renderEpgRows(programmes, container = epgList) {
+    container.innerHTML = "";
     if (!programmes.length) {
-        epgList.innerHTML = '<div class="epg-empty">没有匹配到节目单，请尝试切换 EPG 源或启用代理模式</div>';
+        container.innerHTML = '<div class="epg-empty">没有匹配到节目单，请尝试切换 EPG 源或启用代理模式</div>';
         return;
     }
     for (const item of programmes) {
@@ -507,32 +642,214 @@ function renderEpgRows(programmes) {
             <div class="epg-time">${item.start || "--"} - ${item.stop || "--"}</div>
             <div class="epg-title">${item.title || "未知节目"}</div>
         `;
-        epgList.appendChild(row);
+        container.appendChild(row);
     }
 }
 
-async function loadEpgForCurrentChannel() {
-    if (!currentChannel) {
-        setStatus(epgStatus, "请先选择一个频道", "#fb7185");
-        return;
-    }
+// 标记当前 EPG 源是否已预加载
+let epgPreloaded = false;
+let epgPreloadedUrl = "";
+
+// 从后端获取频道 EPG（后端已有内存缓存，秒返回）
+async function fetchChannelEpg(epgUrl, channelName, tvgId) {
+    const params = new URLSearchParams({
+        epg_url: epgUrl,
+        channel_name: channelName,
+        tvg_id: tvgId,
+    });
+    const data = await getJson(`/api/epg?${params.toString()}`);
+    return data.programmes || [];
+}
+
+// 预加载整个 EPG 源到后端缓存
+async function preloadEpgSource() {
     const epgUrl = epgUrlInput.value.trim();
     if (!epgUrl) {
         setStatus(epgStatus, "请先填写 EPG 链接", "#fb7185");
         return;
     }
-    const params = new URLSearchParams({
-        epg_url: epgUrl,
-        channel_name: currentChannel.name || "",
-        tvg_id: currentChannel.tvgId || "",
-    });
-    setStatus(epgStatus, "正在加载节目表...");
-    const data = await getJson(`/api/epg?${params.toString()}`);
-    const programmes = data.programmes || [];
-    renderEpgRows(programmes);
-    epgNow.textContent = programmes[0]?.title || "-";
-    epgNext.textContent = programmes[1]?.title || "-";
-    setStatus(epgStatus, programmes.length ? `节目条数：${programmes.length}` : "未匹配到节目单", programmes.length ? "#22c55e" : "#f59e0b");
+    
+    setStatus(epgStatus, "正在加载 EPG 节目单...");
+    try {
+        const result = await postJson("/api/epg/preload", { epg_url: epgUrl });
+        epgPreloaded = true;
+        epgPreloadedUrl = epgUrl;
+        setStatus(epgStatus, `EPG 已缓存：${result.channel_count} 个频道，${result.programme_count} 条节目`, "#22c55e");
+        
+        // 如果当前已选中频道，自动加载该频道的节目
+        if (currentChannel) {
+            await loadEpgForCurrentChannel();
+        }
+    } catch (error) {
+        setStatus(epgStatus, error.message || "EPG 加载失败", "#fb7185");
+    }
+}
+
+// 加载当前频道的节目表（从后端缓存获取）
+async function loadEpgForCurrentChannel() {
+    if (!currentChannel) {
+        return;
+    }
+    const epgUrl = epgUrlInput.value.trim();
+    if (!epgUrl) {
+        return;
+    }
+    
+    const channelName = currentChannel.displayName || currentChannel.name || "";
+    const tvgId = currentChannel.tvgId || "";
+    
+    try {
+        const programmes = await fetchChannelEpg(epgUrl, channelName, tvgId);
+        renderEpgRows(programmes, epgList);
+        epgNow.textContent = programmes[0]?.title || "-";
+        epgNext.textContent = programmes[1]?.title || "-";
+    } catch (error) {
+        // 静默失败，不影响播放
+        console.warn("EPG 加载失败:", error);
+    }
+}
+// EPG 弹框相关函数
+function openEpgModal() {
+    epgPanelMask.classList.add("show");
+    epgPanel.classList.add("show");
+    loadEpgForModal();
+}
+
+function closeEpgModal() {
+    epgPanelMask.classList.remove("show");
+    epgPanel.classList.remove("show");
+    // 重置位置，下次打开时居中
+    epgPanel.classList.remove("dragged");
+    epgPanel.style.left = "";
+    epgPanel.style.top = "";
+    // 清空数据
+    epgModalProgrammes = [];
+    epgModalCurrentDate = "";
+}
+
+// 从节目的 start 字段提取日期（格式: MM-DD HH:MM）
+function extractDateFromStart(start) {
+    if (!start) return "";
+    const match = start.match(/^(\d{2}-\d{2})/);
+    return match ? match[1] : "";
+}
+
+// 获取日期的显示文本
+function getDateLabel(dateStr) {
+    if (!dateStr) return "未知";
+    const today = new Date();
+    const todayStr = `${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = `${String(tomorrow.getMonth() + 1).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+    
+    if (dateStr === todayStr) return "今天";
+    if (dateStr === tomorrowStr) return "明天";
+    if (dateStr === yesterdayStr) return "昨天";
+    return dateStr;
+}
+
+// 按日期分组节目
+function groupProgrammesByDate(programmes) {
+    const groups = new Map();
+    for (const prog of programmes) {
+        const date = extractDateFromStart(prog.start);
+        if (!groups.has(date)) {
+            groups.set(date, []);
+        }
+        groups.get(date).push(prog);
+    }
+    return groups;
+}
+
+// 渲染日期 Tab
+function renderEpgDateTabs(dateGroups, currentDate) {
+    epgDateTabs.innerHTML = "";
+    epgDateTabs.classList.remove("has-tabs");
+    
+    const dates = Array.from(dateGroups.keys()).filter(d => d); // 过滤空日期
+    if (dates.length <= 1) {
+        return; // 只有一天不显示 Tab
+    }
+    
+    epgDateTabs.classList.add("has-tabs");
+    
+    for (const date of dates) {
+        const tab = document.createElement("button");
+        tab.className = "epg-date-tab" + (date === currentDate ? " active" : "");
+        tab.textContent = getDateLabel(date);
+        tab.dataset.date = date;
+        tab.addEventListener("click", () => {
+            epgModalCurrentDate = date;
+            // 更新 Tab 激活状态
+            epgDateTabs.querySelectorAll(".epg-date-tab").forEach(t => {
+                t.classList.toggle("active", t.dataset.date === date);
+            });
+            renderEpgRows(dateGroups.get(date) || [], epgModalList);
+        });
+        epgDateTabs.appendChild(tab);
+    }
+}
+
+async function loadEpgForModal() {
+    epgDateTabs.innerHTML = "";
+    epgDateTabs.classList.remove("has-tabs");
+    epgModalProgrammes = [];
+    epgModalCurrentDate = "";
+    
+    if (!currentChannel) {
+        epgModalTitle.textContent = "节目表";
+        epgModalNow.textContent = "-";
+        epgModalNext.textContent = "-";
+        epgModalList.innerHTML = '<div class="epg-empty">请先选择一个频道</div>';
+        setStatus(epgModalStatus, "");
+        return;
+    }
+    
+    const epgUrl = epgUrlInput.value.trim();
+    const channelName = currentChannel.displayName || currentChannel.name || "";
+    
+    epgModalTitle.textContent = `${channelName}`;
+    
+    if (!epgUrl) {
+        epgModalNow.textContent = "-";
+        epgModalNext.textContent = "-";
+        epgModalList.innerHTML = '<div class="epg-empty">请先加载 EPG 节目单</div>';
+        setStatus(epgModalStatus, "");
+        return;
+    }
+    
+    const tvgId = currentChannel.tvgId || "";
+    
+    // 从后端获取（后端有缓存，秒返回）
+    setStatus(epgModalStatus, "正在加载...");
+    try {
+        const programmes = await fetchChannelEpg(epgUrl, channelName, tvgId);
+        epgModalProgrammes = programmes;
+        epgModalNow.textContent = programmes[0]?.title || "-";
+        epgModalNext.textContent = programmes[1]?.title || "-";
+        
+        // 按日期分组
+        const dateGroups = groupProgrammesByDate(programmes);
+        const dates = Array.from(dateGroups.keys());
+        
+        // 默认选中今天，如果没有今天则选第一个
+        const today = new Date();
+        const todayStr = `${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        epgModalCurrentDate = dates.includes(todayStr) ? todayStr : (dates[0] || "");
+        
+        // 渲染 Tab 和列表
+        renderEpgDateTabs(dateGroups, epgModalCurrentDate);
+        renderEpgRows(dateGroups.get(epgModalCurrentDate) || programmes, epgModalList);
+        
+        setStatus(epgModalStatus, programmes.length ? `共 ${programmes.length} 条节目` : "未匹配到节目", programmes.length ? "#22c55e" : "#f59e0b");
+    } catch (error) {
+        epgModalList.innerHTML = `<div class="epg-empty">加载失败：${error.message || "未知错误"}</div>`;
+        setStatus(epgModalStatus, "加载失败", "#fb7185");
+    }
 }
 
 function setupOpenSourceAndEpgBind() {
@@ -718,17 +1035,74 @@ copyBtn.addEventListener("click", async () => {
 });
 
 loadEpgBtn.addEventListener("click", async () => {
-    try {
-        await loadEpgForCurrentChannel();
-    } catch (error) {
-        setStatus(epgStatus, error.message || "EPG 加载失败", "#fb7185");
-    }
+    await preloadEpgSource();
 });
 
 clearEpgBtn.addEventListener("click", () => {
     clearEpgPanel(true);
-    setStatus(epgStatus, "已清空节目表", "#38bdf8");
+    epgPreloaded = false;
+    epgPreloadedUrl = "";
+    setStatus(epgStatus, "已清空 EPG 缓存", "#38bdf8");
 });
+
+// EPG 弹框事件
+showEpgModalBtn.addEventListener("click", openEpgModal);
+epgPanelCloseBtn.addEventListener("click", closeEpgModal);
+epgPanelMask.addEventListener("click", closeEpgModal);
+
+// EPG 面板拖动功能
+(function initEpgPanelDrag() {
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+
+    epgPanelHeader.addEventListener("mousedown", e => {
+        if (e.target.closest("button")) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = epgPanel.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        // 首次拖动时，移除居中的 transform，改为绝对定位
+        if (!epgPanel.classList.contains("dragged")) {
+            epgPanel.classList.add("dragged");
+            epgPanel.style.left = startLeft + "px";
+            epgPanel.style.top = startTop + "px";
+        }
+        epgPanelHeader.style.cursor = "grabbing";
+        e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", e => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+        
+        // 边界限制
+        const panelWidth = epgPanel.offsetWidth;
+        const panelHeight = epgPanel.offsetHeight;
+        const maxLeft = window.innerWidth - panelWidth;
+        const maxTop = window.innerHeight - panelHeight;
+        
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+        
+        epgPanel.style.left = newLeft + "px";
+        epgPanel.style.top = newTop + "px";
+    });
+
+    document.addEventListener("mouseup", () => {
+        if (isDragging) {
+            isDragging = false;
+            epgPanelHeader.style.cursor = "move";
+        }
+    });
+})();
 
 player.addEventListener("error", () => {
     const mediaError = player.error;
@@ -749,6 +1123,7 @@ player.addEventListener("loadedmetadata", () => {
 window.addEventListener("keydown", event => {
     if (event.key === "Escape") {
         closeProxyModal();
+        closeEpgModal();
     }
 });
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPTV Pro 控制台</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plyr.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -49,18 +49,24 @@
                 <label>M3U 文本（模拟 APTV）</label>
                 <textarea id="m3uText" placeholder="#EXTM3U"></textarea>
             </div>
-            <h2 class="section-title">频道筛选</h2>
+            <h2 class="section-title">EPG 节目表</h2>
             <div class="field">
-                <label>关键词筛选</label>
-                <input id="keywordInput" placeholder="输入频道关键字">
+                <label>EPG 预设</label>
+                <select id="epgPreset"></select>
             </div>
             <div class="field">
-                <label>分组筛选</label>
-                <select id="groupFilter"></select>
+                <label>EPG 链接</label>
+                <input id="epgUrlInput" placeholder="https://example.com/epg.xml.gz">
             </div>
-            <div class="small count-row">频道数量 <span class="tag" id="channelCount">0</span></div>
-            <div class="channel-list" id="channelList"></div>
-            <div class="status" id="sourceStatus"></div>
+            <div class="row-2">
+                <button id="loadEpgBtn">加载 EPG 节目单</button>
+                <button id="clearEpgBtn" class="warning">清空缓存</button>
+            </div>
+            <div class="small">当前频道：<span id="epgChannel">-</span></div>
+            <div class="small">正在播出：<span id="epgNow">-</span></div>
+            <div class="small">下个节目：<span id="epgNext">-</span></div>
+            <div class="epg-list" id="epgList"></div>
+            <div class="status" id="epgStatus"></div>
         </aside>
 
         <main class="card player-area">
@@ -80,28 +86,23 @@
             </div>
             <div class="now-box" id="nowPlaying">未选择频道</div>
             <div class="small mono" id="streamUrl"></div>
+            <button id="showEpgModalBtn" class="secondary epg-modal-btn">查看完整节目表</button>
             <div class="status" id="playerStatus"></div>
         </main>
 
         <aside class="card side">
-            <h2 class="section-title">EPG 节目表</h2>
+            <h2 class="section-title">频道筛选</h2>
             <div class="field">
-                <label>EPG 预设</label>
-                <select id="epgPreset"></select>
+                <label>关键词筛选</label>
+                <input id="keywordInput" placeholder="输入频道关键字">
             </div>
             <div class="field">
-                <label>EPG 链接</label>
-                <input id="epgUrlInput" placeholder="https://example.com/epg.xml.gz">
+                <label>分组筛选</label>
+                <select id="groupFilter"></select>
             </div>
-            <div class="row-2">
-                <button id="loadEpgBtn">加载当前频道节目</button>
-                <button id="clearEpgBtn" class="warning">清空节目表</button>
-            </div>
-            <div class="small">当前频道：<span id="epgChannel">-</span></div>
-            <div class="small">正在播出：<span id="epgNow">-</span></div>
-            <div class="small">下个节目：<span id="epgNext">-</span></div>
-            <div class="epg-list" id="epgList"></div>
-            <div class="status" id="epgStatus"></div>
+            <div class="small count-row">频道数量 <span class="tag" id="channelCount">0</span></div>
+            <div class="channel-list" id="channelList"></div>
+            <div class="status" id="sourceStatus"></div>
         </aside>
     </div>
 </div>
@@ -131,8 +132,23 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+<div class="epg-panel-mask" id="epgPanelMask"></div>
+<div class="epg-panel" id="epgPanel">
+    <div class="epg-panel-header" id="epgPanelHeader">
+        <span class="epg-panel-title" id="epgModalTitle">节目表</span>
+        <button id="epgPanelCloseBtn" class="modal-close" type="button">×</button>
+    </div>
+    <div class="epg-date-tabs" id="epgDateTabs"></div>
+    <div class="epg-modal-info">
+        <div class="small">正在播出：<span id="epgModalNow">-</span></div>
+        <div class="small">下个节目：<span id="epgModalNext">-</span></div>
+    </div>
+    <div class="epg-modal-list" id="epgModalList"></div>
+    <div class="status" id="epgModalStatus"></div>
+</div>
+
+<script src="{{ url_for('static', filename='js/hls.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/plyr.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

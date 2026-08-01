@@ -1,7 +1,7 @@
 import requests
 from flask import Blueprint, Response, current_app, jsonify, request
 
-from ..services.epg_service import load_epg_programmes
+from ..services.epg_service import get_epg_cache_stats, load_epg_programmes
 from ..services.http_service import (
     DEFAULT_HEADERS,
     ensure_http_url,
@@ -124,6 +124,39 @@ def get_epg():
         return jsonify({"error": f"EPG 请求失败: {status_code}"}), 502
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
+
+
+@api_bp.route("/epg/preload", methods=["POST"])
+def preload_epg():
+    """预加载 EPG 源，全量下载并缓存到内存"""
+    from ..services.epg_service import preload_epg_source
+    
+    data = request.get_json(silent=True) or {}
+    epg_url = normalize_input_url(data.get("epg_url", ""))
+    if not epg_url:
+        return jsonify({"error": "缺少 epg_url 参数"}), 400
+    
+    try:
+        stats = preload_epg_source(
+            epg_url=epg_url,
+            timeout=current_app.config["REQUEST_TIMEOUT_SECONDS"],
+        )
+        return jsonify({
+            "success": True,
+            "message": "EPG 节目单已加载到缓存",
+            **stats,
+        })
+    except requests.HTTPError as exc:
+        status_code = exc.response.status_code if exc.response is not None else "未知"
+        return jsonify({"error": f"EPG 请求失败: {status_code}"}), 502
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@api_bp.route("/epg/cache-stats", methods=["GET"])
+def get_epg_cache():
+    """获取 EPG 缓存统计信息"""
+    return jsonify(get_epg_cache_stats())
 
 
 @api_bp.route("/proxy-text", methods=["GET"])
