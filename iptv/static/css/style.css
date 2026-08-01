@@ -634,6 +634,11 @@ video {
     --plyr-color-main: #2563eb;
 }
 
+/* 隐藏 Plyr 自带的全屏按钮，使用自定义按钮 */
+.plyr__control[data-plyr="fullscreen"] {
+    display: none !important;
+}
+
 @media (max-width: 1420px) {
     .layout {
         grid-template-columns: 390px 1fr;
