@@ -180,10 +180,23 @@ payload:
 
   - DOMAIN-SUFFIX,marketwatch.com
 
-   #binance
-  - DOMAIN-SUFFIX,binance.com,PROXY
-  - DOMAIN-SUFFIX,bnbstatic.com,PROXY
-  - DOMAIN-SUFFIX,binance.info,PROXY
+
+  # Binance
+  - DOMAIN-SUFFIX,binance.com
+  - DOMAIN-SUFFIX,binance.me
+  - DOMAIN-SUFFIX,binance.cloud
+  - DOMAIN-SUFFIX,bnbstatic.com
+  - DOMAIN-SUFFIX,bntrace.com
+  - DOMAIN-SUFFIX,binance
+  # Binance backup / acceleration
+  - DOMAIN-SUFFIX,binance.info
+  - DOMAIN-SUFFIX,binancecnt.com
+  - DOMAIN-SUFFIX,binancefuture.com
+  - DOMAIN-SUFFIX,bnappzh.co
+  - DOMAIN-SUFFIX,bnbzh.ac
+  # service
+  - DOMAIN-SUFFIX,saasexch.co
+  - DOMAIN-SUFFIX,saasexch.com
 
 
   # ==========================
