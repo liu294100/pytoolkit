@@ -180,6 +180,11 @@ payload:
 
   - DOMAIN-SUFFIX,marketwatch.com
 
+   #binance
+  - DOMAIN-SUFFIX,binance.com,PROXY
+  - DOMAIN-SUFFIX,bnbstatic.com,PROXY
+  - DOMAIN-SUFFIX,binance.info,PROXY
+
 
   # ==========================
   # Bloomberg
