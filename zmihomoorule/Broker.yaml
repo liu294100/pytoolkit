@@ -197,6 +197,7 @@ payload:
   # service
   - DOMAIN-SUFFIX,saasexch.co
   - DOMAIN-SUFFIX,saasexch.com
+  - DOMAIN-SUFFIX,binance.me
 
 
   # ==========================
