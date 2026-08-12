@@ -15,6 +15,7 @@ from .channel_list import ChannelListWidget
 from .epg_panel import EpgPanel
 from .source_dialog import SourceDialog
 from .proxy_dialog import ProxyDialog
+from .mpv_dialog import MpvDialog
 from ..models import ChannelGroup
 from ..services import HttpService, SourceService
 from ..services.cache_manager import cache_manager
@@ -140,6 +141,11 @@ class MainWindow(QMainWindow):
         proxy_action.triggered.connect(self._show_proxy_dialog)
         settings_menu.addAction(proxy_action)
         
+        # MPV 播放器设置
+        mpv_action = QAction("MPV 播放器设置(&M)...", self)
+        mpv_action.triggered.connect(self._show_mpv_dialog)
+        settings_menu.addAction(mpv_action)
+        
         # ========== 播放菜单 ==========
         play_menu = menubar.addMenu("播放(&P)")
         
@@ -249,6 +255,11 @@ class MainWindow(QMainWindow):
             port=self._proxy_port,
         )
         dialog.settings_changed.connect(self._on_proxy_changed)
+        dialog.exec()
+    
+    def _show_mpv_dialog(self):
+        """显示 MPV 设置对话框"""
+        dialog = MpvDialog(self)
         dialog.exec()
     
     def _on_proxy_changed(self, enabled: bool, host: str, port: int):

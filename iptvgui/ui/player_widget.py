@@ -10,19 +10,43 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal, QTimer, QPoint
 from PySide6.QtGui import QMouseEvent, QKeyEvent, QIcon, QCursor
 
-# 设置 mpv DLL 路径
-if getattr(sys, 'frozen', False):
-    MPV_DIR = Path(sys._MEIPASS) / "mpv"
-else:
-    MPV_DIR = Path(__file__).parent.parent / "mpv"
+from ..services.cache_manager import cache_manager
 
-if MPV_DIR.exists():
-    os.environ["PATH"] = str(MPV_DIR) + os.pathsep + os.environ.get("PATH", "")
-    if sys.platform == "win32":
-        try:
-            os.add_dll_directory(str(MPV_DIR))
-        except Exception:
-            pass
+
+def _setup_mpv_dll_path():
+    """
+    设置 MPV DLL 路径
+    优先级：
+    1. 用户配置的自定义路径
+    2. 默认位置 (iptvgui/mpv/)
+    """
+    # 从配置获取 DLL 路径
+    dll_path = cache_manager.get_mpv_dll_path()
+    
+    if dll_path and dll_path.exists():
+        # 使用配置的路径（或默认路径）
+        mpv_dir = dll_path.parent
+    else:
+        # 回退到传统的默认位置
+        if getattr(sys, 'frozen', False):
+            mpv_dir = Path(sys._MEIPASS) / "mpv"
+        else:
+            mpv_dir = Path(__file__).parent.parent / "mpv"
+    
+    # 将目录添加到 PATH
+    if mpv_dir.exists():
+        os.environ["PATH"] = str(mpv_dir) + os.pathsep + os.environ.get("PATH", "")
+        if sys.platform == "win32":
+            try:
+                os.add_dll_directory(str(mpv_dir))
+            except Exception:
+                pass
+    
+    return mpv_dir
+
+
+# 设置 MPV DLL 路径
+MPV_DIR = _setup_mpv_dll_path()
 
 try:
     import mpv
@@ -113,8 +137,8 @@ class PlayerWidget(QWidget):
         if not MPV_AVAILABLE:
             no_mpv_label = QLabel(
                 "未找到 MPV 播放器\n\n"
-                "请运行 download_mpv.bat 下载\n"
-                "或手动下载 mpv 到 iptvgui/mpv/ 目录"
+                "请点击菜单 [设置] → [MPV 播放器设置]\n"
+                "下载或配置 libmpv-2.dll"
             )
             no_mpv_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             no_mpv_label.setStyleSheet("color: #888; font-size: 14px;")

@@ -148,6 +148,74 @@ class CacheManager:
         """加载设置"""
         return self._read_json(self.SETTINGS_FILE) or {}
     
+    # ========== MPV 配置 ==========
+    
+    def get_default_mpv_dir(self) -> Path:
+        """获取默认 MPV DLL 目录"""
+        if getattr(sys, 'frozen', False):
+            return Path(sys.executable).parent / "mpv"
+        else:
+            return Path(__file__).parent.parent / "mpv"
+    
+    def save_mpv_config(self, custom_dll_path: str | None):
+        """
+        保存 MPV 配置
+        
+        Args:
+            custom_dll_path: 自定义 DLL 路径（None 表示使用默认位置）
+        """
+        settings = self.load_settings()
+        settings["mpv_custom_dll_path"] = custom_dll_path
+        self.save_settings(settings)
+    
+    def load_mpv_config(self) -> dict:
+        """
+        加载 MPV 配置
+        
+        Returns:
+            dict 包含:
+                - custom_dll_path: 自定义路径（可能为 None）
+                - effective_dll_path: 实际使用的 DLL 路径
+                - using_custom: 是否使用自定义路径
+        """
+        settings = self.load_settings()
+        custom_path = settings.get("mpv_custom_dll_path")
+        
+        # 确定实际使用的路径
+        if custom_path and Path(custom_path).exists():
+            effective_path = custom_path
+            using_custom = True
+        else:
+            # 默认位置
+            default_dll = self.get_default_mpv_dir() / "libmpv-2.dll"
+            effective_path = str(default_dll) if default_dll.exists() else None
+            using_custom = False
+        
+        return {
+            "custom_dll_path": custom_path,
+            "effective_dll_path": effective_path,
+            "using_custom": using_custom,
+        }
+    
+    def get_mpv_dll_path(self) -> Path | None:
+        """
+        获取应该使用的 MPV DLL 路径
+        优先使用自定义路径，否则使用默认位置
+        
+        Returns:
+            DLL 文件的 Path，或 None（如果都不存在）
+        """
+        config = self.load_mpv_config()
+        effective = config.get("effective_dll_path")
+        if effective:
+            return Path(effective)
+        return None
+    
+    def is_mpv_available(self) -> bool:
+        """检查 MPV DLL 是否可用"""
+        dll_path = self.get_mpv_dll_path()
+        return dll_path is not None and dll_path.exists()
+    
     # ========== 工具方法 ==========
     
     def _write_json(self, filename: str, data: Any):

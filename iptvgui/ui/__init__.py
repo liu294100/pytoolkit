@@ -7,6 +7,7 @@ from .epg_panel import EpgPanel
 from .epg_dialog import EpgDialog
 from .source_dialog import SourceDialog
 from .proxy_dialog import ProxyDialog
+from .mpv_dialog import MpvDialog
 
 __all__ = [
     "MainWindow",
@@ -16,4 +17,5 @@ __all__ = [
     "EpgDialog",
     "SourceDialog",
     "ProxyDialog",
+    "MpvDialog",
 ]

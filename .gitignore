@@ -177,3 +177,8 @@ cython_debug/
 /iptvgui/cache
 iptvgui/cache/epg.json
 iptvgui/cache/channels.json
+
+# MPV DLL 文件（用户通过设置菜单下载或配置）
+iptvgui/mpv/libmpv-2.dll
+iptvgui/mpv/*.dll
+iptvgui/libmpv-2.dll
