@@ -30,7 +30,7 @@ async def download_rom(url: str, output_dir: str = ".", proxy: str = None, headl
     Args:
         url: 游戏页面 URL
         output_dir: 输出目录
-        proxy: 代理地址，如 "http://127.0.0.1:7890"
+        proxy: 代理地址，如 "http://127.0.0.1:1234"
         headless: 是否无头模式运行
     
     Returns:
