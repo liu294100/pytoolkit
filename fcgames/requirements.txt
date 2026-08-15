@@ -1,0 +1,7 @@
+# PlayOldGame ROM 下载器依赖
+
+# Playwright - 浏览器自动化，用于抓包
+playwright>=1.40.0
+
+# py7zr - 7z 压缩包解压
+py7zr>=0.20.0
