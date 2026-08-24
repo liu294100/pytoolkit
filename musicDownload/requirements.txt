@@ -1,3 +1,11 @@
-requests
-PyQt5
-musicdl
+# Music Downloader Pro - 依赖文件
+# Python 3.10+ 推荐
+
+# GUI 框架
+PyQt5>=5.15.9
+
+# 音乐下载核心
+musicdl>=1.0.0
+
+# 网络请求
+requests>=2.28.0
