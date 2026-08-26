@@ -68,6 +68,24 @@ SOURCE_MAP = {
 SOURCE_MAP_REVERSE = {v: k for k, v in SOURCE_MAP.items()}
 DEFAULT_SOURCES = {"网易云音乐", "QQ音乐", "酷我音乐", "酷狗音乐", "咪咕音乐"}
 
+# 应用图标 (SVG base64)
+APP_ICON_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e94560"/>
+      <stop offset="100%" style="stop-color:#ff6b6b"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#bg)"/>
+  <g fill="white">
+    <circle cx="22" cy="44" r="8"/>
+    <rect x="28" y="16" width="4" height="28" rx="2"/>
+    <circle cx="44" cy="38" r="8"/>
+    <rect x="50" y="10" width="4" height="28" rx="2"/>
+    <path d="M30 18 L30 14 Q30 10 34 10 L52 10 Q56 10 56 14 L56 18 Q56 22 52 20 L34 16 Q30 15 30 18 Z"/>
+  </g>
+</svg>'''
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #                              主题样式
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -910,6 +928,9 @@ class MusicDownloaderPro(QMainWindow):
         self.setWindowTitle("🎵 Music Downloader Pro")
         self.resize(1300, 800)
         self.setMinimumSize(1000, 600)
+        
+        # 设置窗口图标
+        self._setup_app_icon()
 
         self._settings = QSettings("MusicDownloaderPro", "Settings")
         base = os.getcwd()
@@ -946,6 +967,15 @@ class MusicDownloaderPro(QMainWindow):
         self._setup_ui()
         self._apply_theme()
         self._log("🎵 Music Downloader Pro v2.4 启动")
+
+    def _setup_app_icon(self):
+        """设置应用程序图标（窗口标题栏和任务栏）"""
+        pixmap = QPixmap()
+        pixmap.loadFromData(APP_ICON_SVG.encode('utf-8'))
+        if not pixmap.isNull():
+            icon = QIcon(pixmap)
+            self.setWindowIcon(icon)
+            QApplication.instance().setWindowIcon(icon)
 
     def _setup_ui(self):
         self._create_menu()
