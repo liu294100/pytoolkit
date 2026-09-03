@@ -1,0 +1,85 @@
+# NAME: DisneyPlus
+# AUTHOR:
+# UPDATED: 2026-09-03
+# SOURCE:
+#   https://github.com/blackmatrix7/ios_rule_script
+#   https://www.netify.ai/resources/applications/disney-plus
+
+payload:
+
+  # ==========================================
+  # Disney+
+  # ==========================================
+
+  # Disney+ 主站
+  - DOMAIN-SUFFIX,disneyplus.com
+  - DOMAIN-SUFFIX,disney-plus.net
+
+  # Disney Streaming
+  - DOMAIN-SUFFIX,disneystreaming.com
+
+  # Disney+ API / Backend
+  - DOMAIN-SUFFIX,bamgrid.com
+
+  # Disney+ Streaming CDN
+  - DOMAIN-SUFFIX,dssott.com
+  - DOMAIN-SUFFIX,dssedge.com
+
+  # ==========================================
+  # Disney+ API
+  # ==========================================
+
+  - DOMAIN,disney.api.edge.bamgrid.com
+  - DOMAIN,disney.connections.edge.bamgrid.com
+  - DOMAIN,disney.content.edge.bamgrid.com
+  - DOMAIN,disney.playback.edge.bamgrid.com
+
+  # Search API
+  - DOMAIN,search-api-disney.bamgrid.com
+
+  # Playback certificate
+  - DOMAIN,playback-certs.bamgrid.com
+
+  # ==========================================
+  # Static / Assets
+  # ==========================================
+
+  - DOMAIN,static-assets.bamgrid.com
+  - DOMAIN,vpe-static.bamgrid.com
+  - DOMAIN,pcs.bamgrid.com
+
+  # ==========================================
+  # Account / Registration
+  # ==========================================
+
+  - DOMAIN-SUFFIX,registerdisney.go.com
+
+  # ==========================================
+  # Disney+ Japan
+  # ==========================================
+
+  - DOMAIN,disneyplus.disney.co.jp
+
+  # ==========================================
+  # Analytics / Playback
+  # ==========================================
+
+  - DOMAIN-SUFFIX,bam.nr-data.net
+  - DOMAIN-SUFFIX,conviva.com
+  - DOMAIN-SUFFIX,newrelic.com
+
+  # ==========================================
+  # Disney+ Web / Application
+  # ==========================================
+
+  - DOMAIN-SUFFIX,apps.disneyplus.com
+
+  # ==========================================
+  # Telemetry / Service
+  # ==========================================
+
+  - DOMAIN-SUFFIX,braze.com
+  - DOMAIN-SUFFIX,adobedtm.com
+  - DOMAIN-SUFFIX,demdex.net
+  - DOMAIN-SUFFIX,flashtalking.com
+  - DOMAIN-SUFFIX,onetrust.com
