@@ -15,7 +15,7 @@ rule-providers:
   DisneyPlus:
     type: http
     behavior: classical
-    url: https://raw.githubusercontent.com/liu294100/pytoolkit/refs/heads/dev/zmihomoorule/DisneyPlus.yaml
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Disney/Disney.yaml
     interval: 86400
   Steam:
     type: http
