@@ -82,14 +82,6 @@ proxy-groups:
   - "🌍 主流媒体"
   include-all-proxies: true
   filter: .*
-# - name: 🌍 RiotGames
-#   type: select
-#   proxies:
-#   - "🔰 手动选择"
-#   - "🎯 Direct"
-#   - "🌍 主流媒体"
-#   include-all-proxies: true
-#   filter: .*
 
 rules:
 - RULE-SET,TikTok,🎬 TikTokRule
