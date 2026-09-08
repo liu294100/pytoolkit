@@ -27,11 +27,6 @@ rule-providers:
     behavior: classical
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml
     interval: 86400
-  # RiotGames:
-  #   type: http
-  #   behavior: classical
-  #   url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml
-  #   interval: 86400
   Broker:
     type: http
     behavior: classical
@@ -103,5 +98,4 @@ rules:
 - RULE-SET,Steam,🎬 SteamRule
 - RULE-SET,HBO,🎬 HBORule
 - RULE-SET,Broker,🌍 Broker
-# - RULE-SET,RiotGames,🌍 RiotGames
 
