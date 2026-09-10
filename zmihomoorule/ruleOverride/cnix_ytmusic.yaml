@@ -1,0 +1,22 @@
+name: CNIX Broker Rule Override
+desc: 合并多个分流规则
+
+rule-providers:
+  YouTubeMusic:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTubeMusic/YouTubeMusic.yaml
+    interval: 86400
+
+proxy-groups:
+- name: 🎬 YouTubeMusicRule
+  type: select
+  proxies:
+  - "🔰 手动选择"
+  - "🎯 Direct"
+  - "🌍 主流媒体"
+  include-all-proxies: true
+  filter: .*
+
+rules:
+- RULE-SET,YouTubeMusic,🎬 YouTubeMusicRule
