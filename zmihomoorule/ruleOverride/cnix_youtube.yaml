@@ -1,4 +1,4 @@
-name: CNIX  YouTube Rule Override
+name: CNIX YouTube Rule Override
 desc: 合并多个分流规则
 
 rule-providers:
