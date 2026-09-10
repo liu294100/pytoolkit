@@ -1,4 +1,4 @@
-name: CNIX Broker Rule Override
+name: CNIX YTMusic Rule Override
 desc: 合并多个分流规则
 
 rule-providers:
