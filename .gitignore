@@ -182,3 +182,7 @@ iptvgui/cache/channels.json
 iptvgui/mpv/libmpv-2.dll
 iptvgui/mpv/*.dll
 iptvgui/libmpv-2.dll
+
+# LoL Scout v3 local cache / generated spectate scripts
+LOL_Riot_Games_API/.lol_scout_data/
+LOL_Riot_Games_API/spectate_*.bat

@@ -1,3 +1,6 @@
 requests>=2.31.0
 customtkinter>=5.2.0
 Pillow>=10.0.0
+psutil>=5.9.0
+# 可选：C 实现的模糊匹配，更快；未安装时自动回退到纯 Python
+rapidfuzz>=3.6.0
