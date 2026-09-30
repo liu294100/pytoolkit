@@ -1,0 +1,22 @@
+name: RiotGame Override
+desc: 独立的 RiotGame 分流规则，包含专用的策略组
+rule-providers:
+  TikTok:
+    type: http
+    behavior: classical
+    url: github.com/blackmatrix7/ios_rule_script/raw/refs/heads/master/rule/Clash/Riot/Riot.yaml
+    interval: 86400
+
+proxy-groups:
+- name: 🎬 RiotGame
+  type: select
+  proxies:
+  - "🔰 手动选择"
+  - "🎯 Direct"
+  - "\U0001F30D 主流媒体"
+  include-all-proxies: true
+  # 匹配所有节点，确保像参考配置那样包含各国节点
+  filter: .*
+
+rules:
+- RULE-SET,RiotGame,🎬 RiotGame

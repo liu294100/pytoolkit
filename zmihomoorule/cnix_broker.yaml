@@ -15,7 +15,7 @@ rule-providers:
   DisneyPlus:
     type: http
     behavior: classical
-    url: https://raw.githubusercontent.com/liu294100/web-subscription-yaml/refs/heads/main/doc/rule/Disneyplus.yaml
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Disney/Disney.yaml
     interval: 86400
   Steam:
     type: http
@@ -90,3 +90,4 @@ rules:
 - RULE-SET,Steam,🎬 SteamRule
 - RULE-SET,HBO,🎬 HBORule
 - RULE-SET,Broker,🌍 Broker
+
