@@ -113,6 +113,92 @@ def hex_mix(c1, c2, t):
     return "#%02x%02x%02x" % tuple(int(x + (y - x) * t) for x, y in zip(a, b))
 
 
+# ---------------- 视频源格式分析工具 ----------------
+LANG_NAMES = {
+    "zh": "中文", "zh-hans": "简体中文", "zh-hant": "繁体中文", "zh-cn": "简体中文", "zh-tw": "繁体中文",
+    "en": "英语", "ja": "日语", "ko": "韩语", "fr": "法语", "de": "德语", "es": "西班牙语", "it": "意大利语",
+    "pt": "葡萄牙语", "ru": "俄语", "ar": "阿拉伯语", "hi": "印地语", "th": "泰语", "vi": "越南语",
+    "id": "印尼语", "tr": "土耳其语", "pl": "波兰语", "nl": "荷兰语", "uk": "乌克兰语", "bn": "孟加拉语",
+    "ta": "泰米尔语", "te": "泰卢固语", "mr": "马拉地语", "ml": "马拉雅拉姆语", "pa": "旁遮普语", "ms": "马来语",
+    "cs": "捷克语", "sv": "瑞典语", "fi": "芬兰语", "da": "丹麦语", "no": "挪威语", "he": "希伯来语",
+    "el": "希腊语", "hu": "匈牙利语", "ro": "罗马尼亚语", "fil": "菲律宾语", "und": "未知",
+}
+# ffmpeg / mp4 容器要求 ISO 639-2 三字母语言码
+ISO3 = {
+    "zh": "chi", "en": "eng", "ja": "jpn", "ko": "kor", "fr": "fre", "de": "ger", "es": "spa", "it": "ita",
+    "pt": "por", "ru": "rus", "ar": "ara", "hi": "hin", "th": "tha", "vi": "vie", "id": "ind", "tr": "tur",
+    "pl": "pol", "nl": "dut", "uk": "ukr", "bn": "ben", "ta": "tam", "te": "tel", "mr": "mar", "ml": "mal",
+    "pa": "pan", "ms": "may", "cs": "cze", "sv": "swe", "fi": "fin", "da": "dan", "no": "nor", "he": "heb",
+    "el": "gre", "hu": "hun", "ro": "rum", "fil": "fil",
+}
+# 视频编码: 显示名 -> yt-dlp vcodec 正则（用于把单个视频的选择套用到整个合集）
+VCODEC_FAMILY = {"H.264": "^avc1", "VP9": "^vp0?9", "AV1": "^av01", "H.265": "^(hev1|hvc1)"}
+
+
+def lang_name(code):
+    c = str(code or "und").lower()
+    return LANG_NAMES.get(c) or LANG_NAMES.get(c.split("-")[0]) or code or "未知"
+
+
+def iso3(code):
+    c = str(code or "und").lower().split("-")[0]
+    return ISO3.get(c, c if len(c) == 3 else "und")
+
+
+def vcodec_family(vcodec):
+    v = str(vcodec or "").lower()
+    for name, pattern in VCODEC_FAMILY.items():
+        if re.match(pattern, v):
+            return name
+    return v.split(".")[0].upper() or "?"
+
+
+def acodec_family(acodec):
+    a = str(acodec or "").lower()
+    if a.startswith("mp4a"):
+        return "AAC"
+    return a.split(".")[0].upper() or "?"
+
+
+def est_size(f, duration):
+    """返回 (字节数, 是否精确)。m3u8 等无 filesize 的格式按 码率 × 时长 估算"""
+    if f.get("filesize"):
+        return f["filesize"], True
+    if f.get("filesize_approx"):
+        return f["filesize_approx"], False
+    rate = f.get("tbr") or f.get("vbr") or f.get("abr")
+    if rate and duration:
+        return rate * 125 * duration, False
+    return None, False
+
+
+def build_rule_selector(height, vfam, langs, afam, audio_only):
+    """把在某个视频上的选择转成通用规则，套用到合集中其他视频（缺失的语言/编码自动降级）"""
+    af = {"AAC": "[acodec^=mp4a]", "OPUS": "[acodec=opus]"}.get(afam, "")
+
+    def aud(lang):
+        if not lang or lang == "und":
+            return f"(ba{af}/ba)"
+        base = lang.split("-")[0]
+        return f"(ba[language={lang}]{af}/ba[language={lang}]/ba[language^={base}])"
+
+    if audio_only:
+        return f"{aud(langs[0])}/ba/b" if langs else "ba/b"
+    hf = f"[height<={height}]" if height else ""
+    vf = f"[vcodec~='{VCODEC_FAMILY[vfam]}']" if vfam in VCODEC_FAMILY else ""
+    video = f"(bv*{hf}{vf}/bv*{hf})"
+    main = video + "+" + ("+".join(aud(lang) for lang in langs) if langs else "ba")
+    return f"{main}/{video}+ba/b{hf}/b"
+
+
+def guess_sub_lang(path):
+    """从 xxx.zh-Hans.srt 这类文件名推测语言码"""
+    parts = os.path.basename(path).rsplit(".", 2)
+    if len(parts) == 3 and re.fullmatch(r"[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*", parts[1]):
+        return parts[1]
+    return "und"
+
+
 class _Logger:
     """把 yt-dlp 输出转发到界面日志（过滤进度刷屏）"""
 
@@ -146,6 +232,7 @@ class ProDownloader:
         self.fail_count = 0
         self.total_count = 0
         self.task_progress = {}
+        self._parse_new = []
         self._glow_phase = 0
         self._build_theme()
         self._build_ui()
@@ -317,11 +404,11 @@ class ProDownloader:
         self._switch(row, "快速", self.flat_var).pack(side=tk.RIGHT)
 
     def _build_option_card(self, parent):
-        card, c = self._card(parent, "下载选项")
+        card, c = self._card(parent, "下载选项", "未单独设置格式的视频使用")
         card.pack(fill=tk.X, pady=(0, 12))
         c.columnconfigure(1, weight=1)
         g = dict(sticky="w", pady=5)
-        self._label(c, "画质").grid(row=0, column=0, **g)
+        self._label(c, "默认画质").grid(row=0, column=0, **g)
         self.quality_var = tk.StringVar(value=list(QUALITY_PRESETS)[0])
         self._option(c, self.quality_var, list(QUALITY_PRESETS)).grid(row=0, column=1, sticky="ew", pady=5, padx=(12, 0))
         self._label(c, "容器").grid(row=1, column=0, **g)
@@ -368,7 +455,7 @@ class ProDownloader:
         self._switch(sw, "含自动字幕", self.auto_sub_var).grid(row=0, column=1, sticky="w", pady=3, padx=(16, 0))
         self._switch(sw, "内嵌到视频", self.embed_sub_var).grid(row=1, column=0, sticky="w", pady=3)
         self._switch(sw, "仅下载字幕", self.only_sub_var).grid(row=1, column=1, sticky="w", pady=3, padx=(16, 0))
-        self._label(c, "语言").grid(row=1, column=0, sticky="w", pady=5)
+        self._label(c, "默认语言").grid(row=1, column=0, sticky="w", pady=5)
         self.sub_lang_var = tk.StringVar(value=SUB_LANG_PRESETS[0])
         ctk.CTkComboBox(c, variable=self.sub_lang_var, values=SUB_LANG_PRESETS, height=34, corner_radius=10,
                         font=self.f_body, dropdown_font=self.f_body, fg_color=C["input"], border_color=C["border"],
@@ -379,7 +466,8 @@ class ProDownloader:
         self.sub_fmt_var = tk.StringVar(value="srt")
         self._segment(c, self.sub_fmt_var, ["srt", "vtt", "ass", "原始"]).grid(
             row=2, column=1, sticky="ew", pady=5, padx=(12, 0))
-        self._label(c, "逗号分隔；zh.* / all 会含大量翻译字幕，易被限流", muted=True).grid(
+        self._label(c, "批量默认规则；双击队列中的视频可按实际存在的\n字幕 / 音轨勾选，并添加本地字幕文件",
+                    muted=True, justify="left").grid(
             row=3, column=0, columnspan=2, sticky="w", pady=(4, 0))
 
     def _build_network_card(self, parent):
@@ -417,7 +505,7 @@ class ProDownloader:
             self.stat_labels[key] = num
 
     def _build_queue_card(self, parent):
-        card, c = self._card(parent, "下载队列", "单击 ☑ 列切换勾选 · 双击行在浏览器打开")
+        card, c = self._card(parent, "下载队列", "单击 ☑ 切换勾选 · 双击行按视频源选择 画质/音轨/字幕 · 右键更多")
         card.pack(fill=tk.BOTH, expand=True)
         bar = ctk.CTkFrame(c, fg_color="transparent")
         bar.pack(fill=tk.X, pady=(0, 10))
@@ -427,12 +515,13 @@ class ProDownloader:
         for text, cmd in actions:
             self._btn(bar, text, cmd, height=30, width=70, font=self.f_small).pack(side=tk.LEFT, padx=(0, 6))
         self._btn(bar, "打开目录", self._open_dir, "violet", height=30, width=90).pack(side=tk.RIGHT)
-        self.count_var = tk.StringVar(value="")
+        self._btn(bar, "⚙ 格式 / 音轨 / 字幕", self._open_format_dialog, "primary", height=30,
+                  width=150).pack(side=tk.RIGHT, padx=(0, 8))
         wrap = ctk.CTkFrame(c, fg_color=C["card"], corner_radius=12, border_width=1, border_color=C["border"])
         wrap.pack(fill=tk.BOTH, expand=True)
-        cols = ("chk", "idx", "title", "group", "dur", "status", "prog", "speed", "size")
-        heads = ("☑", "#", "标题", "合集", "时长", "状态", "进度", "速度 · ETA", "大小")
-        widths = (36, 40, 220, 110, 56, 64, 150, 120, 70)
+        cols = ("chk", "idx", "title", "group", "dur", "fmt", "status", "prog", "speed", "size")
+        heads = ("☑", "#", "标题", "合集", "时长", "格式", "状态", "进度", "速度 · ETA", "大小")
+        widths = (36, 40, 200, 100, 56, 150, 64, 140, 120, 80)
         self.tree = ttk.Treeview(wrap, columns=cols, show="headings", selectmode="extended", style="Pro.Treeview")
         for col, head, w in zip(cols, heads, widths):
             self.tree.heading(col, text=head, anchor="w" if col in ("title", "group") else "center")
@@ -450,6 +539,7 @@ class ProDownloader:
         self.tree.tag_configure("even", background=C["card"])
         self.tree.bind("<Button-1>", self._on_tree_click)
         self.tree.bind("<Double-1>", self._on_tree_double)
+        self.tree.bind("<Button-3>", self._on_tree_menu)
 
     def _build_bottom(self, parent):
         ctl = ctk.CTkFrame(parent, fg_color=C["card"], corner_radius=16, border_width=1, border_color=C["border"])
@@ -596,6 +686,7 @@ class ProDownloader:
         opts["extract_flat"] = "in_playlist" if self.flat_var.get() else False
         opts["skip_download"] = True
         self._set_btn(self.parse_btn, False)
+        self._parse_new = []
         self.status_var.set(f"正在解析 {len(urls)} 个链接...")
         threading.Thread(target=self._parse_worker, args=(urls, opts), daemon=True).start()
 
@@ -612,6 +703,8 @@ class ProDownloader:
                         self.log(f"解析失败: {url} -> {exc}", "err")
                         continue
                     self.log(f"✔ {info.get('title') or url}：{len(items)} 个视频", "ok")
+                    if info.get("formats") and len(items) == 1:
+                        items[0]["info"] = info  # 非快速模式下已拿到完整格式，直接缓存
                     self._ui(self._add_tasks, items)
                     added += len(items)
         except Exception as exc:
@@ -657,16 +750,20 @@ class ProDownloader:
                 continue
             existing.add(it["url"])
             values = ("☑", it["index"] or "-", it["title"], it["group"] or "-", fmt_time(it["duration"]),
-                      "等待", self._bar(0), "-", "-")
+                      "默认规则", "等待", self._bar(0), "-", "-")
             stripe = "odd" if len(self.tree.get_children()) % 2 else "even"
             iid = self.tree.insert("", tk.END, values=values, tags=("等待", stripe))
             it.update(iid=iid, checked=True, status="等待")
             self.tasks[iid] = it
+            self._parse_new.append(iid)
         self._update_count()
 
     def _parse_done(self, added):
         self._set_btn(self.parse_btn, not self.running)
-        self.status_var.set(f"解析完成，新增 {added} 项 · 勾选后点击「开始下载」")
+        self.status_var.set(f"解析完成，新增 {added} 项 · 双击视频可按视频源选择 画质/音轨/字幕")
+        # 只解析出一个视频时，直接弹出格式选择（画质、音轨、字幕全部来自视频源）
+        if len(self._parse_new) == 1 and not self.running:
+            self._open_format_dialog(self._parse_new[0])
 
     @staticmethod
     def _bar(p, width=12):
@@ -685,7 +782,7 @@ class ProDownloader:
         t = self.tasks.get(iid)
         if not t or not self.tree.exists(iid):
             return
-        col_index = {"title": 2, "status": 5, "prog": 6, "speed": 7, "size": 8}
+        col_index = {"title": 2, "fmt": 5, "status": 6, "prog": 7, "speed": 8, "size": 9}
         vals = list(self.tree.item(iid, "values"))
         for k, v in kw.items():
             if k in col_index:
@@ -715,7 +812,89 @@ class ProDownloader:
     def _on_tree_double(self, event):
         iid = self.tree.identify_row(event.y)
         if iid in self.tasks and self.tree.identify_column(event.x) != "#1":
-            webbrowser.open(self.tasks[iid]["url"])
+            self._open_format_dialog(iid)
+
+    def _on_tree_menu(self, event):
+        iid = self.tree.identify_row(event.y)
+        if iid not in self.tasks:
+            return
+        if iid not in self.tree.selection():
+            self.tree.selection_set(iid)
+        menu = tk.Menu(self.root, tearoff=0, bg=C["panel"], fg=C["fg"], activebackground=C["accent2"],
+                       activeforeground="#ffffff", bd=0, font=(FONT, 10))
+        menu.add_command(label="⚙  选择画质 / 音轨 / 字幕", command=lambda: self._open_format_dialog(iid))
+        menu.add_command(label="↺  恢复默认规则", command=self._reset_custom_selected)
+        menu.add_separator()
+        menu.add_command(label="🌐  在浏览器打开", command=lambda: webbrowser.open(self.tasks[iid]["url"]))
+        menu.add_command(label="📋  复制链接", command=lambda: (self.root.clipboard_clear(),
+                                                             self.root.clipboard_append(self.tasks[iid]["url"])))
+        menu.tk_popup(event.x_root, event.y_root)
+
+    # ================= 视频源分析 / 单视频自定义 =================
+    def _analyze(self, iid, on_done):
+        """后台读取单个视频的完整信息(全部格式/音轨/字幕)，结果缓存在 task['info']"""
+        task = self.tasks.get(iid)
+        if not task:
+            return
+        if task.get("info"):
+            on_done(task["info"], None)
+            return
+        opts = self._base_opts()
+        opts.update(skip_download=True, noplaylist=True)
+        url = task["url"]
+
+        def done(info, err):
+            if info and iid in self.tasks:
+                self.tasks[iid]["info"] = info
+                self.tasks[iid]["duration"] = info.get("duration")
+                if self.tree.exists(iid):
+                    vals = list(self.tree.item(iid, "values"))
+                    vals[4] = fmt_time(info.get("duration"))
+                    self.tree.item(iid, values=vals)
+                self._set_row(iid, title=info.get("title") or self.tasks[iid]["title"])
+            on_done(info, err)
+
+        def work():
+            try:
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    info = ydl.extract_info(url, download=False)
+                self._ui(done, info, None)
+            except Exception as exc:
+                self._ui(done, None, exc)
+
+        self.log(f"读取视频源格式: {url}", "accent")
+        threading.Thread(target=work, daemon=True).start()
+
+    def _open_format_dialog(self, iid=None):
+        if yt_dlp is None:
+            messagebox.showerror("缺少依赖", "请先安装 yt-dlp：pip install -U yt-dlp")
+            return
+        if self.running:
+            messagebox.showinfo("提示", "下载进行中，结束后再修改格式")
+            return
+        if iid is None:
+            sel = [i for i in self.tree.selection() if i in self.tasks]
+            iid = sel[0] if sel else None
+        if not iid:
+            messagebox.showinfo("提示", "请先在下载队列中选中一个视频")
+            return
+        FormatDialog(self, iid)
+
+    def _apply_custom(self, iid, custom, to_checked=False):
+        targets = [iid] + ([i for i, t in self.tasks.items() if t["checked"] and i != iid] if to_checked else [])
+        for i in targets:
+            cu = custom if i == iid else custom["rule"]
+            self.tasks[i]["custom"] = cu
+            self._set_row(i, fmt=cu["label"], size=("≈" + fmt_size(cu["size"])) if cu.get("size") else "-")
+        self.log(f"已应用格式设置到 {len(targets)} 个视频: {custom['label']}", "ok")
+
+    def _reset_custom_selected(self):
+        if self.running:
+            return
+        for iid in self.tree.selection():
+            if iid in self.tasks:
+                self.tasks[iid].pop("custom", None)
+                self._set_row(iid, fmt="默认规则", size="-")
 
     def _check_all(self, value):
         if self.running:
@@ -817,44 +996,70 @@ class ProDownloader:
         self.executor = ThreadPoolExecutor(max_workers=workers, thread_name_prefix="ytpro")
         for t in todo:
             snapshot = {k: t[k] for k in ("iid", "url", "title", "group", "index")}
+            snapshot["custom"] = t.get("custom")
             fut = self.executor.submit(self._download_one, snapshot, cfg)
             fut.add_done_callback(lambda f, iid=t["iid"]: self._ui(self._on_task_done, iid, f))
         self.executor.shutdown(wait=False)
         self._refresh_overall()
 
-    def _build_opts(self, task, cfg):
+    @staticmethod
+    def _resolve(task, cfg):
+        """合并全局默认规则与单个视频的自定义选择（custom 由格式对话框生成）"""
+        r = {"selector": cfg["selector"], "audio_conv": cfg["audio"], "container": cfg["container"],
+             "multi_audio": False, "audio_only": bool(cfg["audio"]), "sub_on": cfg["sub"] or cfg["only_sub"],
+             "auto": cfg["auto_sub"], "langs": cfg["sub_langs"], "embed": cfg["embed_sub"],
+             "keep_subs": True, "local_subs": []}
+        cu = task.get("custom")
+        if cu:
+            r.update(selector=cu["selector"], multi_audio=cu["multi_audio"], audio_only=cu["audio_only"],
+                     audio_conv=cfg["audio"] if cu["audio_only"] else None,
+                     container=cu.get("container") or cfg["container"],
+                     sub_on=bool(cu["subs"]), auto=any(a for _, a in cu["subs"]),
+                     langs=[re.escape(code) for code, _ in cu["subs"]],
+                     embed=cu["embed"], keep_subs=cu["keep_subs"], local_subs=list(cu["local_subs"]))
+        if cfg.get("no_sub"):
+            r["sub_on"] = False
+        return r
+
+    def _build_opts(self, task, cfg, final_paths=None):
         opts = dict(cfg["base"])
+        rs = self._resolve(task, cfg)
         out_dir = cfg["path"]
         if cfg["folder"] and task["group"]:
             out_dir = os.path.join(out_dir, *[safe_name(p) for p in task["group"].split("/")])
         name = "%(title).150B [%(id)s].%(ext)s"
         if cfg["prefix"] and task["index"]:
             name = f"{int(task['index']):03d} - " + name
+        state = {"t": 0.0, "total": 0, "prev": 0}  # total 来自视频源(下载前探测)，prev 为已完成分段字节
         opts.update({
             "outtmpl": os.path.join(out_dir, name),
-            "format": cfg["selector"],
+            "format": rs["selector"],
             "noplaylist": True,
             "windowsfilenames": True,
             "continuedl": True,
             "concurrent_fragment_downloads": 4,
-            "progress_hooks": [self._make_hook(task["iid"])],
+            "progress_hooks": [self._make_hook(task["iid"], state)],
             "postprocessor_hooks": [self._make_pp_hook(task["iid"])],
+            "post_hooks": [final_paths.append] if final_paths is not None else [],
+            "_size_state": state,  # 仅供 _run_ydl 读取，yt-dlp 会忽略未知参数
         })
+        if rs["multi_audio"]:
+            opts["allow_multiple_audio_streams"] = True
         pps = []
-        if cfg["audio"]:
-            pps.append({"key": "FFmpegExtractAudio", "preferredcodec": cfg["audio"], "preferredquality": "192"})
-        else:
-            opts["merge_output_format"] = cfg["container"]
-        if cfg["sub"] or cfg["only_sub"]:
+        if rs["audio_conv"]:
+            pps.append({"key": "FFmpegExtractAudio", "preferredcodec": rs["audio_conv"], "preferredquality": "192"})
+        elif not rs["audio_only"]:
+            opts["merge_output_format"] = rs["container"]
+        if rs["sub_on"] and rs["langs"]:
             opts["writesubtitles"] = True
-            opts["writeautomaticsub"] = cfg["auto_sub"]
-            opts["subtitleslangs"] = cfg["sub_langs"]
+            opts["writeautomaticsub"] = rs["auto"]
+            opts["subtitleslangs"] = rs["langs"]
             opts["sleep_interval_subtitles"] = 2  # 降低字幕接口 429 限流概率
             if cfg["sub_fmt"] != "原始":
                 opts["subtitlesformat"] = f"{cfg['sub_fmt']}/best"
                 pps.append({"key": "FFmpegSubtitlesConvertor", "format": cfg["sub_fmt"], "when": "before_dl"})
-            if cfg["embed_sub"] and not cfg["audio"] and not cfg["only_sub"]:
-                pps.append({"key": "FFmpegEmbedSubtitle", "already_have_subtitle": True})
+            if rs["embed"] and not rs["audio_only"] and not cfg["only_sub"]:
+                pps.append({"key": "FFmpegEmbedSubtitle", "already_have_subtitle": rs["keep_subs"]})
         if cfg["only_sub"]:
             opts["skip_download"] = True
         elif cfg["thumb"]:
@@ -864,29 +1069,48 @@ class ProDownloader:
         opts["postprocessors"] = pps
         return opts
 
-    def _make_hook(self, iid):
-        state = {"t": 0.0, "part": 0}
-
+    def _make_hook(self, iid, state):
+        """视频+多条音轨会分多段下载：进度 = (已完成分段 + 当前分段) / 视频源总大小"""
         def hook(d):
             if self.cancel_event.is_set():
                 raise CancelledByUser("用户取消")
             st = d.get("status")
+            part_total = d.get("total_bytes") or d.get("total_bytes_estimate") or 0
+            done = d.get("downloaded_bytes") or 0
             if st == "downloading":
                 now = time.time()
                 if now - state["t"] < 0.25:
                     return
                 state["t"] = now
-                total = d.get("total_bytes") or d.get("total_bytes_estimate") or 0
-                done = d.get("downloaded_bytes") or 0
-                p = done * 100.0 / total if total else 0.0
+                total = max(state["total"], state["prev"] + part_total)
+                p = (state["prev"] + done) * 100.0 / total if total else 0.0
                 title = (d.get("info_dict") or {}).get("title")
                 spd = f"{fmt_size(d.get('speed'))}/s · {fmt_time(d.get('eta'))}"
-                part = f" (分段{state['part'] + 1})" if state["part"] else ""
-                self._ui(self._on_progress, iid, p, spd, fmt_size(total) + part, title)
+                self._ui(self._on_progress, iid, min(p, 99.9), spd, fmt_size(total), title)
             elif st == "finished":
-                state["part"] += 1
-                self._ui(self._set_row, iid, status="处理中", prog=self._bar(100), speed="合并/处理中")
+                state["prev"] += part_total or done
+                if not state["total"] or state["prev"] >= state["total"] * 0.98:
+                    self._ui(self._set_row, iid, status="处理中", prog=self._bar(100), speed="合并/处理中")
         return hook
+
+    def _make_size_probe(self, iid, state):
+        """before_dl 阶段读取 yt-dlp 最终选中的格式，按视频源计算真实总大小"""
+        from yt_dlp.postprocessor.common import PostProcessor
+
+        app = self
+
+        class SizeProbe(PostProcessor):
+            def run(self, info):
+                fmts = info.get("requested_formats") or [info]
+                total = sum(est_size(f, info.get("duration"))[0] or 0 for f in fmts)
+                state["total"] = int(total)
+                audios = sum(1 for f in fmts if f.get("acodec") not in (None, "none"))
+                h = max((f.get("height") or 0) for f in fmts)
+                desc = (f"{h}p · " if h else "") + f"{audios} 音轨"
+                app.log(f"选定格式 {info.get('format_id')} ({desc})，源大小 ≈ {fmt_size(total)}", "accent2")
+                app._ui(app._set_row, iid, size=fmt_size(total) if total else "-")
+                return [], info
+        return SizeProbe()
 
     def _make_pp_hook(self, iid):
         def hook(d):
@@ -926,10 +1150,10 @@ class ProDownloader:
             if self.cancel_event.is_set() or "用户取消" in str(exc):
                 return "cancel", None
             # 字幕失败(如 429 限流)不应拖垮整个视频：去掉字幕重试一次
-            if "subtitle" in str(exc).lower() and cfg["sub"] and not cfg["only_sub"]:
-                self.log(f"⚠ 字幕下载失败，改为无字幕重试: {task['title']}", "warn")
+            if "subtitle" in str(exc).lower() and not cfg["only_sub"] and not cfg.get("no_sub"):
+                self.log(f"⚠ 在线字幕下载失败，改为不下载在线字幕重试: {task['title']}", "warn")
                 try:
-                    return self._run_ydl(task, dict(cfg, sub=False))
+                    return self._run_ydl(task, dict(cfg, no_sub=True))
                 except Exception as exc2:
                     if self.cancel_event.is_set():
                         return "cancel", None
@@ -937,11 +1161,68 @@ class ProDownloader:
             return "fail", str(exc)
 
     def _run_ydl(self, task, cfg):
-        with yt_dlp.YoutubeDL(self._build_opts(task, cfg)) as ydl:
+        final_paths = []
+        opts = self._build_opts(task, cfg, final_paths)
+        state = opts.pop("_size_state")
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            ydl.add_post_processor(self._make_size_probe(task["iid"], state), when="before_dl")
             code = ydl.download([task["url"]])
         if self.cancel_event.is_set():
             return "cancel", None
-        return ("ok", None) if code == 0 else ("fail", f"yt-dlp 返回码 {code}")
+        if code != 0:
+            return "fail", f"yt-dlp 返回码 {code}"
+        rs = self._resolve(task, cfg)
+        if rs["local_subs"] and not rs["audio_only"] and not cfg["only_sub"]:
+            video = next((p for p in reversed(final_paths) if p and os.path.exists(p)), None)
+            if not video:
+                return "fail", "下载完成但找不到输出文件，无法内嵌自定义字幕"
+            self._ui(self._set_row, task["iid"], status="处理中", speed="内嵌本地字幕")
+            self._mux_local_subs(video, rs["local_subs"])
+            self.log(f"已内嵌 {len(rs['local_subs'])} 个本地字幕: {os.path.basename(video)}", "ok")
+        return "ok", None
+
+    @staticmethod
+    def _mux_local_subs(video, subs):
+        """用 ffmpeg 把本地字幕文件无损封装进视频（视频/音轨/已有字幕全部 copy）"""
+        ffmpeg = shutil.which("ffmpeg")
+        if not ffmpeg:
+            raise RuntimeError("未找到 ffmpeg，无法内嵌自定义字幕")
+        base, ext = os.path.splitext(video)
+        ext = ext.lower()
+        tmp = f"{base}.subtmp{ext}"
+        cmd = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", video]
+        for path, _, _ in subs:
+            try:  # 非 UTF-8 的中文字幕(GBK)需要告诉 ffmpeg 编码，否则乱码
+                with open(path, "rb") as fh:
+                    fh.read().decode("utf-8-sig")
+            except UnicodeDecodeError:
+                cmd += ["-sub_charenc", "CP936"]
+            except OSError as exc:
+                raise RuntimeError(f"无法读取字幕文件 {path}: {exc}")
+            cmd += ["-i", path]
+        cmd += ["-map", "0:v?", "-map", "0:a?"]
+        cmd += [x for k in range(len(subs)) for x in ("-map", f"{k + 1}:0")]
+        cmd += ["-map", "0:s?"]  # 保留 yt-dlp 已内嵌的在线字幕，排在本地字幕之后
+        if ext == ".mkv":
+            cmd += ["-map", "0:t?"]
+        cmd += ["-c", "copy"]
+        scodec = {".mp4": "mov_text", ".m4v": "mov_text", ".mov": "mov_text", ".webm": "webvtt"}.get(ext)
+        for k, (path, lang, title) in enumerate(subs):
+            # 文本字幕必须重新编码(不能 copy)，-sub_charenc 才会生效；srt/ass 重编码不丢样式
+            codec = scodec or ("ass" if path.lower().endswith((".ass", ".ssa")) else "srt")
+            cmd += [f"-c:s:{k}", codec, f"-metadata:s:s:{k}", f"language={iso3(lang)}",
+                    f"-metadata:s:s:{k}", f"title={title or lang_name(lang)}"]
+        # 多音轨时只让第 1 条音轨为默认；本地字幕第 1 条设为默认字幕
+        cmd += ["-disposition:a", "0", "-disposition:a:0", "default",
+                "-disposition:s", "0", "-disposition:s:0", "default", "-map_metadata", "0", tmp]
+        flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+        res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                             creationflags=flags)
+        if res.returncode != 0:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+            raise RuntimeError(f"ffmpeg 内嵌字幕失败: {res.stderr.strip()[-400:]}")
+        os.replace(tmp, video)
 
     def _on_task_done(self, iid, future):
         try:
@@ -995,6 +1276,544 @@ class ProDownloader:
             return
         self.cancel_event.set()
         self.root.destroy()
+
+
+
+class FormatDialog:
+    """按视频源真实数据选择：画质(含大小) / 音轨(可多选合并) / 在线字幕 / 本地字幕文件"""
+
+    def __init__(self, app, iid):
+        self.app, self.iid = app, iid
+        self.task = app.tasks[iid]
+        self.info = None
+        self.audio_checked = []      # 按勾选顺序保存语言码，第一条为默认音轨
+        self.sub_checked = set()     # {"m:zh-Hans", "a:en-orig", ...}
+        self.local_subs = []         # [[path, lang, title], ...]
+        w = self.win = ctk.CTkToplevel(app.root)
+        w.title(f"选择格式 · 音轨 · 字幕 — {self.task['title'][:60]}")
+        w.geometry("1280x840")
+        w.minsize(1100, 720)
+        w.configure(fg_color=C["bg"])
+        w.transient(app.root)
+        w.after(250, self._grab)
+        self.loading = ctk.CTkLabel(w, text="⏳  正在读取视频源：画质 / 音轨 / 字幕 ...",
+                                    font=app.f_title, text_color=C["accent"])
+        self.loading.pack(expand=True)
+        app._analyze(iid, self._on_info)
+
+    def _grab(self):
+        if self.win.winfo_exists():
+            self.win.lift()
+            self.win.focus_force()
+            try:
+                self.win.grab_set()
+            except tk.TclError:
+                pass
+
+    def _on_info(self, info, err):
+        if not self.win.winfo_exists():
+            return
+        if err or not info:
+            self.loading.configure(text=f"✖ 读取失败：{err}", text_color=C["err"], wraplength=900)
+            return
+        if not info.get("formats"):
+            self.loading.configure(text="✖ 该链接没有可用的格式（可能是合集/频道链接，请先解析出单个视频）",
+                                   text_color=C["err"])
+            return
+        self.info = info
+        self.loading.destroy()
+        self._build()
+
+    # ---------- 通用 ----------
+    def _tree(self, parent, cols, heads, widths, select="browse", stretch=()):
+        wrap = ctk.CTkFrame(parent, fg_color=C["card"], corner_radius=10, border_width=1, border_color=C["border"])
+        wrap.pack(fill=tk.BOTH, expand=True)
+        tv = ttk.Treeview(wrap, columns=cols, show="headings", selectmode=select, style="Pro.Treeview", height=6)
+        for col, head, width in zip(cols, heads, widths):
+            anchor = "w" if col in stretch else "center"
+            tv.heading(col, text=head, anchor=anchor)
+            tv.column(col, width=width, minwidth=30, stretch=col in stretch, anchor=anchor)
+        sb = ctk.CTkScrollbar(wrap, command=tv.yview, button_color=C["border"],
+                              button_hover_color=C["accent2"], fg_color="transparent")
+        tv.configure(yscrollcommand=sb.set)
+        sb.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 4), pady=6)
+        tv.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(6, 0), pady=6)
+        tv.tag_configure("on", foreground=C["accent"], background="#182a45")
+        tv.tag_configure("off", foreground=C["fg"], background=C["card"])
+        tv.tag_configure("muted", foreground=C["muted"], background=C["card"])
+        return tv
+
+    def _container(self):
+        return self.app.container_var.get()
+
+    def _build(self):
+        app, info = self.app, self.info
+        w = self.win
+        self.duration = info.get("duration")
+        fmts = info.get("formats") or []
+        self.videos = sorted(
+            [f for f in fmts if f.get("vcodec") not in (None, "none") and f.get("format_id")],
+            key=lambda f: (f.get("height") or 0, f.get("fps") or 0,
+                           str(f.get("protocol", "")).startswith("http"), f.get("tbr") or 0), reverse=True)
+        self.audios = [f for f in fmts if f.get("vcodec") == "none" and f.get("acodec") not in (None, "none")]
+        self.fmt_by_id = {f["format_id"]: f for f in fmts if f.get("format_id")}
+        langs = {f.get("language") or "und" for f in self.audios}
+        manual = {k: v for k, v in (info.get("subtitles") or {}).items() if k != "live_chat" and v}
+        auto = {k: v for k, v in (info.get("automatic_captions") or {}).items() if v}
+        self.manual_subs, self.auto_subs = manual, auto
+
+        head = ctk.CTkFrame(w, fg_color=C["card"], corner_radius=14, border_width=1, border_color=C["border"])
+        head.pack(fill=tk.X, padx=16, pady=(14, 10))
+        ctk.CTkLabel(head, text=info.get("title") or self.task["title"], font=app.f_title, text_color=C["fg"],
+                     anchor="w", wraplength=1180, justify="left").pack(fill=tk.X, padx=16, pady=(12, 2))
+        meta = (f"{info.get('uploader') or info.get('channel') or '未知作者'}  ·  时长 {fmt_time(self.duration)}  ·  "
+                f"{len(self.videos)} 个画面格式  ·  {len(langs)} 种音轨语言  ·  "
+                f"{len(manual)} 条人工字幕 / {len(auto)} 条自动字幕")
+        ctk.CTkLabel(head, text=meta, font=app.f_small, text_color=C["muted"], anchor="w").pack(
+            fill=tk.X, padx=16, pady=(0, 12))
+
+        # 底部操作栏（先 pack 到底部，保证窗口缩小时按钮始终可见）
+        foot = ctk.CTkFrame(w, fg_color=C["card"], corner_radius=14, border_width=1, border_color=C["border"])
+        foot.pack(side=tk.BOTTOM, fill=tk.X, padx=16, pady=(0, 14))
+        info_col = ctk.CTkFrame(foot, fg_color="transparent")
+        info_col.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=16, pady=10)
+        self.size_lbl = ctk.CTkLabel(info_col, text="", font=ctk.CTkFont(family=FONT, size=15, weight="bold"),
+                                     text_color=C["accent"], anchor="w")
+        self.size_lbl.pack(fill=tk.X)
+        self.hint_lbl = ctk.CTkLabel(info_col, text="", font=app.f_small, text_color=C["muted"], anchor="w",
+                                     justify="left", wraplength=640)
+        self.hint_lbl.pack(fill=tk.X)
+        app._btn(foot, "✔ 应用到此视频", self._apply_one, "ok", height=40, width=140).pack(
+            side=tk.RIGHT, padx=(0, 16), pady=10)
+        app._btn(foot, "按此规则应用到所有勾选项", self._apply_all, "violet", height=40, width=200).pack(
+            side=tk.RIGHT, padx=8, pady=10)
+        app._btn(foot, "取消", self.win.destroy, height=40, width=80).pack(side=tk.RIGHT, pady=10)
+
+        grid = ctk.CTkFrame(w, fg_color="transparent")
+        grid.pack(fill=tk.BOTH, expand=True, padx=16, pady=(0, 10))
+        grid.columnconfigure(0, weight=11, uniform="c")
+        grid.columnconfigure(1, weight=10, uniform="c")
+        grid.rowconfigure(0, weight=1)
+        grid.rowconfigure(1, weight=1)
+        self._build_video(grid)
+        self._build_audio(grid)
+        self._build_subs(grid)
+        self._build_local(grid)
+        self._update_summary()
+
+    # ---------- 画质 ----------
+    def _build_video(self, grid):
+        card, c = self.app._card(grid, "画质", "来自视频源 · 大小按源文件/码率计算")
+        card.grid(row=0, column=0, sticky="nsew", padx=(0, 6), pady=(0, 6))
+        cols = ("res", "fps", "codec", "ext", "hdr", "rate", "size", "note")
+        heads = ("分辨率", "帧率", "编码", "封装", "动态范围", "码率", "大小", "备注")
+        widths = (70, 46, 64, 52, 70, 70, 86, 170)
+        self.vtree = self._tree(c, cols, heads, widths, stretch=("note",))
+        self.vtree.insert("", tk.END, iid="__none__", tags=("muted",),
+                          values=("🎵 仅音频", "", "", "", "", "", "", "不下载视频画面"))
+        for f in self.videos:
+            size, exact = est_size(f, self.duration)
+            notes = []
+            if f.get("acodec") not in (None, "none"):
+                notes.append("自带音频")
+            if "m3u8" in str(f.get("protocol")):
+                notes.append("HLS")
+            fn = f.get("format_note") or ""
+            if fn and not re.fullmatch(r"\d+p\d*", fn):
+                notes.append(fn)
+            notes.append(f"id {f['format_id']}")
+            res = f"{f['height']}p" if f.get("height") else (f.get("resolution") or "?")
+            self.vtree.insert("", tk.END, iid=f["format_id"], tags=("off",), values=(
+                res, int(f["fps"]) if f.get("fps") else "-", vcodec_family(f.get("vcodec")), f.get("ext") or "-",
+                f.get("dynamic_range") or "SDR", f"{int(f['tbr'])}k" if f.get("tbr") else "-",
+                ("" if exact else "≈") + fmt_size(size), " · ".join(notes)))
+        self.vtree.bind("<<TreeviewSelect>>", lambda e: self._update_summary())
+        self.vtree.selection_set(self._default_video())
+        self.vtree.see(self.vtree.selection()[0])
+
+    def _default_video(self):
+        cu = self.task.get("custom") or {}
+        if cu.get("mode") == "exact":
+            vid = cu.get("video") or "__none__"
+            if vid == "__none__" or vid in self.fmt_by_id:
+                return vid
+        preset = self.app.quality_var.get()
+        if QUALITY_PRESETS[preset][1] or not self.videos:
+            return "__none__"
+        m = re.search(r"(\d{3,4})p", preset)
+        cap = int(m.group(1)) if m else 99999
+        # 同等画质优先 https 直链(比 HLS 更稳定)，再按码率
+        ok = [f for f in self.videos if (f.get("height") or 0) <= cap] or self.videos
+        top_h = ok[0].get("height") or 0
+        same = [f for f in ok if (f.get("height") or 0) == top_h]
+        best = max(same, key=lambda f: (str(f.get("protocol", "")).startswith("http"), f.get("fps") or 0,
+                                        f.get("tbr") or 0))
+        return best["format_id"]
+
+    def _selected_video(self):
+        sel = self.vtree.selection()
+        vid = sel[0] if sel else "__none__"
+        return None if vid == "__none__" else self.fmt_by_id.get(vid)
+
+    # ---------- 音轨 ----------
+    def _build_audio(self, grid):
+        card, c = self.app._card(grid, "音轨", "点击勾选 · 可多选，多音轨合并进同一文件")
+        card.grid(row=0, column=1, sticky="nsew", padx=(6, 0), pady=(0, 6))
+        bar = ctk.CTkFrame(c, fg_color="transparent")
+        bar.pack(fill=tk.X, pady=(0, 6))
+        self.app._label(bar, "音频编码").pack(side=tk.LEFT)
+        cu = self.task.get("custom") or {}
+        self.acodec_var = tk.StringVar(value=cu.get("acodec_pref", "自动"))
+        seg = self.app._segment(bar, self.acodec_var, ["自动", "AAC", "Opus"])
+        seg.configure(command=lambda v: (self._fill_audio(), self._update_summary()))
+        seg.pack(side=tk.LEFT, padx=(10, 0))
+        self.app._btn(bar, "仅原声", self._audio_only_orig, height=28, width=64,
+                      font=self.app.f_small).pack(side=tk.RIGHT)
+        self.app._btn(bar, "全部", self._audio_all, height=28, width=52,
+                      font=self.app.f_small).pack(side=tk.RIGHT, padx=6)
+        cols = ("chk", "name", "code", "tag", "codec", "rate", "size")
+        heads = ("☑", "语言", "代码", "类型", "编码", "码率", "大小")
+        widths = (34, 150, 70, 64, 56, 60, 80)
+        self.atree = self._tree(c, cols, heads, widths, select="none", stretch=("name",))
+        self.atree.bind("<Button-1>", self._on_audio_click)
+        # 按语言分组
+        self.audio_groups = {}
+        for f in self.audios:
+            self.audio_groups.setdefault(f.get("language") or "und", []).append(f)
+        self.orig_langs = [lang for lang, fs in self.audio_groups.items()
+                           if any((f.get("language_preference") or 0) >= 10 or "original" in str(f.get("format_note"))
+                                  for f in fs)]
+        if cu.get("mode") == "exact":
+            self.audio_checked = [lang for lang in cu.get("audio_langs", []) if lang in self.audio_groups]
+        if not self.audio_checked and self.audio_groups:
+            self.audio_checked = self.orig_langs[:1] or [self._lang_order()[0]]
+        self._fill_audio()
+
+    def _lang_order(self):
+        return sorted(self.audio_groups, key=lambda lang: (lang not in self.orig_langs, lang_name(lang)))
+
+    def _acodec_pref(self):
+        v = self.acodec_var.get()
+        if v == "自动":
+            return "AAC" if self._container() == "mp4" else "OPUS"
+        return "OPUS" if v == "Opus" else "AAC"
+
+    def _best_audio(self, lang):
+        """某语言下选最佳格式：优先所选编码 → 非 DRC(动态范围压缩) → 码率最高"""
+        pref = self._acodec_pref()
+        return max(self.audio_groups[lang], key=lambda f: (
+            acodec_family(f.get("acodec")) == pref,
+            "drc" not in f"{f.get('format_id')} {f.get('format_note')}".lower(),
+            f.get("abr") or f.get("tbr") or 0))
+
+    def _fill_audio(self):
+        top = self.atree.yview()[0]
+        self.win.after_idle(lambda: self.atree.yview_moveto(top))
+        self.atree.delete(*self.atree.get_children())
+        multi = len(self.audio_groups) > 1
+        for lang in self._lang_order():
+            f = self._best_audio(lang)
+            size, exact = est_size(f, self.duration)
+            note = re.sub(r",\s*(ultralow|low|medium|high)$", "", str(f.get("format_note") or ""))
+            name = lang_name(lang) if lang != "und" else (note or "默认音轨")
+            tag = "★ 原声" if lang in self.orig_langs else ("配音" if multi else "")
+            on = lang in self.audio_checked
+            order = f" {self.audio_checked.index(lang) + 1}" if on and len(self.audio_checked) > 1 else ""
+            self.atree.insert("", tk.END, iid=lang, tags=("on" if on else "off",), values=(
+                ("☑" + order) if on else "☐", name, lang, tag, acodec_family(f.get("acodec")),
+                f"{int(f.get('abr') or f.get('tbr') or 0)}k", ("" if exact else "≈") + fmt_size(size)))
+
+    def _on_audio_click(self, event):
+        lang = self.atree.identify_row(event.y)
+        if not lang:
+            return "break"
+        if lang in self.audio_checked:
+            self.audio_checked.remove(lang)
+        else:
+            self.audio_checked.append(lang)
+        self._fill_audio()
+        self._update_summary()
+        return "break"
+
+    def _audio_all(self):
+        self.audio_checked = self._lang_order()
+        self._fill_audio()
+        self._update_summary()
+
+    def _audio_only_orig(self):
+        self.audio_checked = self.orig_langs[:1] or self._lang_order()[:1]
+        self._fill_audio()
+        self._update_summary()
+
+    def _selected_audios(self):
+        return [self._best_audio(lang) for lang in self.audio_checked if lang in self.audio_groups]
+
+    # ---------- 在线字幕 ----------
+    def _build_subs(self, grid):
+        card, c = self.app._card(grid, "视频源字幕", "只列出该视频实际存在的字幕 · 点击勾选")
+        card.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(6, 0))
+        bar = ctk.CTkFrame(c, fg_color="transparent")
+        bar.pack(fill=tk.X, pady=(0, 6))
+        # 不绑定 textvariable，否则 CTkEntry 不显示占位提示
+        self.sub_filter = ctk.CTkEntry(bar, height=34, corner_radius=10, font=self.app.f_body, width=220,
+                                       fg_color=C["input"], border_color=C["border"], text_color=C["fg"],
+                                       placeholder_text="🔍 搜索语言 / 代码，如 zh、英语")
+        self.sub_filter.pack(side=tk.LEFT)
+        self.sub_filter.bind("<KeyRelease>", lambda e: self._fill_subs())
+        self.show_trans = tk.BooleanVar(value=False)
+        sw = self.app._switch(bar, "显示自动翻译", self.show_trans)
+        sw.configure(command=self._fill_subs)
+        sw.pack(side=tk.LEFT, padx=12)
+        self.app._btn(bar, "清空", lambda: (self.sub_checked.clear(), self._fill_subs(), self._update_summary()),
+                      height=28, width=52, font=self.app.f_small).pack(side=tk.RIGHT)
+        cols = ("chk", "kind", "code", "name", "exts")
+        heads = ("☑", "类型", "代码", "语言", "可用格式")
+        widths = (34, 90, 90, 190, 110)
+        self.stree = self._tree(c, cols, heads, widths, select="none", stretch=("name",))
+        self.stree.bind("<Button-1>", self._on_sub_click)
+        opt = ctk.CTkFrame(c, fg_color="transparent")
+        opt.pack(fill=tk.X, pady=(8, 0))
+        cu = self.task.get("custom") or {}
+        self.embed_var = tk.BooleanVar(value=cu.get("embed", self.app.embed_sub_var.get()))
+        self.keep_var = tk.BooleanVar(value=cu.get("keep_subs", True))
+        self.app._switch(opt, "内嵌到视频", self.embed_var).pack(side=tk.LEFT)
+        self.app._switch(opt, "同时保留字幕文件", self.keep_var).pack(side=tk.LEFT, padx=16)
+        self._init_sub_checked(cu)
+        self._fill_subs()
+
+    def _init_sub_checked(self, cu):
+        if cu.get("mode") == "exact":
+            for code, is_auto in cu.get("subs", []):
+                key = f"{'a' if is_auto else 'm'}:{code}"
+                if (self.auto_subs if is_auto else self.manual_subs).get(code):
+                    self.sub_checked.add(key)
+            return
+        if not self.app.sub_var.get():
+            return
+        pats = [p.strip() for p in self.app.sub_lang_var.get().split(",") if p.strip()]
+
+        def match(code):
+            for p in pats:
+                try:
+                    if p == "all" or re.fullmatch(p, code):
+                        return True
+                except re.error:
+                    if p == code:
+                        return True
+            return False
+        for code in self.manual_subs:
+            if match(code):
+                self.sub_checked.add(f"m:{code}")
+        if self.app.auto_sub_var.get():
+            for code in self.auto_subs:
+                if match(code) and code not in self.manual_subs:
+                    self.sub_checked.add(f"a:{code}")
+
+    def _fill_subs(self):
+        self.stree.delete(*self.stree.get_children())
+        kw = self.sub_filter.get().strip().lower() if hasattr(self, "sub_filter") else ""
+        orig_bases = {c[:-5] for c in self.auto_subs if c.endswith("-orig")}
+        rows = []
+        for code, tracks in self.manual_subs.items():
+            rows.append((0, f"m:{code}", "人工字幕", code, tracks))
+        for code, tracks in self.auto_subs.items():
+            is_orig = code.endswith("-orig") or code in orig_bases
+            rows.append((1 if is_orig else 2, f"a:{code}", "自动·原声" if is_orig else "自动翻译", code, tracks))
+        rows.sort(key=lambda r: (r[0], r[3].lower()))
+        top = self.stree.yview()[0]
+        shown = 0
+        for rank, key, kind, code, tracks in rows:
+            name = tracks[0].get("name") or lang_name(code.replace("-orig", ""))
+            if kw and kw not in code.lower() and kw not in name.lower() and kw not in lang_name(code).lower():
+                continue
+            if rank == 2 and not (self.show_trans.get() or kw or key in self.sub_checked):
+                continue
+            on = key in self.sub_checked
+            exts = [t.get("ext") for t in tracks if t.get("ext")]
+            common = [e for e in ("srt", "vtt", "ass", "ttml") if e in exts]
+            exts = " ".join(common or exts[:3])
+            self.stree.insert("", tk.END, iid=key, tags=("on" if on else "off",),
+                              values=("☑" if on else "☐", kind, code, f"{lang_name(code.replace('-orig', ''))} · {name}"
+                                      if lang_name(code) != name else name, exts))
+            shown += 1
+        if not shown:
+            tip = "该视频没有字幕" if not rows else "没有匹配的字幕（可打开「显示自动翻译」）"
+            self.stree.insert("", tk.END, iid="__empty__", tags=("muted",), values=("", "", "", tip, ""))
+        self.stree.yview_moveto(top)
+
+    def _on_sub_click(self, event):
+        key = self.stree.identify_row(event.y)
+        if not key or key == "__empty__":
+            return "break"
+        self.sub_checked.symmetric_difference_update({key})
+        self._fill_subs()
+        self._update_summary()
+        return "break"
+
+    def _selected_subs(self):
+        return [(k[2:], k.startswith("a:")) for k in sorted(self.sub_checked)]
+
+    # ---------- 本地字幕 ----------
+    def _build_local(self, grid):
+        card, c = self.app._card(grid, "自定义字幕文件", "下载完成后用 ffmpeg 无损内嵌")
+        card.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(6, 0))
+        bar = ctk.CTkFrame(c, fg_color="transparent")
+        bar.pack(fill=tk.X, pady=(0, 6))
+        self.app._btn(bar, "＋ 添加字幕文件", self._add_local, "primary", height=30, width=130).pack(side=tk.LEFT)
+        self.app._btn(bar, "✎ 语言/标题", self._edit_local, height=30, width=96).pack(side=tk.LEFT, padx=6)
+        self.app._btn(bar, "↑", lambda: self._move_local(-1), height=30, width=34).pack(side=tk.LEFT)
+        self.app._btn(bar, "↓", lambda: self._move_local(1), height=30, width=34).pack(side=tk.LEFT, padx=6)
+        self.app._btn(bar, "✕ 移除", self._remove_local, "danger", height=30, width=70).pack(side=tk.RIGHT)
+        self.app._label(c, "支持 srt / ass / ssa / vtt；文件名如 xxx.zh-Hans.srt 自动识别语言，GBK 编码自动处理。"
+                           "\n本地字幕排在最前并设为默认字幕轨；仅音频模式下不内嵌。", muted=True, justify="left").pack(
+            side=tk.BOTTOM, anchor="w", pady=(6, 0))
+        cols = ("file", "lang", "title")
+        heads = ("文件", "语言", "轨道标题")
+        widths = (240, 80, 130)
+        self.ltree = self._tree(c, cols, heads, widths, select="browse", stretch=("file",))
+        self.ltree.bind("<Double-1>", lambda e: self._edit_local())
+        cu = self.task.get("custom") or {}
+        self.local_subs = [list(x) for x in cu.get("local_subs", [])]
+        self._fill_local()
+
+    def _fill_local(self, select=None):
+        self.ltree.delete(*self.ltree.get_children())
+        for i, (path, lang, title) in enumerate(self.local_subs):
+            self.ltree.insert("", tk.END, iid=str(i), tags=("off",),
+                              values=(os.path.basename(path), lang, title or lang_name(lang)))
+        if not self.local_subs:
+            self.ltree.insert("", tk.END, iid="__empty__", tags=("muted",),
+                              values=("（未添加，点击「＋ 添加字幕文件」）", "", ""))
+        elif select is not None and 0 <= select < len(self.local_subs):
+            self.ltree.selection_set(str(select))
+
+    def _add_local(self):
+        paths = filedialog.askopenfilenames(parent=self.win, title="选择字幕文件",
+                                            filetypes=[("字幕文件", "*.srt *.ass *.ssa *.vtt"), ("所有文件", "*.*")])
+        for p in paths:
+            lang = guess_sub_lang(p)
+            self.local_subs.append([p, lang, f"{lang_name(lang)} (自定义)"])
+        self._fill_local()
+        self._update_summary()
+
+    def _local_index(self):
+        sel = [s for s in self.ltree.selection() if s != "__empty__"]
+        return int(sel[0]) if sel else None
+
+    def _edit_local(self):
+        i = self._local_index()
+        if i is None:
+            return
+        path, lang, title = self.local_subs[i]
+        dlg = ctk.CTkInputDialog(title="字幕语言 / 标题",
+                                 text=f"{os.path.basename(path)}\n\n格式：语言码|轨道标题\n例如  zh-Hans|中文特效字幕  或  en")
+        dlg.after(100, lambda: dlg._entry.insert(0, f"{lang}|{title}"))
+        value = dlg.get_input()
+        self._grab()
+        if not value:
+            return
+        new_lang, _, new_title = value.partition("|")
+        new_lang = new_lang.strip() or "und"
+        self.local_subs[i] = [path, new_lang, new_title.strip() or lang_name(new_lang)]
+        self._fill_local(i)
+
+    def _move_local(self, step):
+        i = self._local_index()
+        j = None if i is None else i + step
+        if j is None or not 0 <= j < len(self.local_subs):
+            return
+        self.local_subs[i], self.local_subs[j] = self.local_subs[j], self.local_subs[i]
+        self._fill_local(j)
+
+    def _remove_local(self):
+        i = self._local_index()
+        if i is not None:
+            self.local_subs.pop(i)
+            self._fill_local()
+            self._update_summary()
+
+    # ---------- 汇总 / 应用 ----------
+    def _effective_container(self, video, audios):
+        c = self._container()
+        if c != "webm" or not video:
+            return c
+        vfam = vcodec_family(video.get("vcodec"))
+        afams = {acodec_family(a.get("acodec")) for a in audios}
+        if vfam not in ("VP9", "AV1") or not afams <= {"OPUS", "VORBIS"}:
+            return "mkv"
+        return c
+
+    def _update_summary(self):
+        video, audios = self._selected_video(), self._selected_audios()
+        vsize = est_size(video, self.duration)[0] or 0 if video else 0
+        asize = sum(est_size(a, self.duration)[0] or 0 for a in audios)
+        exact = (not video or est_size(video, self.duration)[1]) and all(est_size(a, self.duration)[1] for a in audios)
+        n_sub = len(self.sub_checked) + len(self.local_subs)
+        self.size_lbl.configure(text=f"预计大小 {'' if exact else '≈ '}{fmt_size(vsize + asize)}"
+                                     f"    画面 {fmt_size(vsize)}  +  {len(audios)} 条音轨 {fmt_size(asize)}"
+                                     f"    ·  {n_sub} 条字幕")
+        hints = []
+        if not video:
+            conv = QUALITY_PRESETS[self.app.quality_var.get()][1]
+            hints.append(f"仅音频：输出 {conv.upper() if conv else '原始格式 (m4a / webm)'}，只取第一条勾选的音轨")
+        else:
+            eff = self._effective_container(video, audios)
+            hints.append(f"输出容器 {eff}" + ("（webm 不支持所选编码，自动改用 mkv）" if eff != self._container() else ""))
+            if len(audios) > 1:
+                hints.append(f"{len(audios)} 条音轨合并为多音轨文件，按勾选顺序排列，第 1 条为默认"
+                             + ("；mp4 多音轨部分播放器需手动切换，推荐 mkv" if eff == "mp4" else ""))
+            if not audios and video.get("acodec") in (None, "none"):
+                hints.append("⚠ 未勾选音轨，将下载无声视频")
+        self.hint_lbl.configure(text="  ·  ".join(hints), text_color=C["warn"] if "⚠" in hints[-1] else C["muted"])
+
+    def _make_custom(self):
+        video, audios = self._selected_video(), self._selected_audios()
+        langs = [lang for lang in self.audio_checked if lang in self.audio_groups]
+        if not video and not audios:
+            messagebox.showwarning("提示", "仅音频模式请至少勾选一条音轨", parent=self.win)
+            return None
+        if not video and len(audios) > 1:
+            audios, langs = audios[:1], langs[:1]
+        if video and not audios and video.get("acodec") in (None, "none"):
+            if not messagebox.askyesno("确认", "没有勾选任何音轨，确定下载无声视频吗？", parent=self.win):
+                return None
+        ids = ([video["format_id"]] if video else []) + [a["format_id"] for a in audios]
+        n_audio = len(audios) + (1 if video and video.get("acodec") not in (None, "none") else 0)
+        subs = self._selected_subs()
+        container = self._effective_container(video, audios) if video else None
+        size = (est_size(video, self.duration)[0] or 0 if video else 0) + sum(
+            est_size(a, self.duration)[0] or 0 for a in audios)
+        vfam = vcodec_family(video.get("vcodec")) if video else None
+        height = video.get("height") if video else None
+        head = f"{height}p {vfam}" if video else "仅音频"
+        aud = f"{len(audios)}音轨" if len(audios) > 1 else (lang_name(langs[0]) if langs else "默认音")
+        n_sub = len(subs) + len(self.local_subs)
+        label = f"{head} · {aud}" + (f" · {n_sub}字幕" if n_sub else "")
+        common = dict(audio_only=not video, subs=subs, embed=self.embed_var.get(), keep_subs=self.keep_var.get(),
+                      container=container, acodec_pref=self.acodec_var.get())
+        rule = dict(common, mode="rule", selector=build_rule_selector(height, vfam, langs, self._acodec_pref(), not video),
+                    multi_audio=len(langs) > 1, local_subs=[], size=None, label="规则 " + label.replace(
+                        f" · {n_sub}字幕", f" · {len(subs)}字幕" if subs else ""))
+        return dict(common, mode="exact", video=video["format_id"] if video else None, audio_langs=langs,
+                    selector="+".join(ids), multi_audio=n_audio > 1,
+                    local_subs=[tuple(x) for x in self.local_subs], size=size, label=label, rule=rule)
+
+    def _apply_one(self):
+        cu = self._make_custom()
+        if cu:
+            self.app._apply_custom(self.iid, cu)
+            self.win.destroy()
+
+    def _apply_all(self):
+        cu = self._make_custom()
+        if not cu:
+            return
+        others = sum(1 for i, t in self.app.tasks.items() if t["checked"] and i != self.iid)
+        if self.local_subs and others:
+            messagebox.showinfo("提示", "本地字幕文件只对当前视频生效，其他视频按画质/音轨/在线字幕规则匹配",
+                                parent=self.win)
+        self.app._apply_custom(self.iid, cu, to_checked=True)
+        self.win.destroy()
 
 
 def main():
